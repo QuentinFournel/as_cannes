@@ -14,7 +14,7 @@ from googleapiclient.http import MediaIoBaseDownload
 import warnings
 warnings.filterwarnings('ignore')
 
-# Fonction d'authentification via un compte de service
+# Authentification avec Google Drive via compte de service
 def authenticate_google_drive():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service_account_info = st.secrets["GOOGLE_SERVICE_ACCOUNT_JSON"]
@@ -24,13 +24,13 @@ def authenticate_google_drive():
     service = build('drive', 'v3', credentials=creds)
     return service
 
-# Fonction pour lister les fichiers dans un dossier Drive
+# Lister tous les fichiers présents directement dans un dossier Google Drive (non récursif)
 def list_files_in_folder(service, folder_id):
     query = f"'{folder_id}' in parents and trashed=false"
     results = service.files().list(q=query, fields="files(id, name)").execute()
     return results.get('files', [])
 
-# Télécharger un fichier (xlsx ou csv) depuis Google Drive
+# Télécharger un fichier depuis Google Drive et le sauvegarder dans ./data/
 def download_file(service, file_id, file_name, output_folder="data"):
     request = service.files().get_media(fileId=file_id)
     fh = io.BytesIO()
@@ -38,19 +38,16 @@ def download_file(service, file_id, file_name, output_folder="data"):
     done = False
 
     while not done:
-        status, done = downloader.next_chunk()
-        print(f"Téléchargement en cours : {int(status.progress() * 100)}%")
+        _, done = downloader.next_chunk()
 
     os.makedirs(output_folder, exist_ok=True)
     file_path = os.path.join(output_folder, file_name)
     with open(file_path, 'wb') as f:
         f.write(fh.getbuffer())
-    print(f"✅ Fichier téléchargé : {file_path}")
 
-# Fonction principale pour charger tous les fichiers Excel/CSV
+# Fonction principale : télécharge tous les fichiers du dossier Google Drive spécifié
 def load_all_files_from_drive():
     folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
-
     service = authenticate_google_drive()
     files = list_files_in_folder(service, folder_id)
 
@@ -59,8 +56,7 @@ def load_all_files_from_drive():
         return
 
     for file in files:
-            st.write(f"Téléchargement de : {file['name']}...")
-            download_file(service, file['id'], file['name'])
+        download_file(service, file['id'], file['name'])
 
 metrics_by_position = [
     {
