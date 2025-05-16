@@ -515,7 +515,7 @@ def collect_data():
     load_all_files_from_drive()
 
      # Chargement des données
-    df_collective = pd.read_excel('AMS/Données collectives/AS Cannes.xlsx')
+    df_collective = pd.read_excel('data/AS Cannes.xlsx')
 
     # Suppression des deux premières lignes
     df_collective = df_collective.drop([0, 1]).reset_index(drop=True)
