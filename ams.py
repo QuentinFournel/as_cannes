@@ -772,13 +772,11 @@ def compute_weighted_stats_by_minutes(df_joueur):
 def create_individual_radar(df, joueur, poste):
     joueur_infos = df[df['Joueur + Information'] == joueur]
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
-
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
     df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
-
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
     df_ranked = rank_columns(df_filtré)
@@ -808,7 +806,7 @@ def create_individual_radar(df, joueur, poste):
         slice_colors=slice_colors,
         value_bck_colors=slice_colors,
         blank_alpha=0.4,
-        kwargs_slices=dict(edgecolor="#F2F2F2", zorder=2, linewidth=1),
+        kwargs_slices=dict(edgecolor="#FFFFFF", zorder=2, linewidth=1),
         kwargs_params=dict(
             color="#FFFFFF", fontsize=11, va="center"
         ),
@@ -821,31 +819,24 @@ def create_individual_radar(df, joueur, poste):
         )
     )
 
-    # Mettre à jour la couleur de fond de la figure
     fig.set_facecolor('#0e1117')
 
     return fig
 
 def create_comparison_radar(df, joueur_1, joueur_2, poste):
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
-
     joueur_1_infos = df[df['Joueur + Information'] == joueur_1]
 
     if len(joueur_1_infos) > 1:
         joueur_1_infos = compute_weighted_stats_by_minutes(joueur_1_infos)
-
-    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur_1]
-
-    df_filtré = pd.concat([df_filtré, joueur_1_infos], ignore_index=True)
 
     joueur_2_infos = df[df['Joueur + Information'] == joueur_2]
 
     if len(joueur_2_infos) > 1:
         joueur_2_infos = compute_weighted_stats_by_minutes(joueur_2_infos)
 
-    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur_2]
-
-    df_filtré = pd.concat([df_filtré, joueur_2_infos], ignore_index=True)
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    df_filtré = df_filtré[(df_filtré['Joueur + Information'] != joueur_1) & (df_filtré['Joueur + Information'] != joueur_2)]
+    df_filtré = pd.concat([df_filtré, joueur_1_infos, joueur_2_infos], ignore_index=True)
 
     df_ranked = rank_columns(df_filtré)
 
@@ -879,24 +870,64 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
 
     radar.draw_radar_compare(player_values_1, player_values_2, ax=axs['radar'],
                              kwargs_radar={'facecolor': '#1440AC', 'alpha': 0.6},
-                             kwargs_compare={'facecolor': '#AC141A', 'alpha': 0.6})
+                             kwargs_compare={'facecolor': '#FF5050', 'alpha': 0.6})
 
-    radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#fcfcfc', fontproperties=robotto_thin.prop)
-    radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#fcfcfc', fontproperties=robotto_thin.prop)
+    radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#FFFFFF', fontproperties=robotto_thin.prop)
+    radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#FFFFFF', fontproperties=robotto_thin.prop)
 
     axs['title'].text(0.01, 0.60, f"{joueur_1.split(' - ')[0]}", fontsize=25, color='#1440AC',
                       fontproperties=robotto_bold.prop, ha='left', va='center')
     axs['title'].text(0.01, 0.20,
                       f"{df_ranked[df_ranked['Joueur + Information'] == joueur_1]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_1]['Minutes jouées'].iloc[0]} minutes jouées",
-                      fontsize=20, fontproperties=robotto_thin.prop, ha='left', va='center', color='#fcfcfc')
+                      fontsize=20, fontproperties=robotto_thin.prop, ha='left', va='center', color='#FFFFFF')
 
     axs['title'].text(0.99, 0.60, f"{joueur_2.split(' - ')[0]}", fontsize=25,
-                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#AC141A')
+                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#FF5050')
     axs['title'].text(0.99, 0.20,
                       f"{df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Minutes jouées'].iloc[0]} minutes jouées",
-                      fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#fcfcfc')
+                      fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#FFFFFF')
 
     fig.set_facecolor('#0e1117')
+
+    return fig
+
+def create_nuage_de_points(df, joueur, poste, x_metric, y_metric):
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+
+    if len(joueur_infos) > 1:
+        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500) & (df[x_metric] != 0) & (df[y_metric] != 0)]
+    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    x_mean = df_filtré[x_metric].mean()
+    y_mean = df_filtré[y_metric].mean()
+
+    df_highlight = df_filtré[df_filtré['Joueur + Information'] == joueur]
+    df_others = df_filtré[df_filtré['Joueur + Information'] != joueur]
+
+    # Création du graphique avec fond personnalisé
+    fig, ax = plt.subplots(figsize=(10, 7))
+    fig.patch.set_facecolor('#0e1117')
+
+    ax.scatter(df_others[x_metric], df_others[y_metric], color='#FFFFFF', alpha=0.5, label='Autres joueurs')
+    ax.scatter(df_highlight[x_metric], df_highlight[y_metric], color='#FF5050', alpha=1, label='Joueur sélectionné')
+
+    ax.axvline(x=x_mean, color='#FFFFFF', linestyle='--', label=f'Moyenne {x_metric}')
+    ax.axhline(y=y_mean, color='#FFFFFF', linestyle='--', label=f'Moyenne {y_metric}')
+
+    # Suppression des bordures
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    ax.set_xlabel(x_metric, color='#FFFFFF', fontweight='bold')
+    ax.set_ylabel(y_metric, color='#FFFFFF', fontweight='bold')
+    ax.tick_params(colors='#FFFFFF')
+    ax.grid(True, linestyle='--', alpha=0.3, color='#FFFFFF')
+    fig.tight_layout()
+
+    ax.set_facecolor('#0e1117')
 
     return fig
 
@@ -1119,13 +1150,29 @@ def streamlit_application(df_collective, df_individual):
             help="Tu peux choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
 
-        tab1, tab2 = st.tabs(["Radar", "KPI"])
+        tab1, tab2, tab3 = st.tabs(["Radar", "Nuage de points", "KPI"])
 
         with tab1:
             fig = create_individual_radar(df_individual, joueur, poste)
             st.pyplot(fig)
 
         with tab2:
+            # Ne garder que les colonnes contenant "par 90" ou "%"
+            filtered_columns = [col for col in df_individual.columns if ('par 90' in col or '%' in col)]
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                x_metric = st.selectbox("Choisissez la métrique pour l'axe X", filtered_columns, index=filtered_columns.index("xG par 90"))
+
+            with col2:
+                y_metric = st.selectbox("Choisissez la métrique pour l'axe Y", filtered_columns, index=filtered_columns.index("xA par 90"))
+
+            if x_metric and y_metric:
+                fig = create_nuage_de_points(df_individual, joueur, poste, x_metric, y_metric)
+                st.pyplot(fig)
+
+        with tab3:
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
 
             # Récupération de la ligne du joueur sélectionné
