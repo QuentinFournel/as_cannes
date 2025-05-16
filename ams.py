@@ -992,14 +992,9 @@ def streamlit_application(df_collective, df_individual):
         with col2:
             match = st.selectbox("Sélectionnez un match", journées[journée])
 
-        # Construction dynamique du chemin
-        base_path = "E:\\N2\\N2"
-        dossier_match = os.path.join(base_path, journée, match)
-        chemin_video = os.path.join(dossier_match, "Buts.mp4")
-
         # Affichage si la vidéo existe
-        if os.path.exists(chemin_video):
-            st.video(chemin_video)
+        if os.path.exists(f"data/{journée} - {match}"):
+            st.video(f"data/{journée} - {match}")
         else:
             st.warning("Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
