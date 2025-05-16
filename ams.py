@@ -1168,9 +1168,8 @@ def streamlit_application(df_collective, df_individual):
             with col2:
                 y_metric = st.selectbox("Choisissez la métrique pour l'axe Y", filtered_columns, index=filtered_columns.index("xA par 90"))
 
-            if x_metric and y_metric:
-                fig = create_nuage_de_points(df_individual, joueur, poste, x_metric, y_metric)
-                st.pyplot(fig)
+            fig = create_nuage_de_points(df_individual, joueur, poste, x_metric, y_metric)
+            st.pyplot(fig)
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
