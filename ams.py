@@ -1012,7 +1012,7 @@ def streamlit_application(df_collective, df_individual):
         as_cannes = df_filtré[df_filtré["Équipe"] == "Cannes"]
         adversaire = df_filtré[df_filtré["Équipe"] != "Cannes"]
 
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Général", "Attaques", "Défense", "Passes", "Transitions"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Récupération"])
 
         indicateurs_general = [
             'Buts',
