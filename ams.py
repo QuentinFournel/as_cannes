@@ -993,8 +993,8 @@ def streamlit_application(df_collective, df_individual):
             match = st.selectbox("Sélectionnez un match", journées[journée])
 
         # Affichage si la vidéo existe
-        if os.path.exists(f"data/{journée} - {match}"):
-            st.video(f"data/{journée} - {match}")
+        if os.path.exists(f"data/{journée} - {match}.mp4"):
+            st.video(f"data/{journée} - {match}.mp4")
         else:
             st.warning("Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
