@@ -1145,9 +1145,9 @@ def streamlit_application(df_collective, df_individual):
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
 
         poste = st.selectbox(
-            "Choisis la base de comparaison (poste) pour l'analyse :",
+            "Choisissez la base de comparaison (poste) pour l'analyse :",
             list(kpi_by_position.keys()),
-            help="Tu peux choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
 
         tab1, tab2, tab3 = st.tabs(["Radar", "Nuage de points", "KPI"])
@@ -1210,9 +1210,9 @@ def streamlit_application(df_collective, df_individual):
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
         poste = st.selectbox(
-            "Choisis la base de comparaison (poste) pour l'analyse :",
+            "Choisissez la base de comparaison (poste) pour l'analyse :",
             list(kpi_by_position.keys()),
-            help="Tu peux choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
 
         if st.button("Comparer"):
@@ -1220,6 +1220,11 @@ def streamlit_application(df_collective, df_individual):
             st.pyplot(fig, use_container_width=True)
 
 if __name__ == '__main__':
+    st.set_page_config(
+        page_title="AS Cannes",
+        page_icon="https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png"
+    )
+
     st.title("AS Cannes")
 
     logo = "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png"
