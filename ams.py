@@ -709,7 +709,7 @@ def create_plot_stats(indicateurs, as_cannes, adversaire):
     ax.axis("off")
 
     ax.set_facecolor('#0e1117')
-    text_color = 'white'
+    text_color = '#FFFFFF'
 
     x_positions = [0.05, 0.5, 0.85]
 
@@ -1014,10 +1014,10 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     y_offset = (y_max - y_min) * 0.02
 
     annotations = [
-        dict(x=x_min + x_offset, y=y_max - y_offset, text=description_1, showarrow=False, font=dict(color="white", size=11), xanchor="left", yanchor="top"),
-        dict(x=x_max - x_offset, y=y_max - y_offset, text=description_2, showarrow=False, font=dict(color="white", size=11), xanchor="right", yanchor="top"),
-        dict(x=x_min + x_offset, y=y_min + y_offset, text=description_3, showarrow=False, font=dict(color="white", size=11), xanchor="left", yanchor="bottom"),
-        dict(x=x_max - x_offset, y=y_min + y_offset, text=description_4, showarrow=False, font=dict(color="white", size=11), xanchor="right", yanchor="bottom")
+        dict(x=x_min + x_offset, y=y_max - y_offset, text=description_1, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="left", yanchor="top"),
+        dict(x=x_max - x_offset, y=y_max - y_offset, text=description_2, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="right", yanchor="top"),
+        dict(x=x_min + x_offset, y=y_min + y_offset, text=description_3, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="left", yanchor="bottom"),
+        dict(x=x_max - x_offset, y=y_min + y_offset, text=description_4, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="right", yanchor="bottom")
     ]
 
     fig.update_layout(
@@ -1047,6 +1047,27 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     )
 
     return fig
+
+def bordered_metric(container, label, value, color="#FFFFFF"):
+    style = f"""
+        <div style='
+            border: 1px solid {color};
+            border-radius: 6px;
+            padding: 12px;
+            background-color: #0e1117;
+            width: 90px;
+            height: 100px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        '>
+            <div style='font-size: 14px; color: {color}; font-weight: 500; text-align: center;'>{label}</div>
+            <div style='font-size: 24px; font-weight: bold; color: {color};'>{value}</div>
+        </div>
+    """
+    container.markdown(style, unsafe_allow_html=True)
 
 def streamlit_application(df_collective, df_individual):
     page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative"])
@@ -1284,24 +1305,16 @@ def streamlit_application(df_collective, df_individual):
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
-
-            # Récupération de la ligne du joueur sélectionné
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
-
-            # Récupération des KPI liés au poste
             kpis_poste = list(kpi_by_position[poste].keys())
-
-            # Création des colonnes dynamiques selon le nombre de KPI + 1 pour "Note globale"
             colonnes = st.columns(len(kpis_poste) + 1)
 
-            # Affichage des scores pour chaque KPI
             for i, kpi in enumerate(kpis_poste):
                 with colonnes[i]:
-                    st.metric(kpi, f"{joueur_scores[kpi]}")
+                    bordered_metric(colonnes[i], kpi, round(joueur_scores[kpi], 1))
 
-            # Dernière colonne : Note globale
             with colonnes[-1]:
-                st.metric("Note globale", f"{joueur_scores['Note globale']}")
+                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), color= "#FF5050")
     
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
