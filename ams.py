@@ -6,6 +6,7 @@ import io
 from mplsoccer import Radar, FontManager, grid
 import streamlit as st
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -493,73 +494,73 @@ metrics_x_y = {
     "Finition": {
         "metrics": ["xG par 90", "Buts par 90"],
         "descriptions": [
-            "Se procure peu d'occasions\nmais marque beaucoup",
-            "Se procure beaucoup d'occasions\net marque beaucoup",
-            "Se procure peu d'occasions\net marque peu",
-            "Se procure beaucoup d'occasions\nmais marque peu"
+            "Se procure peu d'occasions<br>mais marque beaucoup",
+            "Se procure beaucoup d'occasions<br>et marque beaucoup",
+            "Se procure peu d'occasions<br>et marque peu",
+            "Se procure beaucoup d'occasions<br>mais marque peu"
         ]
     },
     "Progression du ballon": {
         "metrics": ["Courses progressives par 90", "Passes progressives par 90"],
         "descriptions": [
-            "Progresse peu par la course\nmais beaucoup par la passe",
-            "Progresse beaucoup par la course\net par la passe",
-            "Progresse peu par la course\net par la passe",
-            "Progresse beaucoup par la course\nmais peu par la passe"
+            "Progresse peu par la course<br>mais beaucoup par la passe",
+            "Progresse beaucoup par la course<br>et par la passe",
+            "Progresse peu par la course<br>et par la passe",
+            "Progresse beaucoup par la course<br>mais peu par la passe"
         ]
     },
     "Dribble": {
         "metrics": ["Dribbles par 90", "Dribbles réussis, %"],
         "descriptions": [
-            "Dribble peu\nmais réussit beaucoup",
-            "Dribble beaucoup\net réussit beaucoup",
-            "Dribble peu\net réussit peu",
-            "Dribble beaucoup\nmais réussit peu"
+            "Dribble peu<br>mais réussit beaucoup",
+            "Dribble beaucoup<br>et réussit beaucoup",
+            "Dribble peu<br>et réussit peu",
+            "Dribble beaucoup<br>mais réussit peu"
         ]
     },
     "Qualité de centre": {
         "metrics": ["Centres par 90", "Сentres précises, %"],
         "descriptions": [
-            "Centre peu\nmais en réussit beaucoup",
-            "Centre beaucoup\net en réussit beaucoup",
-            "Centre peu\net en réussit peu",
-            "Centre beaucoup\nmais en réussit peu"
+            "Centre peu<br>mais en réussit beaucoup",
+            "Centre beaucoup<br>et en réussit beaucoup",
+            "Centre peu<br>et en réussit peu",
+            "Centre beaucoup<br>mais en réussit peu"
         ]
     },
     "Apport défensif/offensif": {
         "metrics": ["Actions défensives réussies par 90", "Attaques réussies par 90"],
         "descriptions": [
-            "Apporte peu défensivement\nmais beaucoup offensivement",
-            "Apporte beaucoup défensivement\net offensivement",
-            "Apporte peu défensivement\net offensivement",
-            "Apporte beaucoup défensivement\nmais peu offensivement"
+            "Apporte peu défensivement<br>mais beaucoup offensivement",
+            "Apporte beaucoup défensivement<br>et offensivement",
+            "Apporte peu défensivement<br>et offensivement",
+            "Apporte beaucoup défensivement<br>mais peu offensivement"
         ]
     },
     "Duel": {
         "metrics": ["Duels par 90", "Duels gagnés, %"],
         "descriptions": [
-            "Joue peu de duels\nmais en remporte beaucoup",
-            "Joue beaucoup de duels\net en remporte beaucoup",
-            "Joue peu de duels\net en remporte peu",
-            "Joue beaucoup de duels\nmais en remporte peu"
+            "Joue peu de duels<br>mais en remporte beaucoup",
+            "Joue beaucoup de duels<br>et en remporte beaucoup",
+            "Joue peu de duels<br>et en remporte peu",
+            "Joue beaucoup de duels<br>mais en remporte peu"
         ]
     },
     "Duel défensif": {
         "metrics": ["Duels défensifs par 90", "Duels défensifs gagnés, %"],
         "descriptions": [
-            "Joue peu de duels défensifs\nmais en remporte beaucoup",
-            "Joue beaucoup de duels défensifs\net en remporte beaucoup",
-            "Joue peu de duels défensifs\net en remporte peu",
-            "Joue beaucoup de duels défensifs\nmais en remporte peu"
+            "Joue peu de duels défensifs<br>mais en remporte beaucoup",
+            "Joue beaucoup de duels défensifs<br>et en remporte beaucoup",
+            "Joue peu de duels défensifs<br>et en remporte peu",
+            "Joue beaucoup de duels défensifs<br>mais en remporte peu"
         ]
     },
     "Duel aérien": {
         "metrics": ["Duels aériens par 90", "Duels aériens gagnés, %"],
         "descriptions": [
-            "Joue peu de duels aériens\nmais en remporte beaucoup",
-            "Joue beaucoup de duels aériens\net en remporte beaucoup",
-            "Joue peu de duels aériens\net en remporte peu",
-            "Joue beaucoup de duels aériens\nmais en remporte peu"
+            "Joue peu de duels aériens<br>mais en remporte beaucoup",
+            "Joue beaucoup de duels aériens<br>et en remporte beaucoup",
+            "Joue peu de duels aériens<br>et en remporte peu",
+            "Joue beaucoup de duels aériens<br>mais en remporte peu"
         ]
     }
 }
@@ -979,40 +980,71 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     x_mean = df_filtré[x_metric].mean()
     y_mean = df_filtré[y_metric].mean()
 
-    df_highlight = df_filtré[df_filtré['Joueur + Information'] == joueur]
-    df_others = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    # Crée une colonne pour couleur (joueur sélectionné ou non)
+    df_filtré["Catégorie"] = df_filtré["Joueur + Information"].apply(
+        lambda x: "Joueur sélectionné" if x == joueur else "Autres joueurs"
+    )
 
-    # Création du graphique avec fond personnalisé
-    fig, ax = plt.subplots(figsize=(10, 7))
-    fig.patch.set_facecolor('#0e1117')
+    fig = px.scatter(
+        df_filtré,
+        x=x_metric,
+        y=y_metric,
+        color="Catégorie",
+        color_discrete_map={
+            "Autres joueurs": "#FFFFFF",
+            "Joueur sélectionné": "#FF5050"
+        },
+        hover_name="Joueur + Information",
+        hover_data={
+            "Catégorie": False,
+            x_metric: False,
+            y_metric: False
+        },
+        opacity=0.7
+    )
 
-    ax.scatter(df_others[x_metric], df_others[y_metric], color='#FFFFFF', alpha=0.5, label='Autres joueurs')
-    ax.scatter(df_highlight[x_metric], df_highlight[y_metric], color='#FF5050', alpha=1, label='Joueur sélectionné')
+    # Ajoute les lignes de moyenne
+    fig.add_vline(x=x_mean, line=dict(color="rgba(255,255,255,0.5)", dash='dash'))
+    fig.add_hline(y=y_mean, line=dict(color="rgba(255,255,255,0.5)", dash='dash'))
 
-    ax.axvline(x=x_mean, color='#FFFFFF', linestyle='--', label=f'Moyenne {x_metric}')
-    ax.axhline(y=y_mean, color='#FFFFFF', linestyle='--', label=f'Moyenne {y_metric}')
-
-    # Suppression des bordures
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
+    # Ajoute les 4 textes descriptifs
     x_min, x_max = df_filtré[x_metric].min(), df_filtré[x_metric].max()
     y_min, y_max = df_filtré[y_metric].min(), df_filtré[y_metric].max()
     x_offset = (x_max - x_min) * 0.02
     y_offset = (y_max - y_min) * 0.02
 
-    plt.text(x_min + x_offset, y_max - y_offset, description_1, fontsize=10, va='top', ha='left', color='white')
-    plt.text(x_max - x_offset, y_max - y_offset, description_2, fontsize=10, va='top', ha='right', color='white')
-    plt.text(x_min + x_offset, y_min + y_offset, description_3, fontsize=10, va='bottom', ha='left', color='white')
-    plt.text(x_max - x_offset, y_min + y_offset, description_4, fontsize=10, va='bottom', ha='right', color='white')
+    annotations = [
+        dict(x=x_min + x_offset, y=y_max - y_offset, text=description_1, showarrow=False, font=dict(color="white", size=11), xanchor="left", yanchor="top"),
+        dict(x=x_max - x_offset, y=y_max - y_offset, text=description_2, showarrow=False, font=dict(color="white", size=11), xanchor="right", yanchor="top"),
+        dict(x=x_min + x_offset, y=y_min + y_offset, text=description_3, showarrow=False, font=dict(color="white", size=11), xanchor="left", yanchor="bottom"),
+        dict(x=x_max - x_offset, y=y_min + y_offset, text=description_4, showarrow=False, font=dict(color="white", size=11), xanchor="right", yanchor="bottom")
+    ]
 
-    ax.set_xlabel(x_metric, color='#FFFFFF', fontweight='bold')
-    ax.set_ylabel(y_metric, color='#FFFFFF', fontweight='bold')
-    ax.tick_params(colors='#FFFFFF')
-    ax.grid(True, linestyle='--', alpha=0.3, color='#FFFFFF')
-    fig.tight_layout()
-
-    ax.set_facecolor('#0e1117')
+    fig.update_layout(
+        template="plotly_dark",
+        plot_bgcolor="#0e1117",
+        paper_bgcolor="#0e1117",
+        annotations=annotations,
+        showlegend=False,
+        xaxis_title=x_metric,
+        yaxis_title=y_metric,
+        width=1000,
+        height=600,
+        xaxis=dict(
+            showgrid=True,
+            gridcolor="rgba(255,255,255,0.1)",
+            gridwidth=0.5,
+            griddash="dot",
+            zeroline=False
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor="rgba(255,255,255,0.1)",
+            gridwidth=0.5,
+            griddash="dot",
+            zeroline=False
+        )
+    )
 
     return fig
 
@@ -1248,7 +1280,7 @@ def streamlit_application(df_collective, df_individual):
             description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
 
             fig = plot_player_metrics(df_individual, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=False)
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
