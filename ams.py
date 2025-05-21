@@ -7,6 +7,8 @@ from mplsoccer import Radar, FontManager, grid
 import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
+import requests
+import unicodedata
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -1070,7 +1072,7 @@ def bordered_metric(container, label, value, color="#FFFFFF"):
     container.markdown(style, unsafe_allow_html=True)
 
 def streamlit_application(df_collective, df_individual):
-    page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative"])
+    page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative"])
 
     if page == "Accueil":
         st.header("Accueil")
@@ -1086,6 +1088,35 @@ def streamlit_application(df_collective, df_individual):
 
             Le 26 juin 2023, l'AS Cannes est officiellement rachetée par le groupe américain Friedkin.
         """)
+
+    elif page == "Classement":
+        type_classement = st.selectbox("Choisissez un type de classement", ['Général', 'Domicile', 'Extérieur'])
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            journée_début = st.number_input("Choisissez la journée de début", min_value=1, max_value=30, value=1)
+
+        with col2:
+            journée_fin = st.number_input("Choisissez la journée de fin", min_value=1, max_value=30, value=30)
+
+        if journée_fin < journée_début:
+            st.warning("La journée de fin doit être supérieure ou égale à la journée de début.")
+        else:
+            url = f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
+
+            response = requests.get(url)
+            response.encoding = "ISO-8859-1"
+
+            tables = pd.read_html(response.text)
+
+            classement = tables[0]
+
+            classement = classement.iloc[:, :-1]
+
+            classement.columns = [col.replace('\xa0', ' ').strip() for col in classement.columns]
+
+            st.dataframe(classement, use_container_width=True, hide_index=True)
 
     elif page == "Vidéo des buts":
         st.header("Vidéo des buts")
@@ -1292,7 +1323,7 @@ def streamlit_application(df_collective, df_individual):
 
         with tab1:
             fig = create_individual_radar(df_individual, joueur, poste)
-            st.pyplot(fig)
+            st.pyplot(fig, use_container_width=True)
 
         with tab2:
             metrics_label  = st.selectbox("Choisissez une base de comparaison", metrics_x_y.keys())
@@ -1301,7 +1332,7 @@ def streamlit_application(df_collective, df_individual):
             description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
 
             fig = plot_player_metrics(df_individual, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
-            st.plotly_chart(fig, use_container_width=False)
+            st.plotly_chart(fig, use_container_width=True)
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
