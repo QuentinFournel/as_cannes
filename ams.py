@@ -1056,7 +1056,7 @@ def bordered_metric(container, label, value, color="#FFFFFF"):
             padding: 12px;
             background-color: #0e1117;
             width: 90px;
-            height: 100px;
+            height: 110px;
             margin: auto;
             display: flex;
             flex-direction: column;
