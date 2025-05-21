@@ -1102,6 +1102,7 @@ def streamlit_application(df_collective, df_individual):
 
         if journée_fin < journée_début:
             st.warning("La journée de fin doit être supérieure ou égale à la journée de début.")
+
         else:
             url = f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
 
@@ -1318,8 +1319,11 @@ def streamlit_application(df_collective, df_individual):
             list(kpi_by_position.keys()),
             help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
-
-        tab1, tab2, tab3 = st.tabs(["Radar", "Nuage de points", "KPI"])
+        
+        if team == "Cannes":
+            tab1, tab2, tab3, tab4 = st.tabs(["Radar", "Nuage de points", "KPI", "Match"])
+        else:
+            tab1, tab2, tab3 = st.tabs(["Radar", "Nuage de points", "KPI"])
 
         with tab1:
             fig = create_individual_radar(df_individual, joueur, poste)
