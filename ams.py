@@ -946,7 +946,7 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
 
     radar.draw_radar_compare(player_values_1, player_values_2, ax=axs['radar'],
                              kwargs_radar={'facecolor': '#1440AC', 'alpha': 0.6},
-                             kwargs_compare={'facecolor': '#FF5050', 'alpha': 0.6})
+                             kwargs_compare={'facecolor': '#FF4B4B', 'alpha': 0.6})
 
     radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#FFFFFF', fontproperties=robotto_thin.prop)
     radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#FFFFFF', fontproperties=robotto_thin.prop)
@@ -958,7 +958,7 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
                       fontsize=20, fontproperties=robotto_thin.prop, ha='left', va='center', color='#FFFFFF')
 
     axs['title'].text(0.99, 0.60, f"{joueur_2.split(' - ')[0]}", fontsize=25,
-                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#FF5050')
+                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#FF4B4B')
     axs['title'].text(0.99, 0.20,
                       f"{df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Minutes jouées'].iloc[0]} minutes jouées",
                       fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#FFFFFF')
@@ -992,7 +992,7 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
         color="Catégorie",
         color_discrete_map={
             "Autres joueurs": "#FFFFFF",
-            "Joueur sélectionné": "#FF5050"
+            "Joueur sélectionné": "#FF4B4B"
         },
         hover_name="Joueur + Information",
         hover_data={
@@ -1314,7 +1314,7 @@ def streamlit_application(df_collective, df_individual):
                     bordered_metric(colonnes[i], kpi, round(joueur_scores[kpi], 1))
 
             with colonnes[-1]:
-                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), color= "#FF5050")
+                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), color= "#FF4B4B")
     
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
