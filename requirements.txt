@@ -2,6 +2,7 @@ pandas
 numpy
 mplsoccer
 streamlit
+plotly
 openpyxl
 google-api-python-client
 google-auth-httplib2
