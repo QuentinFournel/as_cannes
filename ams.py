@@ -489,6 +489,81 @@ kpi_coefficients_by_position = {
     }
 }
 
+metrics_x_y = {
+    "Finition": {
+        "metrics": ["xG par 90", "Buts par 90"],
+        "descriptions": [
+            "Se procure peu d'occasions\nmais marque beaucoup",
+            "Se procure beaucoup d'occasions\net marque beaucoup",
+            "Se procure peu d'occasions\net marque peu",
+            "Se procure beaucoup d'occasions\nmais marque peu"
+        ]
+    },
+    "Progression du ballon": {
+        "metrics": ["Courses progressives par 90", "Passes progressives par 90"],
+        "descriptions": [
+            "Progresse peu par la course\nmais beaucoup par la passe",
+            "Progresse beaucoup par la course\net par la passe",
+            "Progresse peu par la course\net par la passe",
+            "Progresse beaucoup par la course\nmais peu par la passe"
+        ]
+    },
+    "Dribble": {
+        "metrics": ["Dribbles par 90", "Dribbles réussis, %"],
+        "descriptions": [
+            "Dribble peu\nmais réussit beaucoup",
+            "Dribble beaucoup\net réussit beaucoup",
+            "Dribble peu\net réussit peu",
+            "Dribble beaucoup\nmais réussit peu"
+        ]
+    },
+    "Qualité de centre": {
+        "metrics": ["Centres par 90", "Сentres précises, %"],
+        "descriptions": [
+            "Centre peu\nmais en réussit beaucoup",
+            "Centre beaucoup\net en réussit beaucoup",
+            "Centre peu\net en réussit peu",
+            "Centre beaucoup\nmais en réussit peu"
+        ]
+    },
+    "Apport défensif/offensif": {
+        "metrics": ["Actions défensives réussies par 90", "Attaques réussies par 90"],
+        "descriptions": [
+            "Apporte peu défensivement\nmais beaucoup offensivement",
+            "Apporte beaucoup défensivement\net offensivement",
+            "Apporte peu défensivement\net offensivement",
+            "Apporte beaucoup défensivement\nmais peu offensivement"
+        ]
+    },
+    "Duel": {
+        "metrics": ["Duels par 90", "Duels gagnés, %"],
+        "descriptions": [
+            "Joue peu de duels\nmais en remporte beaucoup",
+            "Joue beaucoup de duels\net en remporte beaucoup",
+            "Joue peu de duels\net en remporte peu",
+            "Joue beaucoup de duels\nmais en remporte peu"
+        ]
+    },
+    "Duel défensif": {
+        "metrics": ["Duels défensifs par 90", "Duels défensifs gagnés, %"],
+        "descriptions": [
+            "Joue peu de duels défensifs\nmais en remporte beaucoup",
+            "Joue beaucoup de duels défensifs\net en remporte beaucoup",
+            "Joue peu de duels défensifs\net en remporte peu",
+            "Joue beaucoup de duels défensifs\nmais en remporte peu"
+        ]
+    },
+    "Duel aérien": {
+        "metrics": ["Duels aériens par 90", "Duels aériens gagnés, %"],
+        "descriptions": [
+            "Joue peu de duels aériens\nmais en remporte beaucoup",
+            "Joue beaucoup de duels aériens\net en remporte beaucoup",
+            "Joue peu de duels aériens\net en remporte peu",
+            "Joue beaucoup de duels aériens\nmais en remporte peu"
+        ]
+    }
+}
+
 def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
@@ -891,7 +966,7 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
 
     return fig
 
-def create_nuage_de_points(df, joueur, poste, x_metric, y_metric):
+def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4):
     joueur_infos = df[df['Joueur + Information'] == joueur]
 
     if len(joueur_infos) > 1:
@@ -920,6 +995,16 @@ def create_nuage_de_points(df, joueur, poste, x_metric, y_metric):
     # Suppression des bordures
     for spine in ax.spines.values():
         spine.set_visible(False)
+
+    x_min, x_max = df_filtré[x_metric].min(), df_filtré[x_metric].max()
+    y_min, y_max = df_filtré[y_metric].min(), df_filtré[y_metric].max()
+    x_offset = (x_max - x_min) * 0.02
+    y_offset = (y_max - y_min) * 0.02
+
+    plt.text(x_min + x_offset, y_max - y_offset, description_1, fontsize=10, va='top', ha='left', color='white')
+    plt.text(x_max - x_offset, y_max - y_offset, description_2, fontsize=10, va='top', ha='right', color='white')
+    plt.text(x_min + x_offset, y_min + y_offset, description_3, fontsize=10, va='bottom', ha='left', color='white')
+    plt.text(x_max - x_offset, y_min + y_offset, description_4, fontsize=10, va='bottom', ha='right', color='white')
 
     ax.set_xlabel(x_metric, color='#FFFFFF', fontweight='bold')
     ax.set_ylabel(y_metric, color='#FFFFFF', fontweight='bold')
@@ -1145,7 +1230,7 @@ def streamlit_application(df_collective, df_individual):
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
 
         poste = st.selectbox(
-            "Choisissez la base de comparaison (poste) pour l'analyse :",
+            "Choisissez la base de comparaison (poste) pour l'analyse",
             list(kpi_by_position.keys()),
             help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
@@ -1157,18 +1242,12 @@ def streamlit_application(df_collective, df_individual):
             st.pyplot(fig)
 
         with tab2:
-            # Ne garder que les colonnes contenant "par 90" ou "%"
-            filtered_columns = [col for col in df_individual.columns if ('par 90' in col or '%' in col)]
+            metrics_label  = st.selectbox("Choisissez une base de comparaison", metrics_x_y.keys())
 
-            col1, col2 = st.columns(2)
+            x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
+            description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
 
-            with col1:
-                x_metric = st.selectbox("Choisissez la métrique pour l'axe X", filtered_columns, index=filtered_columns.index("xG par 90"))
-
-            with col2:
-                y_metric = st.selectbox("Choisissez la métrique pour l'axe Y", filtered_columns, index=filtered_columns.index("xA par 90"))
-
-            fig = create_nuage_de_points(df_individual, joueur, poste, x_metric, y_metric)
+            fig = plot_player_metrics(df_individual, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
             st.pyplot(fig)
 
         with tab3:
@@ -1210,7 +1289,7 @@ def streamlit_application(df_collective, df_individual):
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
         poste = st.selectbox(
-            "Choisissez la base de comparaison (poste) pour l'analyse :",
+            "Choisissez la base de comparaison (poste) pour l'analyse",
             list(kpi_by_position.keys()),
             help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
