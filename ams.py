@@ -1089,7 +1089,7 @@ def search_top_players(df, poste):
     return df_scores
 
 def streamlit_application(df_collective, df_individual):
-    page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative", "Scouting"])
+    page = st.sidebar.selectbox("Sélectionnez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative", "Scouting"])
 
     if page == "Accueil":
         st.header("Accueil")
@@ -1107,15 +1107,15 @@ def streamlit_application(df_collective, df_individual):
         """)
 
     elif page == "Classement":
-        type_classement = st.selectbox("Choisissez un type de classement", ['Général', 'Domicile', 'Extérieur'])
+        type_classement = st.selectbox("Sélectionnez un type de classement", ['Général', 'Domicile', 'Extérieur'])
 
         col1, col2 = st.columns(2)
 
         with col1:
-            journée_début = st.number_input("Choisissez la journée de début", min_value=1, max_value=30, value=1)
+            journée_début = st.number_input("Sélectionnez la journée de début", min_value=1, max_value=30, value=1)
 
         with col2:
-            journée_fin = st.number_input("Choisissez la journée de fin", min_value=1, max_value=30, value=30)
+            journée_fin = st.number_input("Sélectionnez la journée de fin", min_value=1, max_value=30, value=30)
 
         if journée_fin < journée_début:
             st.warning("La journée de fin doit être supérieure ou égale à la journée de début.")
@@ -1326,7 +1326,7 @@ def streamlit_application(df_collective, df_individual):
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
 
         poste = st.selectbox(
-            "Choisissez la base de comparaison (poste) pour l'analyse",
+            "Sélectionnez la base de comparaison (poste) pour l'analyse",
             list(kpi_by_position.keys()),
             help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
@@ -1341,7 +1341,7 @@ def streamlit_application(df_collective, df_individual):
             st.pyplot(fig, use_container_width=True)
 
         with tab2:
-            metrics_label  = st.selectbox("Choisissez une base de comparaison", metrics_x_y.keys())
+            metrics_label  = st.selectbox("Sélectionnez une base de comparaison", metrics_x_y.keys())
 
             x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
             description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
@@ -1380,7 +1380,7 @@ def streamlit_application(df_collective, df_individual):
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
         poste = st.selectbox(
-            "Choisissez la base de comparaison (poste) pour l'analyse",
+            "Sélectionnez la base de comparaison (poste) pour l'analyse",
             list(kpi_by_position.keys()),
             help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
