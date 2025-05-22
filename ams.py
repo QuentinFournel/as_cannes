@@ -784,7 +784,7 @@ def rank_columns(df):
     df_copy[numeric_cols] = ranked_df
     return df_copy
 
-def create_plot_stats(indicateurs, as_cannes, adversaire):
+def create_plot_stats(indicateurs, as_cannes, adversaire, nom_adversaire):
     fig_width, fig_height = 6, 9
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#0e1117')
     ax.set_xlim(0, 1)
@@ -811,8 +811,8 @@ def create_plot_stats(indicateurs, as_cannes, adversaire):
 
         if i == 0:
             ax.text(x_positions[0], y, "Indicateur", fontsize=10, fontweight='bold', va='center', color=text_color)
-            ax.text(x_positions[1], y, "AS Cannes", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
-            ax.text(x_positions[2], y, "Adversaire", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
+            ax.text(x_positions[1], y, "Cannes", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
+            ax.text(x_positions[2], y, nom_adversaire, fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
 
             ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='solid', linewidth=1)
 
@@ -1271,35 +1271,35 @@ def streamlit_application(df_collective, df_individual):
             as_cannes_values = clean_values(as_cannes[indicateurs_general].values.flatten())
             adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
 
-            fig = create_plot_stats(indicateurs_general, as_cannes_values, adversaire_values)
+            fig = create_plot_stats(indicateurs_general, as_cannes_values, adversaire_values, adversaire['Équipe'].iloc[0])
             st.pyplot(fig, use_container_width=True)
 
         with tab2:
             as_cannes_values = clean_values(as_cannes[indicateurs_attaques].values.flatten())
             adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
 
-            fig = create_plot_stats(indicateurs_attaques, as_cannes_values, adversaire_values)
+            fig = create_plot_stats(indicateurs_attaques, as_cannes_values, adversaire_values, adversaire['Équipe'].iloc[0])
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
             as_cannes_values = clean_values(as_cannes[indicateurs_defense].values.flatten())
             adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
 
-            fig = create_plot_stats(indicateurs_defense, as_cannes_values, adversaire_values)
+            fig = create_plot_stats(indicateurs_defense, as_cannes_values, adversaire_values, adversaire['Équipe'].iloc[0])
             st.pyplot(fig, use_container_width=True)
 
         with tab4:
             as_cannes_values = clean_values(as_cannes[indicateurs_passes].values.flatten())
             adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
 
-            fig = create_plot_stats(indicateurs_passes, as_cannes_values, adversaire_values)
+            fig = create_plot_stats(indicateurs_passes, as_cannes_values, adversaire_values, adversaire['Équipe'].iloc[0])
             st.pyplot(fig, use_container_width=True)
 
         with tab5:
             as_cannes_values = clean_values(as_cannes[indicateurs_pressing].values.flatten())
             adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
 
-            fig = create_plot_stats(indicateurs_pressing, as_cannes_values, adversaire_values)
+            fig = create_plot_stats(indicateurs_pressing, as_cannes_values, adversaire_values, adversaire['Équipe'].iloc[0])
             st.pyplot(fig, use_container_width=True)
 
     elif page == "Analyse individuelle":
