@@ -1408,6 +1408,11 @@ if __name__ == '__main__':
         unsafe_allow_html=True
     )
 
+    # Empêche l'app de se mettre en veille
+    if "ping" in st.query_params:
+        st.write("pong")
+        st.stop()
+
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
