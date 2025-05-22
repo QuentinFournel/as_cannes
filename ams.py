@@ -1328,7 +1328,7 @@ def streamlit_application(df_collective, df_individual):
         poste = st.selectbox(
             "Sélectionnez la base de comparaison (poste) pour l'analyse",
             list(kpi_by_position.keys()),
-            help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
         
         if team == "Cannes":
@@ -1382,7 +1382,7 @@ def streamlit_application(df_collective, df_individual):
         poste = st.selectbox(
             "Sélectionnez la base de comparaison (poste) pour l'analyse",
             list(kpi_by_position.keys()),
-            help="Vous pouvez choisir n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
         )
 
         if st.button("Comparer"):
