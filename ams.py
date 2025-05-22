@@ -1068,23 +1068,31 @@ def search_top_players(df, poste):
 
     df_ranked = rank_columns(df_filtré)
 
-    # Initialisation du DataFrame des scores
     df_scores = df_ranked[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration']].copy()
 
-    # Récupération des KPI spécifiques au poste
     kpi_metrics = kpi_by_position[poste]
     kpi_coefficients = kpi_coefficients_by_position[poste]
     total_coeff = sum(kpi_coefficients.values())
 
-    # Calcul des scores par KPI
     for kpi, metrics in kpi_metrics.items():
         df_scores[kpi] = df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1).round(1)
 
-    # Calcul de la note globale pondérée
     df_scores["Note globale"] = sum(
         df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
     ) / total_coeff
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
+
+    return df_scores
+
+def search_recommended_players(df, poste, thresholds):
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+
+    df_ranked = rank_columns(df_filtré)
+
+    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration'] + list(thresholds.keys())].copy()
+
+    for métrique, seuil in thresholds.items():
+        df_scores = df_scores[df_scores[métrique] >= seuil]
 
     return df_scores
 
@@ -1393,13 +1401,32 @@ def streamlit_application(df_collective, df_individual):
         st.header("Scouting")
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
-        nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
-        df_scores = search_top_players(df_individual, poste)
+        tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
-        top_joueurs = df_scores.sort_values(by= 'Note globale', ascending=False).head(nombre_joueur)
+        with tab1:
+            nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
-        st.dataframe(top_joueurs, use_container_width=True, hide_index=True)
+            top_players = search_top_players(df_individual, poste)
+
+            top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
+
+            st.dataframe(top_players, use_container_width=True, hide_index=True)
+
+        with tab2:
+            colonnes_filtrées = [col for col in df_individual.columns if 'par 90' in col.lower() or '%' in col]
+            
+            métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
+
+            thresholds = {}
+            for métrique in métriques_selectionnées:
+                thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
+
+            recommended_players = search_recommended_players(df_individual, poste, thresholds)
+
+            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
+
+            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
