@@ -736,11 +736,6 @@ def assign_color(value):
         return 'green'
     
 def compute_weighted_stats_by_minutes(df_joueur):
-    """
-    Calcule les moyennes pondérées des colonnes numériques (hors 'Minutes jouées'),
-    pondérées par les minutes jouées. La colonne 'Minutes jouées' est simplement additionnée.
-    Les colonnes non numériques (texte) sont conservées à partir de la première ligne.
-    """
     if df_joueur.empty:
         return pd.DataFrame()
 
@@ -774,7 +769,7 @@ def rank_columns(df):
     df_copy = df.copy()
     # Sélection des colonnes numériques sauf 'Minutes jouées'
     numeric_cols = df_copy.select_dtypes(include=['number']).columns
-    numeric_cols = numeric_cols.drop('Minutes jouées', errors='ignore')
+    numeric_cols = numeric_cols.drop(['Minutes jouées', 'Âge'], errors='ignore')
 
     # Calcul des rangs
     ranked_df = df_copy[numeric_cols].rank(pct=True, method='average') * 100
@@ -834,24 +829,19 @@ def create_plot_stats(indicateurs, as_cannes, adversaire, nom_adversaire):
 
 # Fonction de calcul des scores à partir de df_ranked, avec Note globale pondérée
 def calcul_scores_par_kpi(df, joueur, poste):
-    """
-    Calcule les scores pondérés par KPI et une note globale en fonction du poste du joueur.
-    Utilise kpi_by_position et kpi_coefficients_by_position.
-    """
     joueur_infos = df[df['Joueur + Information'] == joueur]
 
-    # Filtrer les joueurs du même poste avec un minimum de minutes jouées
+    if len(joueur_infos) > 1:
+        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+
     df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
-    # S'assurer que le joueur est inclus même s'il ne respecte pas les filtres
-    if joueur not in df_filtré['Joueur + Information'].values:
-        df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
-
-    # Classement des colonnes
     df_ranked = rank_columns(df_filtré)
 
     # Initialisation du DataFrame des scores
-    df_scores = df_ranked[['Joueur + Information', 'Minutes jouées']].copy()
+    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration']].copy()
 
     # Récupération des KPI spécifiques au poste
     kpi_metrics = kpi_by_position[poste]
@@ -1073,8 +1063,33 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
 
     return fig
 
+def search_top_players(df, poste):
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+
+    df_ranked = rank_columns(df_filtré)
+
+    # Initialisation du DataFrame des scores
+    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration']].copy()
+
+    # Récupération des KPI spécifiques au poste
+    kpi_metrics = kpi_by_position[poste]
+    kpi_coefficients = kpi_coefficients_by_position[poste]
+    total_coeff = sum(kpi_coefficients.values())
+
+    # Calcul des scores par KPI
+    for kpi, metrics in kpi_metrics.items():
+        df_scores[kpi] = df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1).round(1)
+
+    # Calcul de la note globale pondérée
+    df_scores["Note globale"] = sum(
+        df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
+    ) / total_coeff
+    df_scores["Note globale"] = df_scores["Note globale"].round(1)
+
+    return df_scores
+
 def streamlit_application(df_collective, df_individual):
-    page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative"])
+    page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative", "Scouting"])
 
     if page == "Accueil":
         st.header("Accueil")
@@ -1373,6 +1388,18 @@ def streamlit_application(df_collective, df_individual):
         if st.button("Comparer"):
             fig = create_comparison_radar(df_individual, joueur_1, joueur_2, poste)
             st.pyplot(fig, use_container_width=True)
+            
+    elif page == "Scouting":
+        st.header("Scouting")
+
+        poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
+        nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
+
+        df_scores = search_top_players(df_individual, poste)
+
+        top_joueurs = df_scores.sort_values(by= 'Note globale', ascending=False).head(nombre_joueur)
+
+        st.dataframe(top_joueurs, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
