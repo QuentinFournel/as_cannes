@@ -1402,12 +1402,16 @@ def streamlit_application(df_collective, df_individual):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
+        min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_individual['Âge'].min()), max_value=int(df_individual['Âge'].max()), value=(int(df_individual['Âge'].min()), int(df_individual['Âge'].max())), step=1)
+
         tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
         with tab1:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             top_players = search_top_players(df_individual, poste)
+
+            top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
 
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
@@ -1423,6 +1427,8 @@ def streamlit_application(df_collective, df_individual):
                 thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
             recommended_players = search_recommended_players(df_individual, poste, thresholds)
+
+            recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
 
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
