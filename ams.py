@@ -703,106 +703,29 @@ def collect_data():
 
     return df_collective, df_individual
 
-def create_plot_stats(indicateurs, as_cannes, adversaire):
-    fig_width, fig_height = 6, 9
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#0e1117')
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-
-    ax.set_facecolor('#0e1117')
-    text_color = '#FFFFFF'
-
-    x_positions = [0.05, 0.5, 0.85]
-
-    total_slots = 15
-    top_margin = 1
-    bottom_margin = 0.05
-    spacing = (top_margin - bottom_margin) / total_slots
-
-    def format_value(value, label):
-        if "%" in label and not str(value).strip().endswith("%"):
-            return f"{value}%"
-        return str(value)
-
-    for i in range(total_slots):
-        y = top_margin - i * spacing
-
-        if i == 0:
-            # En-tête
-            ax.text(x_positions[0], y, "Indicateur", fontsize=10, fontweight='bold', va='center', color=text_color)
-            ax.text(x_positions[1], y, "AS Cannes", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
-            ax.text(x_positions[2], y, "Adversaire", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
-
-            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='solid', linewidth=1)
-
-        elif i - 1 < len(indicateurs):
-            idx = i - 1
-            label = indicateurs[idx]
-            cannes_val = format_value(as_cannes[idx], label)
-            adv_val = format_value(adversaire[idx], label)
-
-            ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
-            ax.text(x_positions[1], y, cannes_val, fontsize=10, va='center', ha='center', color=text_color)
-            ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
-
-            if i < len(indicateurs):
-                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='dotted', linewidth=1)
-
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    return fig
-
-def rank_columns(df):
-    df_copy = df.copy()
-    # Sélection des colonnes numériques sauf 'Minutes jouées'
-    numeric_cols = df_copy.select_dtypes(include=['number']).columns
-    numeric_cols = numeric_cols.drop('Minutes jouées', errors='ignore')
-
-    # Calcul des rangs
-    ranked_df = df_copy[numeric_cols].rank(pct=True, method='average') * 100
-    ranked_df = ranked_df.fillna(0).astype(int)
-
-    # Remplacement des colonnes dans le DataFrame original
-    df_copy[numeric_cols] = ranked_df
-    return df_copy
-
-# Fonction de calcul des scores à partir de df_ranked, avec Note globale pondérée
-def calcul_scores_par_kpi(df, joueur, poste):
+def bordered_metric(container, label, value, color="#FFFFFF"):
+    style = f"""
+        <div style='
+            border: 1px solid {color};
+            border-radius: 6px;
+            padding: 12px;
+            background-color: #0e1117;
+            width: 90px;
+            height: 110px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        '>
+            <div style='font-size: 14px; color: {color}; font-weight: 500; text-align: center;'>{label}</div>
+            <div style='font-size: 24px; font-weight: bold; color: {color};'>{value}</div>
+        </div>
     """
-    Calcule les scores pondérés par KPI et une note globale en fonction du poste du joueur.
-    Utilise kpi_by_position et kpi_coefficients_by_position.
-    """
-    joueur_infos = df[df['Joueur + Information'] == joueur]
+    container.markdown(style, unsafe_allow_html=True)
 
-    # Filtrer les joueurs du même poste avec un minimum de minutes jouées
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
-
-    # S'assurer que le joueur est inclus même s'il ne respecte pas les filtres
-    if joueur not in df_filtré['Joueur + Information'].values:
-        df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
-
-    # Classement des colonnes
-    df_ranked = rank_columns(df_filtré)
-
-    # Initialisation du DataFrame des scores
-    df_scores = df_ranked[['Joueur + Information', 'Minutes jouées']].copy()
-
-    # Récupération des KPI spécifiques au poste
-    kpi_metrics = kpi_by_position[poste]
-    kpi_coefficients = kpi_coefficients_by_position[poste]
-    total_coeff = sum(kpi_coefficients.values())
-
-    # Calcul des scores par KPI
-    for kpi, metrics in kpi_metrics.items():
-        df_scores[kpi] = df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1).round(1)
-
-    # Calcul de la note globale pondérée
-    df_scores["Note globale"] = sum(
-        df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
-    ) / total_coeff
-    df_scores["Note globale"] = df_scores["Note globale"].round(1)
-
-    return df_scores
+def clean_values(values):
+    return [int(v) if isinstance(v, float) and v.is_integer() else v for v in values]
 
 def assign_color(value):
     if value <= 33:
@@ -846,6 +769,106 @@ def compute_weighted_stats_by_minutes(df_joueur):
     resultat['Minutes jouées'] = total_minutes
 
     return pd.DataFrame([resultat])
+
+def rank_columns(df):
+    df_copy = df.copy()
+    # Sélection des colonnes numériques sauf 'Minutes jouées'
+    numeric_cols = df_copy.select_dtypes(include=['number']).columns
+    numeric_cols = numeric_cols.drop('Minutes jouées', errors='ignore')
+
+    # Calcul des rangs
+    ranked_df = df_copy[numeric_cols].rank(pct=True, method='average') * 100
+    ranked_df = ranked_df.fillna(0).astype(int)
+
+    # Remplacement des colonnes dans le DataFrame original
+    df_copy[numeric_cols] = ranked_df
+    return df_copy
+
+def create_plot_stats(indicateurs, as_cannes, adversaire):
+    fig_width, fig_height = 6, 9
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#0e1117')
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+
+    ax.set_facecolor('#0e1117')
+    text_color = '#FFFFFF'
+
+    x_positions = [0.05, 0.5, 0.85]
+
+    total_slots = 15
+    top_margin = 1
+    bottom_margin = 0.05
+    spacing = (top_margin - bottom_margin) / total_slots
+
+    def format_value(value, label):
+        if "%" in label and not str(value).strip().endswith("%"):
+            return f"{value}%"
+        return str(value)
+
+    for i in range(total_slots):
+        y = top_margin - i * spacing
+
+        if i == 0:
+            ax.text(x_positions[0], y, "Indicateur", fontsize=10, fontweight='bold', va='center', color=text_color)
+            ax.text(x_positions[1], y, "AS Cannes", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
+            ax.text(x_positions[2], y, "Adversaire", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
+
+            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='solid', linewidth=1)
+
+        elif i - 1 < len(indicateurs):
+            idx = i - 1
+            label = indicateurs[idx]
+            cannes_val = format_value(as_cannes[idx], label)
+            adv_val = format_value(adversaire[idx], label)
+
+            ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
+            ax.text(x_positions[1], y, cannes_val, fontsize=10, va='center', ha='center', color=text_color)
+            ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
+
+            if i < len(indicateurs):
+                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='dotted', linewidth=1)
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    return fig
+
+# Fonction de calcul des scores à partir de df_ranked, avec Note globale pondérée
+def calcul_scores_par_kpi(df, joueur, poste):
+    """
+    Calcule les scores pondérés par KPI et une note globale en fonction du poste du joueur.
+    Utilise kpi_by_position et kpi_coefficients_by_position.
+    """
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+
+    # Filtrer les joueurs du même poste avec un minimum de minutes jouées
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+
+    # S'assurer que le joueur est inclus même s'il ne respecte pas les filtres
+    if joueur not in df_filtré['Joueur + Information'].values:
+        df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    # Classement des colonnes
+    df_ranked = rank_columns(df_filtré)
+
+    # Initialisation du DataFrame des scores
+    df_scores = df_ranked[['Joueur + Information', 'Minutes jouées']].copy()
+
+    # Récupération des KPI spécifiques au poste
+    kpi_metrics = kpi_by_position[poste]
+    kpi_coefficients = kpi_coefficients_by_position[poste]
+    total_coeff = sum(kpi_coefficients.values())
+
+    # Calcul des scores par KPI
+    for kpi, metrics in kpi_metrics.items():
+        df_scores[kpi] = df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1).round(1)
+
+    # Calcul de la note globale pondérée
+    df_scores["Note globale"] = sum(
+        df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
+    ) / total_coeff
+    df_scores["Note globale"] = df_scores["Note globale"].round(1)
+
+    return df_scores
 
 def create_individual_radar(df, joueur, poste):
     joueur_infos = df[df['Joueur + Information'] == joueur]
@@ -1050,27 +1073,6 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
 
     return fig
 
-def bordered_metric(container, label, value, color="#FFFFFF"):
-    style = f"""
-        <div style='
-            border: 1px solid {color};
-            border-radius: 6px;
-            padding: 12px;
-            background-color: #0e1117;
-            width: 90px;
-            height: 110px;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        '>
-            <div style='font-size: 14px; color: {color}; font-weight: 500; text-align: center;'>{label}</div>
-            <div style='font-size: 24px; font-weight: bold; color: {color};'>{value}</div>
-        </div>
-    """
-    container.markdown(style, unsafe_allow_html=True)
-
 def streamlit_application(df_collective, df_individual):
     page = st.sidebar.selectbox("Choisissez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative"])
 
@@ -1213,37 +1215,38 @@ def streamlit_application(df_collective, df_individual):
         as_cannes = df_filtré[df_filtré["Équipe"] == "Cannes"]
         adversaire = df_filtré[df_filtré["Équipe"] != "Cannes"]
 
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Récupération"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
 
         indicateurs_general = [
             'Buts',
             'xG',
             'Possession %',
-            'Rythme du match',
-            'PPDA'
+            'Corners',
+            'Coups francs'
         ]
 
         indicateurs_attaques = [
             'Tirs',
             'Tirs cadrés',
-            'Duels offensifs gagnés %',
-            'Attaques positionnelles avec tirs',
-            'Contre-attaques avec tirs',
-            'Entrées surface',
-            'Touches de balle surface',
-            'Centres précis %',
             'Tirs ext. surface',
-            'Distance moyenne de tir'
+            'Distance moyenne de tir',
+            'Duels offensifs gagnés %',
+            'Attaques positionnelles',
+            'Contre-attaques',
+            'Entrées surface',
+            'Touches de balle surface'
         ]
 
         indicateurs_defense = [
             'Duels défensifs gagnés %',
             'Tacles glissés réussis %',
             'Interceptions',
-            'Dégagements'
+            'Dégagements',
+            'Fautes'
         ]
 
         indicateurs_passes = [
+            'Rythme du match',
             'Passes',
             'Passes précises',
             'Passes avant précises',
@@ -1252,58 +1255,51 @@ def streamlit_application(df_collective, df_individual):
             'Passes 3e tiers précises',
             'Passes astucieuses précises',
             'Passes par possession',
-            'Longueur moyenne des passes'
+            'Longueur moyenne des passes',
+            'Centres',
+            'Centres précis'
         ]
 
-        indicateurs_transitions = [
+        indicateurs_pressing = [
+            'PPDA',
             'Récupérations élevé',
             'Récupérations moyen',
             'Pertes bas'
         ]
 
         with tab1:
-            st.subheader("Statistiques générales")
-
-            as_cannes_values = as_cannes[indicateurs_general].values.flatten()
-            adversaire_values = adversaire[indicateurs_general].values.flatten()
+            as_cannes_values = clean_values(as_cannes[indicateurs_general].values.flatten())
+            adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
 
             fig = create_plot_stats(indicateurs_general, as_cannes_values, adversaire_values)
             st.pyplot(fig, use_container_width=True)
 
         with tab2:
-            st.subheader("Statistiques offensives")
-
-            as_cannes_values = as_cannes[indicateurs_attaques].values.flatten()
-            adversaire_values = adversaire[indicateurs_attaques].values.flatten()
+            as_cannes_values = clean_values(as_cannes[indicateurs_attaques].values.flatten())
+            adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
 
             fig = create_plot_stats(indicateurs_attaques, as_cannes_values, adversaire_values)
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
-            st.subheader("Statistiques défensives")
-
-            as_cannes_values = as_cannes[indicateurs_defense].values.flatten()
-            adversaire_values = adversaire[indicateurs_defense].values.flatten()
+            as_cannes_values = clean_values(as_cannes[indicateurs_defense].values.flatten())
+            adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
 
             fig = create_plot_stats(indicateurs_defense, as_cannes_values, adversaire_values)
             st.pyplot(fig, use_container_width=True)
 
         with tab4:
-            st.subheader("Statistiques des passes")
-
-            as_cannes_values = as_cannes[indicateurs_passes].values.flatten()
-            adversaire_values = adversaire[indicateurs_passes].values.flatten()
+            as_cannes_values = clean_values(as_cannes[indicateurs_passes].values.flatten())
+            adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
 
             fig = create_plot_stats(indicateurs_passes, as_cannes_values, adversaire_values)
             st.pyplot(fig, use_container_width=True)
 
         with tab5:
-            st.subheader("Statistiques des transitions")
+            as_cannes_values = clean_values(as_cannes[indicateurs_pressing].values.flatten())
+            adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
 
-            as_cannes_values = as_cannes[indicateurs_transitions].values.flatten()
-            adversaire_values = adversaire[indicateurs_transitions].values.flatten()
-
-            fig = create_plot_stats(indicateurs_transitions, as_cannes_values, adversaire_values)
+            fig = create_plot_stats(indicateurs_pressing, as_cannes_values, adversaire_values)
             st.pyplot(fig, use_container_width=True)
 
     elif page == "Analyse individuelle":
