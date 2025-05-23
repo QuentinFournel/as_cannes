@@ -1431,55 +1431,57 @@ def streamlit_application(df_collective, df_individual):
             st.pyplot(fig, use_container_width=True)
             
     elif page == "Scouting":
-        if "authenticated" not in st.session_state:
-                st.session_state.authenticated = False
+        if "scouting_authenticated" not in st.session_state:
+            st.session_state.scouting_authenticated = False
 
-        if not st.session_state.authenticated:
+        if not st.session_state.scouting_authenticated:
             with st.form("login_form"):
                 password = st.text_input("Mot de passe", type="password")
                 submitted = st.form_submit_button("Valider")
 
                 if submitted:
                     if password == st.secrets['password']['scouting']:
-                        st.session_state.authenticated = True
-
-                        st.header("Scouting")
-
-                        poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
-
-                        min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_individual['Âge'].min()), max_value=int(df_individual['Âge'].max()), value=(int(df_individual['Âge'].min()), int(df_individual['Âge'].max())), step=1)
-
-                        tab1, tab2 = st.tabs(["Classement", "Recommandation"])
-
-                        with tab1:
-                            nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
-
-                            top_players = search_top_players(df_individual, poste)
-
-                            top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
-
-                            top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
-
-                            st.dataframe(top_players, use_container_width=True, hide_index=True)
-
-                        with tab2:
-                            colonnes_filtrées = [col for col in df_individual.columns if 'par 90' in col.lower() or '%' in col]
-                            
-                            métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
-
-                            thresholds = {}
-                            for métrique in métriques_selectionnées:
-                                thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
-
-                            recommended_players = search_recommended_players(df_individual, poste, thresholds)
-
-                            recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
-
-                            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
-
-                            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+                        st.session_state.scouting_authenticated = True
+                        st.rerun()
                     else:
                         st.error("Mot de passe incorrect")
+
+        if st.session_state.scouting_authenticated:
+            st.header("Scouting")
+
+            poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
+
+            min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_individual['Âge'].min()), max_value=int(df_individual['Âge'].max()), value=(int(df_individual['Âge'].min()), int(df_individual['Âge'].max())), step=1)
+
+            tab1, tab2 = st.tabs(["Classement", "Recommandation"])
+
+            with tab1:
+                nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
+
+                top_players = search_top_players(df_individual, poste)
+
+                top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
+
+                top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
+
+                st.dataframe(top_players, use_container_width=True, hide_index=True)
+
+            with tab2:
+                colonnes_filtrées = [col for col in df_individual.columns if 'par 90' in col.lower() or '%' in col]
+                
+                métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
+
+                thresholds = {}
+                for métrique in métriques_selectionnées:
+                    thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
+
+                recommended_players = search_recommended_players(df_individual, poste, thresholds)
+
+                recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
+
+                recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
+
+                st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
