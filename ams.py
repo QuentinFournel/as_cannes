@@ -1516,17 +1516,23 @@ if __name__ == '__main__':
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
+    if "username" not in st.session_state:
+        st.session_state.username = None
+
     if not st.session_state.authenticated:
         with st.form("login_form"):
+            username = st.text_input("Nom d'utilisateur")
             password = st.text_input("Mot de passe", type="password")
-            submitted = st.form_submit_button("Valider")
+            submitted = st.form_submit_button("Se connecter")
 
             if submitted:
-                if password == st.secrets['password']['password']:
+                if username in st.secrets['users'] and password == st.secrets['users'][username]:
                     st.session_state.authenticated = True
+                    st.session_state.username = username
+                    st.success("Connexion réussie")
                     st.rerun()
                 else:
-                    st.error("Mot de passe incorrect")
+                    st.error("Nom d'utilisateur ou mot de passe incorrect")
 
     if st.session_state.authenticated:
         df_collective, df_individual = collect_data()
