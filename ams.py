@@ -1020,8 +1020,8 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     )
 
     # Ajoute les lignes de moyenne
-    fig.add_vline(x=x_mean, line=dict(color="rgba(0,0,0,0.5)", dash='dash'))
-    fig.add_hline(y=y_mean, line=dict(color="rgba(0,0,0,0.5)", dash='dash'))
+    fig.add_vline(x=x_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
+    fig.add_hline(y=y_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
 
     # Ajoute les 4 textes descriptifs
     x_min, x_max = df_filtré[x_metric].min(), df_filtré[x_metric].max()
@@ -1048,14 +1048,14 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
         height=600,
         xaxis=dict(
             showgrid=True,
-            gridcolor="rgba(0,0,0,0.1)",
+            gridcolor="rgba(61,58,42,0.1)",
             gridwidth=0.5,
             griddash="dot",
             zeroline=False
         ),
         yaxis=dict(
             showgrid=True,
-            gridcolor="rgba(0,0,0,0.1)",
+            gridcolor="rgba(61,58,42,0.1)",
             gridwidth=0.5,
             griddash="dot",
             zeroline=False
