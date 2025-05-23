@@ -1459,6 +1459,8 @@ def streamlit_application(df_collective, df_individual):
             top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
+            top_players.insert(0, "Classement", range(1, len(top_players) + 1))
+
             st.dataframe(top_players, use_container_width=True, hide_index=True)
 
         with tab2:
@@ -1473,6 +1475,8 @@ def streamlit_application(df_collective, df_individual):
             recommended_players = search_recommended_players(df_individual, poste, thresholds)
             recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
+
+            recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
             st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
