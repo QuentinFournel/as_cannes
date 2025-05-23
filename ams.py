@@ -1169,7 +1169,6 @@ def streamlit_application(df_collective, df_individual):
             tables = pd.read_html(response.text)
 
             classement = tables[0]
-
             classement = classement.iloc[:, :-1]
 
             classement.columns = [col.replace('\xa0', ' ').strip() for col in classement.columns]
