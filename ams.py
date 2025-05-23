@@ -704,14 +704,14 @@ def collect_data():
 
     return df_collective, df_individual
 
-def bordered_metric(container, label, value, color="#3d3a2a"):
+def bordered_metric(container, label, value, size, color="#3d3a2a"):
     style = f"""
         <div style='
             border: 1px solid {color};
             border-radius: 6px;
             padding: 12px;
             background-color: #f4f3ed;
-            width: 90px;
+            width: {size}px;
             height: 110px;
             margin: auto;
             display: flex;
@@ -1039,7 +1039,6 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     fig.update_layout(
         template="plotly_dark",
         plot_bgcolor="#f4f3ed",
-        paper_bgcolor="#f4f3ed",
         annotations=annotations,
         showlegend=False,
         xaxis_title=x_metric,
@@ -1372,15 +1371,30 @@ def streamlit_application(df_collective, df_individual):
         )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4 = st.tabs(["Radar", "Nuage de points", "KPI", "Match"])
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Match"])
         else:
-            tab1, tab2, tab3 = st.tabs(["Radar", "Nuage de points", "KPI"])
+            tab1, tab2, tab3, tab4 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI"])
 
         with tab1:
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                bordered_metric(col1, "Matchs joués", df_individual[df_individual['Joueur + Information'] == joueur]['Matchs joués'].values[0], 165)
+
+            with col2:
+                bordered_metric(col2, "Minutes jouées", df_individual[df_individual['Joueur + Information'] == joueur]['Minutes jouées'].values[0], 165)
+
+            with col3:
+                bordered_metric(col3, "Buts", df_individual[df_individual['Joueur + Information'] == joueur]['Buts'].values[0], 165)
+
+            with col4:
+                bordered_metric(col4, "Passes décisives", df_individual[df_individual['Joueur + Information'] == joueur]['Passes décisives'].values[0], 165)
+
+        with tab2:
             fig = create_individual_radar(df_individual, joueur, poste)
             st.pyplot(fig, use_container_width=True)
 
-        with tab2:
+        with tab3:
             metrics_label  = st.selectbox("Sélectionnez une base de comparaison", metrics_x_y.keys())
 
             x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
@@ -1389,7 +1403,7 @@ def streamlit_application(df_collective, df_individual):
             fig = plot_player_metrics(df_individual, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
-        with tab3:
+        with tab4:
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
@@ -1397,10 +1411,10 @@ def streamlit_application(df_collective, df_individual):
 
             for i, kpi in enumerate(kpis_poste):
                 with colonnes[i]:
-                    bordered_metric(colonnes[i], kpi, round(joueur_scores[kpi], 1))
+                    bordered_metric(colonnes[i], kpi, round(joueur_scores[kpi], 1), 90)
 
             with colonnes[-1]:
-                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), color= "#AC141A")
+                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
     
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
