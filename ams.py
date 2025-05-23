@@ -1180,7 +1180,6 @@ def streamlit_application(df_collective, df_individual):
     elif page == "Vidéo des buts":
         st.header("Vidéo des buts")
 
-        # Dictionnaire des journées et matchs
         journées = {
             "J24": [
                 'Anglet Genets Foot VS Le Puy Foot 43',
@@ -1443,9 +1442,7 @@ def streamlit_application(df_collective, df_individual):
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             top_players = search_top_players(df_individual, poste)
-
             top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
-
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
             st.dataframe(top_players, use_container_width=True, hide_index=True)
@@ -1460,9 +1457,7 @@ def streamlit_application(df_collective, df_individual):
                 thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
             recommended_players = search_recommended_players(df_individual, poste, thresholds)
-
             recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
-
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             st.dataframe(recommended_players, use_container_width=True, hide_index=True)
