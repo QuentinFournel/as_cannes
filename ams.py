@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import requests
 import unicodedata
+from streamlit_option_menu import option_menu
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -703,13 +704,13 @@ def collect_data():
 
     return df_collective, df_individual
 
-def bordered_metric(container, label, value, color="#FFFFFF"):
+def bordered_metric(container, label, value, color="#3d3a2a"):
     style = f"""
         <div style='
             border: 1px solid {color};
             border-radius: 6px;
             padding: 12px;
-            background-color: #0e1117;
+            background-color: #f4f3ed;
             width: 90px;
             height: 110px;
             margin: auto;
@@ -781,13 +782,13 @@ def rank_columns(df):
 
 def create_plot_stats(indicateurs, as_cannes, adversaire, nom_adversaire):
     fig_width, fig_height = 6, 9
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#0e1117')
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#f4f3ed')
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
 
-    ax.set_facecolor('#0e1117')
-    text_color = '#FFFFFF'
+    ax.set_facecolor('#f4f3ed')
+    text_color = '#3d3a2a'
 
     x_positions = [0.05, 0.5, 0.85]
 
@@ -809,7 +810,7 @@ def create_plot_stats(indicateurs, as_cannes, adversaire, nom_adversaire):
             ax.text(x_positions[1], y, "Cannes", fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
             ax.text(x_positions[2], y, nom_adversaire, fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
 
-            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='solid', linewidth=1)
+            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='solid', linewidth=1)
 
         elif i - 1 < len(indicateurs):
             idx = i - 1
@@ -822,7 +823,7 @@ def create_plot_stats(indicateurs, as_cannes, adversaire, nom_adversaire):
             ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
 
             if i < len(indicateurs):
-                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='gray', linestyles='dotted', linewidth=1)
+                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='dotted', linewidth=1)
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return fig
@@ -881,11 +882,11 @@ def create_individual_radar(df, joueur, poste):
 
     pizza = PyPizza(
         params=metrics,
-        background_color="#FFFFFF",
-        straight_line_color="#FFFFFF",
+        background_color="#f4f3ed",
+        straight_line_color="#3d3a2a",
         straight_line_lw=1,
         last_circle_lw=2,
-        last_circle_color="#FFFFFF",
+        last_circle_color="#3d3a2a",
         other_circle_lw=0,
         inner_circle_size=20
     )
@@ -897,20 +898,20 @@ def create_individual_radar(df, joueur, poste):
         slice_colors=slice_colors,
         value_bck_colors=slice_colors,
         blank_alpha=0.4,
-        kwargs_slices=dict(edgecolor="#FFFFFF", zorder=2, linewidth=1),
+        kwargs_slices=dict(edgecolor="#3d3a2a", zorder=2, linewidth=1),
         kwargs_params=dict(
-            color="#FFFFFF", fontsize=11, va="center"
+            color="#3d3a2a", fontsize=11, va="center"
         ),
         kwargs_values=dict(
-            color="#FFFFFF", fontsize=11, zorder=3,
+            color="#f4f3ed", fontsize=11, zorder=3,
             bbox=dict(
-                edgecolor="#FFFFFF", facecolor="cornflowerblue",
+                edgecolor="#3d3a2a", facecolor="cornflowerblue",
                 boxstyle="round,pad=0.2", lw=1
             )
         )
     )
 
-    fig.set_facecolor('#0e1117')
+    fig.set_facecolor('#f4f3ed')
 
     return fig
 
@@ -954,31 +955,31 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
                     title_space=0, endnote_space=0, grid_key='radar', axis=False)
 
     radar.setup_axis(ax=axs['radar'], facecolor='None')
-    radar.draw_circles(ax=axs['radar'], facecolor='#28252c', edgecolor='#39353f', lw=1.5)
+    radar.draw_circles(ax=axs['radar'], facecolor='#ecebe3', lw=1.5)
 
     player_values_1 = df_ranked[df_ranked['Joueur + Information'] == joueur_1][metrics_cols].mean().values.flatten()
     player_values_2 = df_ranked[df_ranked['Joueur + Information'] == joueur_2][metrics_cols].mean().values.flatten()
 
     radar.draw_radar_compare(player_values_1, player_values_2, ax=axs['radar'],
                              kwargs_radar={'facecolor': '#1440AC', 'alpha': 0.6},
-                             kwargs_compare={'facecolor': '#FF4B4B', 'alpha': 0.6})
+                             kwargs_compare={'facecolor': '#ac141a', 'alpha': 0.6})
 
-    radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#FFFFFF', fontproperties=robotto_thin.prop)
-    radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#FFFFFF', fontproperties=robotto_thin.prop)
+    radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#3d3a2a', fontproperties=robotto_thin.prop)
+    radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#3d3a2a', fontproperties=robotto_thin.prop)
 
     axs['title'].text(0.01, 0.60, f"{joueur_1.split(' - ')[0]}", fontsize=25, color='#1440AC',
                       fontproperties=robotto_bold.prop, ha='left', va='center')
     axs['title'].text(0.01, 0.20,
                       f"{df_ranked[df_ranked['Joueur + Information'] == joueur_1]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_1]['Minutes jouées'].iloc[0]} minutes jouées",
-                      fontsize=20, fontproperties=robotto_thin.prop, ha='left', va='center', color='#FFFFFF')
+                      fontsize=20, fontproperties=robotto_thin.prop, ha='left', va='center', color='#3d3a2a')
 
     axs['title'].text(0.99, 0.60, f"{joueur_2.split(' - ')[0]}", fontsize=25,
-                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#FF4B4B')
+                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#ac141a')
     axs['title'].text(0.99, 0.20,
                       f"{df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Minutes jouées'].iloc[0]} minutes jouées",
-                      fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#FFFFFF')
+                      fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#3d3a2a')
 
-    fig.set_facecolor('#0e1117')
+    fig.set_facecolor('#f4f3ed')
 
     return fig
 
@@ -1006,8 +1007,8 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
         y=y_metric,
         color="Catégorie",
         color_discrete_map={
-            "Autres joueurs": "#FFFFFF",
-            "Joueur sélectionné": "#FF4B4B"
+            "Autres joueurs": "#3d3a2a",
+            "Joueur sélectionné": "#ac141a"
         },
         hover_name="Joueur + Information",
         hover_data={
@@ -1019,8 +1020,8 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     )
 
     # Ajoute les lignes de moyenne
-    fig.add_vline(x=x_mean, line=dict(color="rgba(255,255,255,0.5)", dash='dash'))
-    fig.add_hline(y=y_mean, line=dict(color="rgba(255,255,255,0.5)", dash='dash'))
+    fig.add_vline(x=x_mean, line=dict(color="rgba(0,0,0,0.5)", dash='dash'))
+    fig.add_hline(y=y_mean, line=dict(color="rgba(0,0,0,0.5)", dash='dash'))
 
     # Ajoute les 4 textes descriptifs
     x_min, x_max = df_filtré[x_metric].min(), df_filtré[x_metric].max()
@@ -1029,16 +1030,16 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
     y_offset = (y_max - y_min) * 0.02
 
     annotations = [
-        dict(x=x_min + x_offset, y=y_max - y_offset, text=description_1, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="left", yanchor="top"),
-        dict(x=x_max - x_offset, y=y_max - y_offset, text=description_2, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="right", yanchor="top"),
-        dict(x=x_min + x_offset, y=y_min + y_offset, text=description_3, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="left", yanchor="bottom"),
-        dict(x=x_max - x_offset, y=y_min + y_offset, text=description_4, showarrow=False, font=dict(color="#FFFFFF", size=11), xanchor="right", yanchor="bottom")
+        dict(x=x_min + x_offset, y=y_max - y_offset, text=description_1, showarrow=False, font=dict(color="#3d3a2a", size=11), xanchor="left", yanchor="top"),
+        dict(x=x_max - x_offset, y=y_max - y_offset, text=description_2, showarrow=False, font=dict(color="#3d3a2a", size=11), xanchor="right", yanchor="top"),
+        dict(x=x_min + x_offset, y=y_min + y_offset, text=description_3, showarrow=False, font=dict(color="#3d3a2a", size=11), xanchor="left", yanchor="bottom"),
+        dict(x=x_max - x_offset, y=y_min + y_offset, text=description_4, showarrow=False, font=dict(color="#3d3a2a", size=11), xanchor="right", yanchor="bottom")
     ]
 
     fig.update_layout(
         template="plotly_dark",
-        plot_bgcolor="#0e1117",
-        paper_bgcolor="#0e1117",
+        plot_bgcolor="#f4f3ed",
+        paper_bgcolor="#f4f3ed",
         annotations=annotations,
         showlegend=False,
         xaxis_title=x_metric,
@@ -1047,14 +1048,14 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
         height=600,
         xaxis=dict(
             showgrid=True,
-            gridcolor="rgba(255,255,255,0.1)",
+            gridcolor="rgba(0,0,0,0.1)",
             gridwidth=0.5,
             griddash="dot",
             zeroline=False
         ),
         yaxis=dict(
             showgrid=True,
-            gridcolor="rgba(255,255,255,0.1)",
+            gridcolor="rgba(0,0,0,0.1)",
             gridwidth=0.5,
             griddash="dot",
             zeroline=False
@@ -1097,7 +1098,39 @@ def search_recommended_players(df, poste, thresholds):
     return df_scores
 
 def streamlit_application(df_collective, df_individual):
-    page = st.sidebar.selectbox("Sélectionnez une page", ["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative", "Scouting"])
+    with st.sidebar:
+        page = option_menu(
+            menu_title="",
+            options=["Accueil", "Classement", "Vidéo des buts", "Analyse collective", "Analyse individuelle", "Analyse comparative", "Scouting"],
+            icons=["house", "bar-chart", "camera-video", "people", "person", "graph-up-arrow", "search"],
+            menu_icon="cast",
+            default_index=0,
+            orientation="vertical",
+            styles={
+                "container": {"padding": "5!important", "background-color": "#ecebe3"},
+                "icon": {"font-size": "18px"},
+                "nav-link": {
+                    "font-size": "16px",
+                    "text-align": "left",
+                    "margin":"0px",
+                    "--hover-color": "#f4f3ed"
+                },
+                "nav-link-selected": {
+                    "background-color": "#AC141A",
+                    "color": "#ecebe3",
+                    "font-weight": "bold"
+                }
+            }
+        )
+
+        st.sidebar.markdown(
+            """
+            <div style='text-align: center; padding-top: 10px;'>
+                <img src='https://i.postimg.cc/0j1RhZV5/Dragon-couleur-png.png' width='120'>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     if page == "Accueil":
         st.header("Accueil")
@@ -1463,11 +1496,6 @@ if __name__ == '__main__':
         """,
         unsafe_allow_html=True
     )
-
-    # Empêche l'app de se mettre en veille
-    if "ping" in st.query_params:
-        st.write("pong")
-        st.stop()
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
