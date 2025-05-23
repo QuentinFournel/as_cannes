@@ -1007,7 +1007,7 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
         y=y_metric,
         color="Catégorie",
         color_discrete_map={
-            "Autres joueurs": "#3d3a2a",
+            "Autres joueurs": "rgba(61,58,42,0.2)",
             "Joueur sélectionné": "#ac141a"
         },
         hover_name="Joueur + Information",
