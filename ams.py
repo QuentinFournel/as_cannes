@@ -1107,7 +1107,7 @@ def streamlit_application(df_collective, df_individual):
             default_index=0,
             orientation="vertical",
             styles={
-                "container": {"padding": "5!important", "background-color": "#ecebe3"},
+                "container": {"padding": "5!important", "background-color": "transparent"},
                 "icon": {"font-size": "18px"},
                 "nav-link": {
                     "font-size": "16px",
