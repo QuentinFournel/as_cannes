@@ -1101,7 +1101,7 @@ def streamlit_application(df_collective, df_individual):
     with st.sidebar:
         page = option_menu(
             menu_title="",
-            options=st.secrets['roles'].get(username, []),
+            options=st.secrets['roles'].get(st.session_state.username, []),
             icons=["house", "bar-chart", "camera-video", "people", "person", "graph-up-arrow", "search"],
             menu_icon="cast",
             default_index=0,
@@ -1513,7 +1513,6 @@ if __name__ == '__main__':
                 if username in st.secrets['users'] and password == st.secrets['users'][username]:
                     st.session_state.authenticated = True
                     st.session_state.username = username
-                    st.success("Connexion réussie")
                     st.rerun()
                 else:
                     st.error("Nom d'utilisateur ou mot de passe incorrect")
