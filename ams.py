@@ -1401,7 +1401,7 @@ def streamlit_application(df_collective, df_individual):
                     bordered_metric(colonnes[i], kpi, round(joueur_scores[kpi], 1))
 
             with colonnes[-1]:
-                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), color= "#FF4B4B")
+                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), color= "#AC141A")
     
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
