@@ -1411,12 +1411,6 @@ def streamlit_application(df_collective, df_individual, df_résultats):
         df_filtré = df_individual[df_individual['Équipe dans la période sélectionnée'] == team]
 
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
-
-        poste = st.selectbox(
-            "Sélectionnez la base de comparaison (poste) pour l'analyse",
-            list(kpi_by_position.keys()),
-            help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
-        )
         
         if team == "Cannes":
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Match"])
@@ -1439,10 +1433,22 @@ def streamlit_application(df_collective, df_individual, df_résultats):
                 bordered_metric(col4, "Passes décisives", df_individual[df_individual['Joueur + Information'] == joueur]['Passes décisives'].values[0], 165)
 
         with tab2:
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                list(kpi_by_position.keys()),
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
+
             fig = create_individual_radar(df_individual, joueur, poste)
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                list(kpi_by_position.keys()),
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
+
             metrics_label  = st.selectbox("Sélectionnez une base de comparaison", metrics_x_y.keys())
 
             x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
@@ -1452,6 +1458,12 @@ def streamlit_application(df_collective, df_individual, df_résultats):
             st.plotly_chart(fig, use_container_width=True)
 
         with tab4:
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                list(kpi_by_position.keys()),
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
+
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
