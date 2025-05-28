@@ -1436,7 +1436,8 @@ def streamlit_application(df_collective, df_individual, df_résultats):
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
                 list(kpi_by_position.keys()),
-                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères.",
+                key="radar"
             )
 
             fig = create_individual_radar(df_individual, joueur, poste)
@@ -1446,7 +1447,8 @@ def streamlit_application(df_collective, df_individual, df_résultats):
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
                 list(kpi_by_position.keys()),
-                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères.",
+                key="nuage de points"
             )
 
             metrics_label  = st.selectbox("Sélectionnez une base de comparaison", metrics_x_y.keys())
@@ -1461,7 +1463,8 @@ def streamlit_application(df_collective, df_individual, df_résultats):
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
                 list(kpi_by_position.keys()),
-                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères.",
+                key="kpi"
             )
 
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
