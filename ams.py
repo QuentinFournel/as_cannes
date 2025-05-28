@@ -1463,7 +1463,95 @@ def streamlit_application(df_collective, df_individual, df_résultats):
 
             with colonnes[-1]:
                 bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
-    
+
+        if team == "Cannes":
+            with tab5:
+                joueur = joueur.split(" - ")[0]
+
+                df_player = pd.read_excel(f"data/Player stats {joueur}.xlsx")
+
+                colonnes = [
+                    "Match",
+                    "Competition",
+                    "Date",
+                    "Place",
+                    "Minutes jouées",
+                    "Total actions",
+                    "Total actions réussies",
+                    "But",
+                    "Passe décisive",
+                    "Tirs",
+                    "Tirs cadrés",
+                    "xG",
+                    "Passes",
+                    "Passes précises",
+                    "Passes longues",
+                    "Passes longues précises",
+                    "Centres",
+                    "Centres précis",
+                    "Dribbles",
+                    "Dribbles réussis",
+                    "Duels",
+                    "Duels gagnés",
+                    "Duels aériens",
+                    "Duels aériens gagnés",
+                    "Interceptions",
+                    "Pertes",
+                    "Pertes dans le propre terrain",
+                    "Récupérations",
+                    "Récupérations dans le terrain adverse",
+                    "Carton jaune",
+                    "Carton rouge",
+                    "Duels défensifs",
+                    "Duels défensifs gagnés",
+                    "Duels ballons perdus",
+                    "Duels ballons gagnés",
+                    "Tacles glissés",
+                    "Tacles glissés réussis",
+                    "Dégagements",
+                    "Faute",
+                    "Cartons jaunes",
+                    "Cartons rouges",
+                    "Passes décisives avec tir",
+                    "Duels offensifs",
+                    "Duels offensifs gagnés",
+                    "Touches de balle dans la surface de réparation",
+                    "Hors-jeu",
+                    "Courses progressives",
+                    "Fautes subies",
+                    "Passes en profondeur",
+                    "Passes en profondeur précises",
+                    "xA",
+                    "Secondes passes décisives",
+                    "Passes dans le 3ème tiers",
+                    "Passes dans le 3ème tiers précises",
+                    "Passes vers la surface de réparation",
+                    "Passes vers la surface de réparation précises",
+                    "Passes réceptionnées",
+                    "Passes en avant",
+                    "Passes en avant précises",
+                    "Passes arrière",
+                    "Passes arrière précises",
+                    "Buts concédés",
+                    "xCG",
+                    "Tirs contre",
+                    "Arrêts",
+                    "Arrêts réflexes",
+                    "Sorties",
+                    "Passes au gardien de but",
+                    "Passes au gardien de but précises",
+                    "But sur coup franc",
+                    "But sur coup franc courtes",
+                    "But sur coup franc longues"
+                ]
+
+                # Renommer les colonnes
+                df_player.columns = colonnes
+
+                matchs = st.multiselect("Sélectionnez les matchs à analyser", df_player["Match"].unique())
+
+                st.dataframe(df_player[df_player["Match"].isin(matchs)], use_container_width=True, hide_index=True)
+
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
 
