@@ -699,10 +699,13 @@ def collect_data():
         nat2_ailier, nat2_buteur, nat2_defenseur_central, nat2_lateral, nat2_milieu, nat2_milieu_offensif
     ], ignore_index=True)
 
+    df_résultats = pd.read_excel("data/résultats.xlsx")
+
     df_collective.columns = df_collective.columns.str.strip()
     df_individual.columns = df_individual.columns.str.strip()
+    df_résultats.columns = df_résultats.columns.str.strip()
 
-    return df_collective, df_individual
+    return df_collective, df_individual, df_résultats
 
 def bordered_metric(container, label, value, size, color="#3d3a2a"):
     style = f"""
@@ -1096,7 +1099,50 @@ def search_recommended_players(df, poste, thresholds):
 
     return df_scores
 
-def streamlit_application(df_collective, df_individual):
+def creation_moyenne_anglaise(résultats, type_classement, journée_début, journée_fin):
+    # Filtrer les journées
+    résultats_filtrés = résultats[(résultats["Journée"] >= journée_début) & (résultats["Journée"] <= journée_fin)].copy()
+
+    # Initialiser un dictionnaire pour stocker les stats
+    stats = {}
+
+    for _, row in résultats_filtrés.iterrows():
+        eq_dom = row["Équipe à domicile"]
+        eq_ext = row["Équipe à l'extérieur"]
+        score = row["Score"]
+        buts_dom, buts_ext = map(int, score.split(" - "))
+
+        if type_classement == "Général":
+            équipes_concernées = [(eq_dom, buts_dom, buts_ext, True), (eq_ext, buts_ext, buts_dom, False)]
+        elif type_classement == "Domicile":
+            équipes_concernées = [(eq_dom, buts_dom, buts_ext, True)]
+        elif type_classement == "Extérieur":
+            équipes_concernées = [(eq_ext, buts_ext, buts_dom, False)]
+        else:
+            raise ValueError("Type de classement non reconnu")
+
+        for équipe, bp, bc, is_home in équipes_concernées:
+            if équipe not in stats:
+                stats[équipe] = {"Moyenne anglaise": 0}
+
+            # Détermination du résultat
+            if bp > bc:
+                stats[équipe]["Moyenne anglaise"] += 0 if is_home else 2
+            elif bp == bc:
+                stats[équipe]["Moyenne anglaise"] += -2 if is_home else 0
+            else:
+                stats[équipe]["Moyenne anglaise"] += -3 if is_home else -1
+
+    # Conversion en DataFrame
+    df_ranking = pd.DataFrame.from_dict(stats, orient='index')
+    df_ranking.index.name = "Equipes"
+
+    # Tri simplement par valeur, car c'est une Series ou DataFrame d'une colonne
+    df_ranking = df_ranking.sort_values("Moyenne anglaise", ascending=False).reset_index()
+
+    return df_ranking
+
+def streamlit_application(df_collective, df_individual, df_résultats):
     with st.sidebar:
         page = option_menu(
             menu_title="",
@@ -1172,6 +1218,9 @@ def streamlit_application(df_collective, df_individual):
             classement = classement.iloc[:, :-1]
 
             classement.columns = [col.replace('\xa0', ' ').strip() for col in classement.columns]
+
+            moyenne_anglaise = creation_moyenne_anglaise(df_résultats, type_classement, journée_début, journée_fin)
+            classement = classement.merge(moyenne_anglaise, on="Equipes", how="left")
 
             st.dataframe(classement, use_container_width=True, hide_index=True)
 
@@ -1530,5 +1579,5 @@ if __name__ == '__main__':
                     st.error("Nom d'utilisateur ou mot de passe incorrect")
 
     if st.session_state.authenticated:
-        df_collective, df_individual = collect_data()
-        streamlit_application(df_collective, df_individual)
+        df_collective, df_individual, df_résultats = collect_data()
+        streamlit_application(df_collective, df_individual, df_résultats)
