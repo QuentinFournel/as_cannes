@@ -503,6 +503,15 @@ metrics_x_y = {
             "Se procure beaucoup d'occasions<br>mais marque peu"
         ]
     },
+    "Apport par la passe": {
+        "metrics": ["Passes judicieuses par 90", "Passes intelligentes précises, %"],
+        "descriptions": [
+            "Tente peu de passes<br>judicieuses mais<br>en réussit beaucoup",
+            "Tente beaucoup de passes<br>judicieuses et<br>en réussit beaucoup",
+            "Tente peu de passes<br>judicieuses et<br>en réussit peu",
+            "Tente beaucoup de passes<br>judicieuses mais<br>en réussit peu"
+        ]
+    },
     "Progression du ballon": {
         "metrics": ["Courses progressives par 90", "Passes progressives par 90"],
         "descriptions": [
