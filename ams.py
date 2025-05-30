@@ -1142,6 +1142,63 @@ def creation_moyenne_anglaise(résultats, type_classement, journée_début, jour
 
     return df_ranking
 
+def performance_index(df_player, poste, match):
+    total_actions = df_player['Total actions'].sum()
+    total_actions_réussies = df_player['Total actions réussies'].sum()
+
+    note_sans_bonus = total_actions_réussies / total_actions * 10
+
+    bonus = 0
+    malus = 0
+
+    total_buts = df_player['But'].sum()
+    bonus += total_buts * 1.5
+
+    total_passes = df_player['Passe décisive'].sum()
+    bonus += total_passes * 1
+
+    total_cr = df_player['Cartons rouges'].sum()
+    malus -= total_cr * 1.5
+
+    total_cj = df_player['Cartons jaunes'].sum()
+    malus -= total_cj * 0.5
+
+    # Séparer pour récupérer le score (toujours à la fin)
+    score_str = match.split()[-1]
+    score_a, score_b = map(int, score_str.split(":"))
+
+    # Récupérer la chaîne avec les deux équipes
+    equipes = " ".join(match.split()[:-1])
+    equipe_dom, _ = equipes.split(" - ")
+
+    if "Cannes" in equipe_dom:
+        score_cannes = score_a
+        score_adv = score_b
+    else:
+        score_cannes = score_b
+        score_adv = score_a
+
+    if score_cannes > score_adv:
+        bonus_resultat = 1
+    elif score_cannes < score_adv:
+        bonus_resultat = -1
+    else:
+        bonus_resultat = 0
+
+    bonus_clean_sheet = 0
+
+    # On applique le bonus clean sheet uniquement aux postes défensifs
+    if poste in ['Défenseur central', 'Latéral', 'Milieu']:
+        if score_adv == 0:
+            bonus_clean_sheet = 1
+        else:
+            bonus_clean_sheet -= score_adv * 0.5
+
+    note = note_sans_bonus + bonus + malus + bonus_resultat + bonus_clean_sheet
+    note = 10.0 if note > 10.0 else note
+
+    return round(note, 1)
+
 def streamlit_application(df_collective, df_individual, df_résultats):
     with st.sidebar:
         page = option_menu(
@@ -1548,9 +1605,27 @@ def streamlit_application(df_collective, df_individual, df_résultats):
                 # Renommer les colonnes
                 df_player.columns = colonnes
 
-                matchs = st.multiselect("Sélectionnez les matchs à analyser", df_player["Match"].unique())
+                match = st.selectbox("Sélectionnez le match à analyser", df_player["Match"].unique())
 
-                st.dataframe(df_player[df_player["Match"].isin(matchs)], use_container_width=True, hide_index=True)
+                df_player = df_player[df_player["Match"] == match]
+
+                st.dataframe(df_player, use_container_width=True, hide_index=True)
+
+                note = performance_index(df_player, poste, match)
+
+                col1, col2, col3, col4 = st.columns(4)
+
+                with col1:
+                    bordered_metric(col1, "Minutes jouées", df_player[df_player["Match"] == match]["Minutes jouées"].values[0], 165)
+
+                with col2:
+                    bordered_metric(col2, "Buts", df_player[df_player["Match"] == match]["But"].values[0], 165)
+
+                with col3:
+                    bordered_metric(col3, "Passes décisives", df_player[df_player["Match"] == match]["Passe décisive"].values[0], 165)
+
+                with col4:
+                    bordered_metric(col4, "Note", note, 165, color="#ac141a")
 
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
