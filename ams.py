@@ -1357,7 +1357,7 @@ def streamlit_application(df_individual):
 
             classement.columns = [col.replace('\xa0', ' ').strip() for col in classement.columns]
 
-            df_résultats = pd.read_excel("Résultats/résultats.xlsx")
+            df_résultats = pd.read_excel("data/résultats.xlsx")
             df_résultats.columns = df_résultats.columns.str.strip()
 
             moyenne_anglaise = creation_moyenne_anglaise(df_résultats, type_classement, journée_début, journée_fin)
@@ -1666,7 +1666,7 @@ def streamlit_application(df_individual):
             with tab5:
                 joueur = joueur.split(" - ")[0]
 
-                df_player = pd.read_excel(f"Données individuelles par matchs/Player stats {joueur}.xlsx")
+                df_player = pd.read_excel(f"data/Player stats {joueur}.xlsx")
 
                 colonnes = [
                     "Match",
