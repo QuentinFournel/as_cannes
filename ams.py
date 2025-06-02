@@ -1492,8 +1492,8 @@ def streamlit_application(df_individual):
             colonnes_a_ranker = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
 
             colonnes_bas_mieux = {
-                'Pertes', 'Pertes bas', 'Perte Moyen', 'Perte élevé', 'Hors jeu',
-                'Tirs contre', 'Tirs contre cadré', 'But concédés', 'Fautes',
+                'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
+                'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
                 'Cartons jaunes', 'Cartons rouges', 'PPDA'
             }
 
