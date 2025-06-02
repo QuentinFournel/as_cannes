@@ -585,6 +585,15 @@ indicateurs_general = [
     'Coups francs'
 ]
 
+indicateurs_general_moyens = [
+    'Buts',
+    'xG',
+    'Buts concédés',
+    'Possession %',
+    'Corners',
+    'Coups francs'
+]
+
 indicateurs_attaques = [
     'Tirs',
     'Tirs cadrés',
@@ -598,6 +607,16 @@ indicateurs_attaques = [
 ]
 
 indicateurs_defense = [
+    'Duels défensifs gagnés %',
+    'Tacles glissés réussis %',
+    'Interceptions',
+    'Dégagements',
+    'Fautes'
+]
+
+indicateurs_defense_moyens = [
+    'Tirs contre',
+    'Tirs contre cadré',
     'Duels défensifs gagnés %',
     'Tacles glissés réussis %',
     'Interceptions',
@@ -1474,7 +1493,7 @@ def streamlit_application(df_individual):
 
             colonnes_bas_mieux = {
                 'Pertes', 'Pertes bas', 'Perte Moyen', 'Perte élevé', 'Hors jeu',
-                'Tirs contre', 'Tirs contre cadré', 'But concédés', 'Fauters',
+                'Tirs contre', 'Tirs contre cadré', 'But concédés', 'Fautes',
                 'Cartons jaunes', 'Cartons rouges', 'PPDA'
             }
 
@@ -1500,10 +1519,10 @@ def streamlit_application(df_individual):
             tab3, tab4, tab5, tab6, tab7 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
 
             with tab3:
-                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
-                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general].values.flatten())
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
 
-                fig = create_plot_stats(indicateurs_general, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                fig = create_plot_stats(indicateurs_general_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                 st.pyplot(fig, use_container_width=True)
 
             with tab4:
@@ -1514,10 +1533,10 @@ def streamlit_application(df_individual):
                 st.pyplot(fig, use_container_width=True)
 
             with tab5:
-                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
-                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense].values.flatten())
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
 
-                fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                fig = create_plot_stats(indicateurs_defense_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                 st.pyplot(fig, use_container_width=True)
 
             with tab6:
