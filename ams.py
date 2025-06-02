@@ -878,7 +878,10 @@ def create_plot_stats(indicateurs, équipe_analysée, nom_équipe_analysée, adv
             idx = i - 1
             label = indicateurs[idx]
             éq_val = format_value(équipe_analysée[idx], label)
-            adv_val = format_value(adversaire[idx], label)
+            if nom_adversaire != 'Classement':
+                adv_val = format_value(adversaire[idx], label)
+            else:
+                adv_val = adversaire[idx]
 
             ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
             ax.text(x_positions[1], y, éq_val, fontsize=10, va='center', ha='center', color=text_color)
@@ -1258,51 +1261,6 @@ def performance_index(df_player, poste, match):
 
     return round(note, 1)
 
-def create_plot_stats_moyennes(indicateurs, équipe, nom_équipe):
-    fig_width, fig_height = 6, 9
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#f4f3ed')
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
-
-    ax.set_facecolor('#f4f3ed')
-    text_color = '#3d3a2a'
-
-    x_positions = [0.05, 0.5, 0.85]
-
-    total_slots = 15
-    top_margin = 1
-    bottom_margin = 0.05
-    spacing = (top_margin - bottom_margin) / total_slots
-
-    def format_value(value, label):
-        if "%" in label and not str(value).strip().endswith("%"):
-            return f"{value}%"
-        return str(value)
-
-    for i in range(total_slots):
-        y = top_margin - i * spacing
-
-        if i == 0:
-            ax.text(x_positions[0], y, "Indicateur", fontsize=10, fontweight='bold', va='center', color=text_color)
-            ax.text(x_positions[2], y, nom_équipe, fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
-
-            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='solid', linewidth=1)
-
-        elif i - 1 < len(indicateurs):
-            idx = i - 1
-            label = indicateurs[idx]
-            adv_val = format_value(équipe[idx], label)
-
-            ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
-            ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
-
-            if i < len(indicateurs):
-                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='dotted', linewidth=1)
-
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    return fig
-
 def streamlit_application(df_individual):
     with st.sidebar:
         page = option_menu(
@@ -1512,39 +1470,69 @@ def streamlit_application(df_individual):
             cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
             df_stats_moyennes = df_stats_moyennes[cols]
 
+            colonnes_a_ranker = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+
+            colonnes_bas_mieux = {
+                'Pertes', 'Pertes bas', 'Perte Moyen', 'Perte élevé', 'Hors jeu',
+                'Tirs contre', 'Tirs contre cadré', 'But concédés', 'Fauters',
+                'Cartons jaunes', 'Cartons rouges', 'PPDA'
+            }
+
+            df_stats_ranks = df_stats_moyennes.copy()
+
+            for col in colonnes_a_ranker:
+                if col in colonnes_bas_mieux:
+                    # Plus c'est bas, mieux c'est
+                    df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=True, method='min')
+                else:
+                    # Plus c'est haut, mieux c'est
+                    df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=False, method='min')
+
+            # Colonnes non numériques inchangées
+            df_stats_ranks['Équipe'] = df_stats_moyennes['Équipe']
+            df_stats_ranks['Matchs analysés'] = df_stats_moyennes['Matchs analysés']
+            df_stats_ranks = df_stats_ranks[cols]
+            df_stats_ranks = df_stats_ranks.astype({col: int for col in colonnes_a_ranker})
+
             équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
+            équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
 
             tab3, tab4, tab5, tab6, tab7 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
 
             with tab3:
                 équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general].values.flatten())
 
-                fig = create_plot_stats_moyennes(indicateurs_general, équipe_analysée_values, team)
-                st.pyplot(fig, use_container_width=False)
+                fig = create_plot_stats(indicateurs_general, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                st.pyplot(fig, use_container_width=True)
 
             with tab4:
                 équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
-                
-                fig = create_plot_stats_moyennes(indicateurs_attaques, équipe_analysée_values, team)
-                st.pyplot(fig, use_container_width=False)
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
+
+                fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                st.pyplot(fig, use_container_width=True)
 
             with tab5:
                 équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
-                
-                fig = create_plot_stats_moyennes(indicateurs_defense, équipe_analysée_values, team)
-                st.pyplot(fig, use_container_width=False)
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense].values.flatten())
+
+                fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                st.pyplot(fig, use_container_width=True)
 
             with tab6:
                 équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
-                
-                fig = create_plot_stats_moyennes(indicateurs_passes, équipe_analysée_values, team)
-                st.pyplot(fig, use_container_width=False)
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
+
+                fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                st.pyplot(fig, use_container_width=True)
 
             with tab7:
                 équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
-                
-                fig = create_plot_stats_moyennes(indicateurs_pressing, équipe_analysée_values, team)
-                st.pyplot(fig, use_container_width=False)
+                équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
+
+                fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
+                st.pyplot(fig, use_container_width=True)
 
         with tab2:
             compétition = st.selectbox("Sélectionnez une compétition", df_collective["Compétition"].unique())
