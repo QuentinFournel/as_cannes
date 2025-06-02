@@ -577,6 +577,56 @@ metrics_x_y = {
     }
 }
 
+indicateurs_general = [
+    'Buts',
+    'xG',
+    'Possession %',
+    'Corners',
+    'Coups francs'
+]
+
+indicateurs_attaques = [
+    'Tirs',
+    'Tirs cadrés',
+    'Tirs ext. surface',
+    'Distance moyenne de tir',
+    'Duels offensifs gagnés %',
+    'Attaques positionnelles',
+    'Contre-attaques',
+    'Entrées surface',
+    'Touches de balle surface'
+]
+
+indicateurs_defense = [
+    'Duels défensifs gagnés %',
+    'Tacles glissés réussis %',
+    'Interceptions',
+    'Dégagements',
+    'Fautes'
+]
+
+indicateurs_passes = [
+    'Rythme du match',
+    'Passes',
+    'Passes précises',
+    'Passes avant précises',
+    'Passes progressives précises',
+    'Passes longues précises %',
+    'Passes 3e tiers précises',
+    'Passes astucieuses précises',
+    'Passes par possession',
+    'Longueur moyenne des passes',
+    'Centres',
+    'Centres précis'
+]
+
+indicateurs_pressing = [
+    'PPDA',
+    'Récupérations élevé',
+    'Récupérations moyen',
+    'Pertes bas'
+]
+
 def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
@@ -827,11 +877,11 @@ def create_plot_stats(indicateurs, équipe_analysée, nom_équipe_analysée, adv
         elif i - 1 < len(indicateurs):
             idx = i - 1
             label = indicateurs[idx]
-            cannes_val = format_value(équipe_analysée[idx], label)
+            éq_val = format_value(équipe_analysée[idx], label)
             adv_val = format_value(adversaire[idx], label)
 
             ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
-            ax.text(x_positions[1], y, cannes_val, fontsize=10, va='center', ha='center', color=text_color)
+            ax.text(x_positions[1], y, éq_val, fontsize=10, va='center', ha='center', color=text_color)
             ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
 
             if i < len(indicateurs):
@@ -1208,6 +1258,51 @@ def performance_index(df_player, poste, match):
 
     return round(note, 1)
 
+def create_plot_stats_moyennes(indicateurs, équipe, nom_équipe):
+    fig_width, fig_height = 6, 9
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#f4f3ed')
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+
+    ax.set_facecolor('#f4f3ed')
+    text_color = '#3d3a2a'
+
+    x_positions = [0.05, 0.5, 0.85]
+
+    total_slots = 15
+    top_margin = 1
+    bottom_margin = 0.05
+    spacing = (top_margin - bottom_margin) / total_slots
+
+    def format_value(value, label):
+        if "%" in label and not str(value).strip().endswith("%"):
+            return f"{value}%"
+        return str(value)
+
+    for i in range(total_slots):
+        y = top_margin - i * spacing
+
+        if i == 0:
+            ax.text(x_positions[0], y, "Indicateur", fontsize=10, fontweight='bold', va='center', color=text_color)
+            ax.text(x_positions[2], y, nom_équipe, fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
+
+            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='solid', linewidth=1)
+
+        elif i - 1 < len(indicateurs):
+            idx = i - 1
+            label = indicateurs[idx]
+            adv_val = format_value(équipe[idx], label)
+
+            ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
+            ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
+
+            if i < len(indicateurs):
+                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='dotted', linewidth=1)
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    return fig
+
 def streamlit_application(df_individual):
     with st.sidebar:
         page = option_menu(
@@ -1285,7 +1380,7 @@ def streamlit_application(df_individual):
 
             classement.columns = [col.replace('\xa0', ' ').strip() for col in classement.columns]
 
-            df_résultats = pd.read_excel("data/résultats.xlsx")
+            df_résultats = pd.read_excel("Résultats/résultats.xlsx")
             df_résultats.columns = df_résultats.columns.str.strip()
 
             moyenne_anglaise = creation_moyenne_anglaise(df_résultats, type_classement, journée_début, journée_fin)
@@ -1394,107 +1489,111 @@ def streamlit_application(df_individual):
             "Toulon"
         ]
 
-        équipe = st.selectbox("Sélectionnez une équipe", équipes, index=équipes.index("Cannes"))
+        team = st.selectbox("Sélectionnez une équipe", équipes, index=équipes.index("Cannes"))
 
-        df_collective = collect_collective_data(équipe)
+        df_collective = collect_collective_data(team)
 
-        compétition = st.selectbox("Sélectionnez une compétition", df_collective["Compétition"].unique())
-
-        df_filtré = df_collective[df_collective["Compétition"] == compétition]
-
-        match = st.selectbox("Sélectionnez un match", df_filtré["Match"].unique())
-
-        df_filtré = df_filtré[df_filtré["Match"] == match]
-
-        équipe_analysée = df_filtré[df_filtré["Équipe"] == équipe]
-        adversaire = df_filtré[df_filtré["Équipe"] != équipe]
-
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
-
-        indicateurs_general = [
-            'Buts',
-            'xG',
-            'Possession %',
-            'Corners',
-            'Coups francs'
-        ]
-
-        indicateurs_attaques = [
-            'Tirs',
-            'Tirs cadrés',
-            'Tirs ext. surface',
-            'Distance moyenne de tir',
-            'Duels offensifs gagnés %',
-            'Attaques positionnelles',
-            'Contre-attaques',
-            'Entrées surface',
-            'Touches de balle surface'
-        ]
-
-        indicateurs_defense = [
-            'Duels défensifs gagnés %',
-            'Tacles glissés réussis %',
-            'Interceptions',
-            'Dégagements',
-            'Fautes'
-        ]
-
-        indicateurs_passes = [
-            'Rythme du match',
-            'Passes',
-            'Passes précises',
-            'Passes avant précises',
-            'Passes progressives précises',
-            'Passes longues précises %',
-            'Passes 3e tiers précises',
-            'Passes astucieuses précises',
-            'Passes par possession',
-            'Longueur moyenne des passes',
-            'Centres',
-            'Centres précis'
-        ]
-
-        indicateurs_pressing = [
-            'PPDA',
-            'Récupérations élevé',
-            'Récupérations moyen',
-            'Pertes bas'
-        ]
+        tab1, tab2 = st.tabs(['Statistiques moyennes', 'Statistiques par match'])
 
         with tab1:
-            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
-            adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
+            df_stats_moyennes = pd.DataFrame()
 
-            fig = create_plot_stats(indicateurs_general, équipe_analysée_values, équipe, adversaire_values, adversaire['Équipe'].iloc[0])
-            st.pyplot(fig, use_container_width=True)
+            for équipe in équipes:
+                df_filtré = collect_collective_data(équipe)
+                df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
+                df_stats = df_filtré[df_filtré['Équipe'] == équipe]
+                df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
+                df_stats['Équipe'] = équipe
+                df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
+                df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
+
+            df_stats_moyennes = df_stats_moyennes.drop(['Championnat'], axis=1)
+
+            cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+            df_stats_moyennes = df_stats_moyennes[cols]
+
+            équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
+
+            tab3, tab4, tab5, tab6, tab7 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
+
+            with tab3:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
+
+                fig = create_plot_stats_moyennes(indicateurs_general, équipe_analysée_values, team)
+                st.pyplot(fig, use_container_width=False)
+
+            with tab4:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
+                
+                fig = create_plot_stats_moyennes(indicateurs_attaques, équipe_analysée_values, team)
+                st.pyplot(fig, use_container_width=False)
+
+            with tab5:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
+                
+                fig = create_plot_stats_moyennes(indicateurs_defense, équipe_analysée_values, team)
+                st.pyplot(fig, use_container_width=False)
+
+            with tab6:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
+                
+                fig = create_plot_stats_moyennes(indicateurs_passes, équipe_analysée_values, team)
+                st.pyplot(fig, use_container_width=False)
+
+            with tab7:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
+                
+                fig = create_plot_stats_moyennes(indicateurs_pressing, équipe_analysée_values, team)
+                st.pyplot(fig, use_container_width=False)
 
         with tab2:
-            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
-            adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
+            compétition = st.selectbox("Sélectionnez une compétition", df_collective["Compétition"].unique())
 
-            fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, équipe, adversaire_values, adversaire['Équipe'].iloc[0])
-            st.pyplot(fig, use_container_width=True)
+            df_filtré = df_collective[df_collective["Compétition"] == compétition]
 
-        with tab3:
-            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
-            adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
+            match = st.selectbox("Sélectionnez un match", df_filtré["Match"].unique())
 
-            fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, équipe, adversaire_values, adversaire['Équipe'].iloc[0])
-            st.pyplot(fig, use_container_width=True)
+            df_filtré = df_filtré[df_filtré["Match"] == match]
 
-        with tab4:
-            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
-            adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
+            équipe_analysée = df_filtré[df_filtré["Équipe"] == team]
+            adversaire = df_filtré[df_filtré["Équipe"] != team]
 
-            fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, équipe, adversaire_values, adversaire['Équipe'].iloc[0])
-            st.pyplot(fig, use_container_width=True)
+            tab3, tab4, tab5, tab6, tab7 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
 
-        with tab5:
-            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
-            adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
+            with tab3:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
+                adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
 
-            fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, équipe, adversaire_values, adversaire['Équipe'].iloc[0])
-            st.pyplot(fig, use_container_width=True)
+                fig = create_plot_stats(indicateurs_general, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                st.pyplot(fig, use_container_width=True)
+
+            with tab4:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
+                adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
+
+                fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                st.pyplot(fig, use_container_width=True)
+
+            with tab5:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
+                adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
+
+                fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                st.pyplot(fig, use_container_width=True)
+
+            with tab6:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
+                adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
+
+                fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                st.pyplot(fig, use_container_width=True)
+
+            with tab7:
+                équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
+                adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
+
+                fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                st.pyplot(fig, use_container_width=True)
 
     elif page == "Analyse individuelle":
         st.header("Analyse individuelle")
@@ -1560,7 +1659,7 @@ def streamlit_application(df_individual):
             with tab5:
                 joueur = joueur.split(" - ")[0]
 
-                df_player = pd.read_excel(f"data/Player stats {joueur}.xlsx")
+                df_player = pd.read_excel(f"Données individuelles par matchs/Player stats {joueur}.xlsx")
 
                 colonnes = [
                     "Match",
