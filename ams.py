@@ -822,29 +822,38 @@ def compute_weighted_stats_by_minutes(df_joueur):
     if df_joueur.empty:
         return pd.DataFrame()
 
-    # Colonnes numériques à moyenner sauf la colonne des minutes
-    colonnes_a_moyenner = [
+    # Colonnes à additionner (en plus de 'Minutes jouées')
+    colonnes_a_additioner = ['Buts', 'Matchs joués', 'Passes décisives', 'Minutes jouées']
+
+    # Colonnes numériques à pondérer par les minutes, sauf celles à additionner
+    colonnes_a_ponderee = [
         col for col in df_joueur.columns
-        if df_joueur[col].dtype in ['float64', 'int64'] and col != 'Minutes jouées'
+        if df_joueur[col].dtype in ['float64', 'int64']
+        and col not in colonnes_a_additioner
     ]
 
-    total_minutes = df_joueur['Minutes jouées'].sum()
     resultat = {}
 
-    for col in colonnes_a_moyenner:
-        resultat[col] = (df_joueur[col] * df_joueur['Minutes jouées']).sum() / total_minutes
+    # Additionner les colonnes concernées
+    for col in colonnes_a_additioner:
+        if col in df_joueur.columns:
+            resultat[col] = df_joueur[col].sum()
 
-    # Ajouter les colonnes non numériques depuis la première ligne (identité du joueur, etc.)
+    # Pondérer les autres colonnes numériques par les minutes jouées
+    total_minutes = resultat.get('Minutes jouées', df_joueur['Minutes jouées'].sum())
+    for col in colonnes_a_ponderee:
+        if total_minutes > 0:
+            resultat[col] = (df_joueur[col] * df_joueur['Minutes jouées']).sum() / total_minutes
+        else:
+            resultat[col] = 0
+
+    # Ajouter les colonnes non numériques depuis la première ligne
     colonnes_non_numeriques = [
         col for col in df_joueur.columns
-        if col not in colonnes_a_moyenner and col != 'Minutes jouées'
+        if col not in colonnes_a_ponderee and col not in colonnes_a_additioner
     ]
-
     for col in colonnes_non_numeriques:
         resultat[col] = df_joueur.iloc[0][col]
-
-    # Ajouter les minutes totales
-    resultat['Minutes jouées'] = total_minutes
 
     return pd.DataFrame([resultat])
 
@@ -1281,9 +1290,6 @@ def performance_index(df_player, poste, match):
 
     return round(note, 1)
 
-def ceil_if_not_int(x):
-    return int(x) if float(x).is_integer() else math.ceil(x)
-
 def streamlit_application(df_individual):
     with st.sidebar:
         page = option_menu(
@@ -1629,16 +1635,16 @@ def streamlit_application(df_individual):
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-                bordered_metric(col1, "Matchs joués", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0]), 165)
+                bordered_metric(col1, "Matchs joués", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0], 165)
 
             with col2:
-                bordered_metric(col2, "Minutes jouées", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0]), 165)
+                bordered_metric(col2, "Minutes jouées", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0], 165)
 
             with col3:
-                bordered_metric(col3, "Buts", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0]), 165)
+                bordered_metric(col3, "Buts", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0], 165)
 
             with col4:
-                bordered_metric(col4, "Passes décisives", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0]), 165)
+                bordered_metric(col4, "Passes décisives", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0], 165)
 
         with tab2:
             fig = create_individual_radar(df_individual, joueur, poste)
