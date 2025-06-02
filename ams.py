@@ -10,6 +10,7 @@ import plotly.express as px
 import requests
 import unicodedata
 from streamlit_option_menu import option_menu
+import math
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -1280,6 +1281,9 @@ def performance_index(df_player, poste, match):
 
     return round(note, 1)
 
+def ceil_if_not_int(x):
+    return int(x) if float(x).is_integer() else math.ceil(x)
+
 def streamlit_application(df_individual):
     with st.sidebar:
         page = option_menu(
@@ -1625,16 +1629,16 @@ def streamlit_application(df_individual):
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-                bordered_metric(col1, "Matchs joués", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0]), 165)
+                bordered_metric(col1, "Matchs joués", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0]), 165)
 
             with col2:
-                bordered_metric(col2, "Minutes jouées", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0]), 165)
+                bordered_metric(col2, "Minutes jouées", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0]), 165)
 
             with col3:
-                bordered_metric(col3, "Buts", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0]), 165)
+                bordered_metric(col3, "Buts", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0]), 165)
 
             with col4:
-                bordered_metric(col4, "Passes décisives", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0]), 165)
+                bordered_metric(col4, "Passes décisives", ceil_if_not_int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0]), 165)
 
         with tab2:
             fig = create_individual_radar(df_individual, joueur, poste)
