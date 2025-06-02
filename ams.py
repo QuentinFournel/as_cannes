@@ -1625,16 +1625,16 @@ def streamlit_application(df_individual):
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-                bordered_metric(col1, "Matchs joués", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0], 165)
+                bordered_metric(col1, "Matchs joués", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0]), 165)
 
             with col2:
-                bordered_metric(col2, "Minutes jouées", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0], 165)
+                bordered_metric(col2, "Minutes jouées", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0]), 165)
 
             with col3:
-                bordered_metric(col3, "Buts", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0], 165)
+                bordered_metric(col3, "Buts", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0]), 165)
 
             with col4:
-                bordered_metric(col4, "Passes décisives", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0], 165)
+                bordered_metric(col4, "Passes décisives", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0]), 165)
 
         with tab2:
             fig = create_individual_radar(df_individual, joueur, poste)
