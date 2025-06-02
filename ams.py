@@ -616,7 +616,7 @@ indicateurs_defense = [
 
 indicateurs_defense_moyens = [
     'Tirs contre',
-    'Tirs contre cadré',
+    'Tirs contre cadrés',
     'Duels défensifs gagnés %',
     'Tacles glissés réussis %',
     'Interceptions',
