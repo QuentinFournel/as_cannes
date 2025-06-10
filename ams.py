@@ -965,6 +965,13 @@ def calcul_scores_par_kpi(df, joueur, poste):
     df_scores["Note globale"] = sum(
         df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
     ) / total_coeff
+    
+    # Application d'un coefficient selon le niveau du championnat du joueur
+    df_scores["Note globale"] = (
+        df_scores["Note globale"] *
+        (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))
+    )
+    
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
 
     return df_scores
@@ -1188,6 +1195,13 @@ def search_top_players(df, poste):
     df_scores["Note globale"] = sum(
         df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
     ) / total_coeff
+
+    # Application d'un coefficient selon le niveau du championnat du joueur
+    df_scores["Note globale"] = (
+        df_scores["Note globale"] *
+        (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))
+    )
+
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
 
     return df_scores
