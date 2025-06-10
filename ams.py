@@ -63,6 +63,14 @@ def load_all_files_from_drive():
     for file in files:
         download_file(service, file['id'], file['name'])
 
+league_rating = {
+    "Ligue 1": 85.47222222,
+    "Ligue 2": 74.78888889,
+    "National 1": 68.98823529,
+    "National 2": 63.84375,
+    "National 3": 57.23285714
+}
+
 metrics_by_position = [
     {
         "position": "Buteur",
@@ -72,6 +80,7 @@ metrics_by_position = [
             "xG": "xG par 90",
             "Précision tirs": "Tirs à la cible, %",
             "Conversion tirs": "Taux de conversion but/tir",
+            "Précision passes": "Passes précises, %",
             "xA": "xA par 90",
             "Passes clés": "Passes judicieuses par 90",
             "Passes reçues": "Passes réceptionnées par 90",
@@ -91,14 +100,15 @@ metrics_by_position = [
             "Attaques réussies": "Attaques réussies par 90",
             "xG": "xG par 90",
             "xA": "xA par 90",
-            "Centres": "Centres par 90",
-            "Centres réussis": "Сentres précises, %",
+            "Précision passes": "Passes précises, %",
             "Passes quasi\ndéc.": "Passes quasi décisives par 90",
             "Passes clés": "Passes judicieuses par 90",
             "Passes surface": "Passes vers la surface de réparation par 90",
             "Passes\npénétrantes": "Passes pénétrantes par 90",
             "Passes tiers adv.": "Passes dans tiers adverse par 90",
             "Passes prog.": "Passes progressives par 90",
+            "Centres": "Centres par 90",
+            "Centres réussis": "Сentres précises, %",
             "Courses prog.": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
@@ -112,6 +122,7 @@ metrics_by_position = [
             "Attaques réussies": "Attaques réussies par 90",
             "xG": "xG par 90",
             "xA": "xA par 90",
+            "Précision passes": "Passes précises, %",
             "Passes quasi déc.": "Passes quasi décisives par 90",
             "Passes clés": "Passes judicieuses par 90",
             "Passes surface": "Passes vers la surface de réparation par 90",
@@ -132,6 +143,7 @@ metrics_by_position = [
         "metrics": {
             "Attaques réussies": "Attaques réussies par 90",
             "xA": "xA par 90",
+            "Précision passes": "Passes précises, %",
             "Passes avant": "Passes avant par 90",
             "Passes clés": "Passes judicieuses par 90",
             "Passes tiers adv.": "Passes dans tiers adverse par 90",
@@ -153,10 +165,11 @@ metrics_by_position = [
         "metrics": {
             "Attaques réussies": "Attaques réussies par 90",
             "xA": "xA par 90",
+            "Précision passes": "Passes précises, %",
             "Passes surface": "Passes vers la surface de réparation par 90",
+            "Passes prog.": "Passes progressives par 90",
             "Centres": "Centres par 90",
             "Centres réussis": "Сentres précises, %",
-            "Passes prog.": "Passes progressives par 90",
             "Courses prog.": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels aér.": "Duels aériens par 90",
@@ -173,6 +186,7 @@ metrics_by_position = [
         "position": "Défenseur central",
         "metrics": {
             "Buts tête": "Buts de la tête par 90",
+            "Précision passes": "Passes précises, %",
             "Passes avant": "Passes avant par 90",
             "Passes avant\nréussies": "Passes en avant précises, %",
             "Passes longues": "Passes en avant précises, %",
