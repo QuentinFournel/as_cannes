@@ -959,18 +959,12 @@ def calcul_scores_par_kpi(df, joueur, poste):
 
     # Calcul des scores par KPI
     for kpi, metrics in kpi_metrics.items():
-        df_scores[kpi] = df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1).round(1)
+        df_scores[kpi] = (df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1) * (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))).round(1)
 
     # Calcul de la note globale pondérée
     df_scores["Note globale"] = sum(
         df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
     ) / total_coeff
-    
-    # Application d'un coefficient selon le niveau du championnat du joueur
-    df_scores["Note globale"] = (
-        df_scores["Note globale"] *
-        (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))
-    )
 
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
 
@@ -1190,17 +1184,11 @@ def search_top_players(df, poste):
     total_coeff = sum(kpi_coefficients.values())
 
     for kpi, metrics in kpi_metrics.items():
-        df_scores[kpi] = df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1).round(1)
+        df_scores[kpi] = (df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1) * (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))).round(1)
 
     df_scores["Note globale"] = sum(
         df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
     ) / total_coeff
-
-    # Application d'un coefficient selon le niveau du championnat du joueur
-    df_scores["Note globale"] = (
-        df_scores["Note globale"] *
-        (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))
-    )
 
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
 
