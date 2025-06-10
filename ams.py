@@ -89,9 +89,9 @@ metrics_by_position = [
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
             "Dribbles\nréussiss": "Dribbles réussis, %",
-            "Duels\noffenfis": "Duels offensifs par 90",
+            "Duels\noffensifs": "Duels offensifs par 90",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens\ngagnés": "Duels aériens gagnés, %"
+            "Duels\naériens gagnés": "Duels aériens gagnés, %"
         }
     },
     {
@@ -113,7 +113,7 @@ metrics_by_position = [
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
             "Dribbles\nréussis": "Dribbles réussis, %",
-            "Duels\noffenfis": "Duels offensifs par 90"
+            "Duels\noffensifs": "Duels offensifs par 90"
         }
     },
     {
@@ -188,16 +188,16 @@ metrics_by_position = [
             "Buts tête": "Buts de la tête par 90",
             "Précision\npasses": "Passes précises, %",
             "Passes\navant": "Passes avant par 90",
-            "Passes\navant\nréussies": "Passes en avant précises, %",
+            "Passes\navant réussies": "Passes en avant précises, %",
             "Passes longues": "Passes en avant précises, %",
-            "Passes\nlongues\nréussies": "Longues passes précises, %",
+            "Passes\nlongues réussies": "Longues passes précises, %",
             "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens\ngagnés": "Duels aériens gagnés, %",
-            "Duels\ndéfensifs": "Duels défensifs par 90",
-            "Duels\ndéfensifs\ngagnés": "Duels défensifs gagnés, %",
+            "Duels\naériens gagnés": "Duels aériens gagnés, %",
+            "Duels\ndéf.": "Duels défensifs par 90",
+            "Duels\ndéf. gagnés": "Duels défensifs gagnés, %",
             "Tacles\nglissés": "Tacles glissés par 90",
             "Interceptions": "Interceptions par 90",
             "Tirs\ncontrés": "Tirs contrés par 90",
@@ -1042,8 +1042,8 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
 
     # Récupération des bonnes métriques selon le poste
     metrics_dict = next(item["metrics"] for item in metrics_by_position if item["position"] == poste)
-    metrics_abbr = list(metrics_dict.keys())  # ex: "xG", "Buts hors pen."
-    metrics_cols = [metrics_dict[m] for m in metrics_abbr]  # ex: "xG par 90", "Buts hors penalty par 90"
+    metrics_abbr = list(metrics_dict.keys())
+    metrics_cols = [metrics_dict[m] for m in metrics_abbr]
 
     low = [0] * len(metrics_abbr)
     high = [100] * len(metrics_abbr)
@@ -1072,8 +1072,8 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
                              kwargs_radar={'facecolor': '#1440AC', 'alpha': 0.6},
                              kwargs_compare={'facecolor': '#ac141a', 'alpha': 0.6})
 
-    radar.draw_range_labels(ax=axs['radar'], fontsize=25, color='#3d3a2a', fontproperties=robotto_thin.prop)
-    radar.draw_param_labels(ax=axs['radar'], fontsize=25, color='#3d3a2a', fontproperties=robotto_thin.prop)
+    radar.draw_range_labels(ax=axs['radar'], fontsize=20, color='#3d3a2a', fontproperties=robotto_thin.prop)
+    radar.draw_param_labels(ax=axs['radar'], fontsize=20, color='#3d3a2a', fontproperties=robotto_thin.prop)
 
     axs['title'].text(0.01, 0.60, f"{joueur_1.split(' - ')[0]}", fontsize=25, color='#1440AC',
                       fontproperties=robotto_bold.prop, ha='left', va='center')
