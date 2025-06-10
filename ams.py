@@ -825,10 +825,12 @@ def clean_values(values):
     return [int(v) if isinstance(v, float) and v.is_integer() else v for v in values]
 
 def assign_color(value):
-    if value <= 33:
+    if value <= 25:
         return 'red'
-    elif value <= 66:
+    elif value <= 50:
         return 'orange'
+    elif value <= 75:
+        return 'yellowgreen'
     else:
         return 'green'
     
@@ -1250,61 +1252,149 @@ def creation_moyenne_anglaise(résultats, type_classement, journée_début, jour
     return df_ranking
 
 def performance_index(df_player, poste, match):
-    total_actions = df_player['Total actions'].sum()
-    total_actions_réussies = df_player['Total actions réussies'].sum()
+    coeffs_postes_complets = {
+        'Défenseur central': {
+            'ratio_tirs': 0,
+            'ratio_centres': 0,
+            'ratio_dribbles': 0,
+            'ratio_duels_offensifs': 0,
+            'ratio_duels_aériens': 2,
+            'ratio_duels_défensifs': 2.5,
+            'ratio_duels_ballons': 0.5,
+            'ratio_tacles_glissés': 1,
+            'ratio_passes': 2,
+            'ratio_passes_longues': 1,
+            'ratio_passes_profondeur': 0,
+            'ratio_passes_tiers3': 0,
+            'ratio_passes_surface': 0,
+            'ratio_passes_avant': 0
+        },
+        'Latéral': {
+            'ratio_tirs': 0,
+            'ratio_centres': 1,
+            'ratio_dribbles': 1,
+            'ratio_duels_offensifs': 0.5,
+            'ratio_duels_aériens': 0.5,
+            'ratio_duels_défensifs': 1,
+            'ratio_duels_ballons': 0.5,
+            'ratio_tacles_glissés': 0.5,
+            'ratio_passes': 2,
+            'ratio_passes_longues': 0,
+            'ratio_passes_profondeur': 0,
+            'ratio_passes_tiers3': 0,
+            'ratio_passes_surface': 0,
+            'ratio_passes_avant': 0
+        },
+        'Milieu': {
+            'ratio_tirs': 0,
+            'ratio_centres': 0,
+            'ratio_dribbles': 0.5,
+            'ratio_duels_offensifs': 0.5,
+            'ratio_duels_aériens': 1.5,
+            'ratio_duels_défensifs': 2,
+            'ratio_duels_ballons': 0.5,
+            'ratio_tacles_glissés': 0.5,
+            'ratio_passes': 2,
+            'ratio_passes_longues': 0,
+            'ratio_passes_profondeur': 0,
+            'ratio_passes_tiers3': 0,
+            'ratio_passes_surface': 0,
+            'ratio_passes_avant': 0
+        },
+        'Milieu offensif': {
+            'ratio_tirs': 0.5,
+            'ratio_centres': 0,
+            'ratio_dribbles': 1,
+            'ratio_duels_offensifs': 1,
+            'ratio_duels_aériens': 0,
+            'ratio_duels_défensifs': 0,
+            'ratio_duels_ballons': 0.5,
+            'ratio_tacles_glissés': 0,
+            'ratio_passes': 2,
+            'ratio_passes_longues': 0,
+            'ratio_passes_profondeur': 0,
+            'ratio_passes_tiers3': 0,
+            'ratio_passes_surface': 0,
+            'ratio_passes_avant': 0
+        },
+        'Ailier': {
+            'ratio_tirs': 0.5,
+            'ratio_centres': 1,
+            'ratio_dribbles': 1,
+            'ratio_duels_offensifs': 2,
+            'ratio_duels_aériens': 0,
+            'ratio_duels_défensifs': 0,
+            'ratio_duels_ballons': 0.5,
+            'ratio_tacles_glissés': 0,
+            'ratio_passes': 2,
+            'ratio_passes_longues': 0,
+            'ratio_passes_profondeur': 0,
+            'ratio_passes_tiers3': 0,
+            'ratio_passes_surface': 0,
+            'ratio_passes_avant': 0
+        },
+        'Buteur': {
+            'ratio_tirs': 2,
+            'ratio_centres': 0,
+            'ratio_dribbles': 1,
+            'ratio_duels_offensifs': 2,
+            'ratio_duels_aériens': 1,
+            'ratio_duels_défensifs': 0,
+            'ratio_duels_ballons': 0.5,
+            'ratio_tacles_glissés': 0,
+            'ratio_passes': 2,
+            'ratio_passes_longues': 0,
+            'ratio_passes_profondeur': 0,
+            'ratio_passes_tiers3': 0,
+            'ratio_passes_surface': 0,
+            'ratio_passes_avant': 0
+        }
+    }
 
-    note_sans_bonus = total_actions_réussies / total_actions * 10
+    df_match = df_player[df_player["Match"] == match]
 
-    bonus = 0
-    malus = 0
+    def safe_ratio(n, d):
+        return n / d * 10 if d != 0 else 0
 
-    total_buts = df_player['But'].sum()
-    bonus += total_buts * 1.5
+    ratio_vars = {
+        'ratio_total_actions': safe_ratio(df_match['Total actions réussies'].sum(), df_match['Total actions'].sum()),
+        'ratio_tirs': safe_ratio(df_match['Tirs cadrés'].sum(), df_match['Tirs'].sum()),
+        'ratio_centres': safe_ratio(df_match['Centres précis'].sum(), df_match['Centres'].sum()),
+        'ratio_dribbles': safe_ratio(df_match['Dribbles réussis'].sum(), df_match['Dribbles'].sum()),
+        'ratio_duels': safe_ratio(df_match['Duels gagnés'].sum(), df_match['Duels'].sum()),
+        'ratio_duels_offensifs': safe_ratio(df_match['Duels offensifs gagnés'].sum(), df_match['Duels offensifs'].sum()),
+        'ratio_duels_aériens': safe_ratio(df_match['Duels aériens gagnés'].sum(), df_match['Duels aériens'].sum()),
+        'ratio_duels_défensifs': safe_ratio(df_match['Duels défensifs gagnés'].sum(), df_match['Duels défensifs'].sum()),
+        'ratio_duels_ballons': safe_ratio(df_match['Duels ballons gagnés'].sum(), df_match['Duels ballons gagnés'].sum() + df_match['Duels ballons perdus'].sum()),
+        'ratio_tacles_glissés': safe_ratio(df_match['Tacles glissés réussis'].sum(), df_match['Tacles glissés'].sum()),
+        'ratio_passes': safe_ratio(df_match['Passes précises'].sum(), df_match['Passes'].sum()),
+        'ratio_passes_longues': safe_ratio(df_match['Passes longues précises'].sum(), df_match['Passes longues'].sum()),
+        'ratio_passes_profondeur': safe_ratio(df_match['Passes en profondeur précises'].sum(), df_match['Passes en profondeur'].sum()),
+        'ratio_passes_tiers3': safe_ratio(df_match['Passes dans le 3ème tiers précises'].sum(), df_match['Passes dans le 3ème tiers'].sum()),
+        'ratio_passes_surface': safe_ratio(df_match['Passes vers la surface de réparation précises'].sum(), df_match['Passes vers la surface de réparation'].sum()),
+        'ratio_passes_avant': safe_ratio(df_match['Passes en avant précises'].sum(), df_match['Passes en avant'].sum())
+    }
 
-    total_passes = df_player['Passe décisive'].sum()
-    bonus += total_passes * 1
+    coeffs = coeffs_postes_complets[poste]
+    numerateur = sum(ratio_vars[k] * coeffs[k] for k in coeffs)
+    denominateur = sum(coeffs[k] for k in coeffs)
+    note = numerateur / denominateur
 
-    total_cr = df_player['Cartons rouges'].sum()
-    malus -= total_cr * 1.5
+    bonus = df_match['But'].sum() * 1.5 + df_match['Passe décisive'].sum() * 1.0 + df_match['Récupérations'].sum() * 0.05 + df_match['Récupérations dans le terrain adverse'].sum() * 0.1 + df_match['Interceptions'].sum() * 0.05
+    malus = df_match['Cartons rouges'].sum() * 1.5 + df_match['Cartons jaunes'].sum() * 0.5 + df_match['Pertes'].sum() * 0.05 + df_match['Pertes dans le propre terrain'].sum() * 0.1 + df_match['Faute'].sum() * 0.05
 
-    total_cj = df_player['Cartons jaunes'].sum()
-    malus -= total_cj * 0.5
-
-    # Séparer pour récupérer le score (toujours à la fin)
     score_str = match.split()[-1]
     score_a, score_b = map(int, score_str.split(":"))
+    equipe_dom, _ = " ".join(match.split()[:-1]).split(" - ")
+    score_cannes = score_a if "Cannes" in equipe_dom else score_b
+    score_adv = score_b if "Cannes" in equipe_dom else score_a
 
-    # Récupérer la chaîne avec les deux équipes
-    equipes = " ".join(match.split()[:-1])
-    equipe_dom, _ = equipes.split(" - ")
+    bonus_resultat = 1 if score_cannes > score_adv else -1 if score_cannes < score_adv else 0
+    bonus_clean_sheet = 1 if poste in ['Défenseur central', 'Latéral', 'Milieu'] and score_adv == 0 else 0
 
-    if "Cannes" in equipe_dom:
-        score_cannes = score_a
-        score_adv = score_b
-    else:
-        score_cannes = score_b
-        score_adv = score_a
+    note_finale = note + bonus - malus + bonus_resultat + bonus_clean_sheet
 
-    if score_cannes > score_adv:
-        bonus_resultat = 1
-    elif score_cannes < score_adv:
-        bonus_resultat = -1
-    else:
-        bonus_resultat = 0
-
-    bonus_clean_sheet = 0
-
-    # On applique le bonus clean sheet uniquement aux postes défensifs
-    if poste in ['Défenseur central', 'Latéral', 'Milieu']:
-        if score_adv == 0:
-            bonus_clean_sheet = 1
-        else:
-            bonus_clean_sheet -= score_adv * 0.5
-
-    note = note_sans_bonus + bonus + malus + bonus_resultat + bonus_clean_sheet
-    note = 10.0 if note > 10.0 else note
-
-    return round(note, 1)
+    return max(0, min(10, round(note_finale, 1)))
 
 def streamlit_application(df_individual):
     with st.sidebar:
