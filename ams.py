@@ -64,11 +64,11 @@ def load_all_files_from_drive():
         download_file(service, file['id'], file['name'])
 
 league_rating = {
-    "Ligue 1": 85.47222222,
-    "Ligue 2": 74.78888889,
-    "National 1": 68.98823529,
-    "National 2": 63.84375,
-    "National 3": 57.23285714
+    "Ligue 1": 1,
+    "Ligue 2": 0.875008125,
+    "National 1": 0.807142174,
+    "National 2": 0.746953201,
+    "National 3": 0.669607688
 }
 
 metrics_by_position = [
@@ -971,7 +971,7 @@ def calcul_scores_par_kpi(df, joueur, poste):
         df_scores["Note globale"] *
         (1 - 0.5 + 0.5 * df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].map(league_rating))
     )
-    
+
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
 
     return df_scores
