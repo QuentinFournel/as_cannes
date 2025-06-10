@@ -76,7 +76,7 @@ metrics_by_position = [
         "position": "Buteur",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
-            "Buts hors pen.": "Buts hors penalty par 90",
+            "Buts\nhors penalty": "Buts hors penalty par 90",
             "xG": "xG par 90",
             "Précision\ntirs": "Tirs à la cible, %",
             "Conversion\ntirs": "Taux de conversion but/tir",
@@ -89,9 +89,9 @@ metrics_by_position = [
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
             "Dribbles\nréussiss": "Dribbles réussis, %",
-            "Duels off.": "Duels offensifs par 90",
+            "Duels\noffenfis": "Duels offensifs par 90",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %"
+            "Duels\naériens\ngagnés": "Duels aériens gagnés, %"
         }
     },
     {
@@ -101,7 +101,7 @@ metrics_by_position = [
             "xG": "xG par 90",
             "xA": "xA par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes quasi\ndécisives": "Passes quasi décisives par 90",
+            "Passes\nquasi décisives": "Passes quasi décisives par 90",
             "Passes\njudicieuses": "Passes judicieuses par 90",
             "Passes\nsurface": "Passes vers la surface de réparation par 90",
             "Passes\npénétrantes": "Passes pénétrantes par 90",
@@ -113,7 +113,7 @@ metrics_by_position = [
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
             "Dribbles\nréussis": "Dribbles réussis, %",
-            "Duels off.": "Duels offensifs par 90"
+            "Duels\noffenfis": "Duels offensifs par 90"
         }
     },
     {
@@ -123,7 +123,7 @@ metrics_by_position = [
             "xG": "xG par 90",
             "xA": "xA par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes quasi\ndécisives": "Passes quasi décisives par 90",
+            "Passes\nquasi décisives": "Passes quasi décisives par 90",
             "Passes\njudicieuses": "Passes judicieuses par 90",
             "Passes\nsurface": "Passes vers la surface de réparation par 90",
             "Passes\npénétrantes": "Passes pénétrantes par 90",
@@ -144,7 +144,7 @@ metrics_by_position = [
             "Attaques\nréussies": "Attaques réussies par 90",
             "xA": "xA par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes avant": "Passes avant par 90",
+            "Passes\navant": "Passes avant par 90",
             "Passes\njudicieuses": "Passes judicieuses par 90",
             "Passes\ntiers adverse": "Passes dans tiers adverse par 90",
             "Passes\nprogressives": "Passes progressives par 90",
@@ -187,17 +187,17 @@ metrics_by_position = [
         "metrics": {
             "Buts tête": "Buts de la tête par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes avant": "Passes avant par 90",
-            "Passes avant\nréussies": "Passes en avant précises, %",
+            "Passes\navant": "Passes avant par 90",
+            "Passes\navant\nréussies": "Passes en avant précises, %",
             "Passes longues": "Passes en avant précises, %",
-            "Passes longues\nréussies": "Longues passes précises, %",
+            "Passes\nlongues\nréussies": "Longues passes précises, %",
             "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %",
+            "Duels\naériens\ngagnés": "Duels aériens gagnés, %",
             "Duels\ndéfensifs": "Duels défensifs par 90",
-            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
+            "Duels\ndéfensifs\ngagnés": "Duels défensifs gagnés, %",
             "Tacles\nglissés": "Tacles glissés par 90",
             "Interceptions": "Interceptions par 90",
             "Tirs\ncontrés": "Tirs contrés par 90",
