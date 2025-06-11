@@ -872,88 +872,6 @@ coeffs_postes_complets = {
     }
 }
 
-journées = {
-    "J24": [
-        'Anglet Genets Foot VS Le Puy Foot 43',
-        'Angoulême Charente FC VS Andrézieux-Bouthéon FC',
-        'AS Saint-Priest VS Jura Sud Foot',
-        'EFC Fréjus Saint-Raphaël VS AS Cannes',
-        'FC Istres VS Bergerac Périgord FC',
-        'Goal FC VS SC Toulon',
-        'Hyeres FC VS GFA Rumilly Vallieres',
-        'RCP Grasse VS Marignane Gignac FC'
-    ],
-    "J25": [
-        'Andrézieux-Bouthéon FC VS EFC Fréjus Saint-Raphaël',
-        'AS Cannes VS Goal FC',
-        'Bergerac Périgord FC VS RCP Grasse',
-        'GFA Rumilly Vallieres VS Angoulême Charente FC',
-        'Jura Sud Foot VS Anglet Genets Foot',
-        'Le Puy Foot 43 VS Hyeres FC',
-        'Marignane Gignac FC VS AS Saint-Priest',
-        'SC Toulon VS FC Istres'
-    ],
-    "J26": [
-        'Anglet Genets Foot VS Marignane Gignac FC',
-        'Angoulême Charente FC VS Le Puy Foot 43',
-        'Bergerac Périgord FC VS SC Toulon',
-        'EFC Fréjus Saint-Raphaël VS GFA Rumilly Vallieres',
-        'FC Istres VS AS Cannes',
-        'Goal FC VS Andrézieux-Bouthéon FC',
-        'Hyeres FC VS Jura Sud Foot',
-        'RCP Grasse VS AS Saint-Priest'
-    ],
-    "J27": [
-        "Andrézieux-Bouthéon FC VS FC Istres",
-        "AS Cannes VS Bergerac Périgord FC",
-        "AS Saint-Priest VS Anglet Genets Foot",
-        "GFA Rumilly Vallieres VS Goal FC",
-        "Jura Sud Foot VS Angoulême Charente FC",
-        "Le Puy Foot 43 VS EFC Fréjus Saint-Raphaël",
-        "Marignane Gignac FC VS Hyeres FC",
-        "SC Toulon VS RCP Grasse"
-    ],
-    "J28": [
-        "Angoulême Charente FC VS Marignane Gignac FC",
-        "Bergerac Périgord FC VS Andrézieux-Bouthéon FC",
-        "EFC Fréjus Saint-Raphaël VS Jura Sud Foot",
-        "FC Istres VS GFA Rumilly Vallieres",
-        "Goal FC VS Le Puy Foot 43",
-        "Hyeres FC VS AS Saint-Priest",
-        "RCP Grasse VS Anglet Genets Foot",
-        "SC Toulon VS AS Cannes"
-    ],
-    "J29": [
-        "Andrézieux-Bouthéon FC VS SC Toulon",
-        "Anglet Genets Foot VS Hyeres FC",
-        "AS Saint-Priest VS Angoulême Charente FC",
-        "GFA Rumilly Vallieres VS Bergerac Périgord FC",
-        "Jura Sud Foot VS Goal FC",
-        "Le Puy Foot 43 VS FC Istres",
-        "Marignane Gignac FC VS EFC Fréjus Saint-Raphaël",
-        "RCP Grasse VS AS Cannes"
-    ]
-}
-
-équipes = [
-    "Andrézieux",
-    "Anglet Genets",
-    "Angoulême",
-    "Bergerac",
-    "Cannes",
-    "Fréjus St-Raphaël",
-    "GOAL FC",
-    "Grasse",
-    "Hyères FC",
-    "Istres",
-    "Jura Sud Foot",
-    "Le Puy F.43 Auvergne",
-    "Marignane Gignac CB",
-    "Rumilly Vallières",
-    "Saint-Priest",
-    "Toulon"
-]
-
 def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
@@ -1714,6 +1632,69 @@ def streamlit_application(df_individual):
     elif page == "Vidéo des buts":
         st.header("Vidéo des buts")
 
+        journées = {
+            "J24": [
+                'Anglet Genets Foot VS Le Puy Foot 43',
+                'Angoulême Charente FC VS Andrézieux-Bouthéon FC',
+                'AS Saint-Priest VS Jura Sud Foot',
+                'EFC Fréjus Saint-Raphaël VS AS Cannes',
+                'FC Istres VS Bergerac Périgord FC',
+                'Goal FC VS SC Toulon',
+                'Hyeres FC VS GFA Rumilly Vallieres',
+                'RCP Grasse VS Marignane Gignac FC'
+            ],
+            "J25": [
+                'Andrézieux-Bouthéon FC VS EFC Fréjus Saint-Raphaël',
+                'AS Cannes VS Goal FC',
+                'Bergerac Périgord FC VS RCP Grasse',
+                'GFA Rumilly Vallieres VS Angoulême Charente FC',
+                'Jura Sud Foot VS Anglet Genets Foot',
+                'Le Puy Foot 43 VS Hyeres FC',
+                'Marignane Gignac FC VS AS Saint-Priest',
+                'SC Toulon VS FC Istres'
+            ],
+            "J26": [
+                'Anglet Genets Foot VS Marignane Gignac FC',
+                'Angoulême Charente FC VS Le Puy Foot 43',
+                'Bergerac Périgord FC VS SC Toulon',
+                'EFC Fréjus Saint-Raphaël VS GFA Rumilly Vallieres',
+                'FC Istres VS AS Cannes',
+                'Goal FC VS Andrézieux-Bouthéon FC',
+                'Hyeres FC VS Jura Sud Foot',
+                'RCP Grasse VS AS Saint-Priest'
+            ],
+            "J27": [
+                "Andrézieux-Bouthéon FC VS FC Istres",
+                "AS Cannes VS Bergerac Périgord FC",
+                "AS Saint-Priest VS Anglet Genets Foot",
+                "GFA Rumilly Vallieres VS Goal FC",
+                "Jura Sud Foot VS Angoulême Charente FC",
+                "Le Puy Foot 43 VS EFC Fréjus Saint-Raphaël",
+                "Marignane Gignac FC VS Hyeres FC",
+                "SC Toulon VS RCP Grasse"
+            ],
+            "J28": [
+                "Angoulême Charente FC VS Marignane Gignac FC",
+                "Bergerac Périgord FC VS Andrézieux-Bouthéon FC",
+                "EFC Fréjus Saint-Raphaël VS Jura Sud Foot",
+                "FC Istres VS GFA Rumilly Vallieres",
+                "Goal FC VS Le Puy Foot 43",
+                "Hyeres FC VS AS Saint-Priest",
+                "RCP Grasse VS Anglet Genets Foot",
+                "SC Toulon VS AS Cannes"
+            ],
+            "J29": [
+                "Andrézieux-Bouthéon FC VS SC Toulon",
+                "Anglet Genets Foot VS Hyeres FC",
+                "AS Saint-Priest VS Angoulême Charente FC",
+                "GFA Rumilly Vallieres VS Bergerac Périgord FC",
+                "Jura Sud Foot VS Goal FC",
+                "Le Puy Foot 43 VS FC Istres",
+                "Marignane Gignac FC VS EFC Fréjus Saint-Raphaël",
+                "RCP Grasse VS AS Cannes"
+            ]
+        }
+
         col1, col2 = st.columns([1, 3])
 
         with col1:
@@ -1729,6 +1710,25 @@ def streamlit_application(df_individual):
 
     elif page == "Analyse collective":
         st.header("Analyse collective")
+
+        équipes = [
+            "Andrézieux",
+            "Anglet Genets",
+            "Angoulême",
+            "Bergerac",
+            "Cannes",
+            "Fréjus St-Raphaël",
+            "GOAL FC",
+            "Grasse",
+            "Hyères FC",
+            "Istres",
+            "Jura Sud Foot",
+            "Le Puy F.43 Auvergne",
+            "Marignane Gignac CB",
+            "Rumilly Vallières",
+            "Saint-Priest",
+            "Toulon"
+        ]
 
         team = st.selectbox("Sélectionnez une équipe", équipes, index=équipes.index("Cannes"))
 
