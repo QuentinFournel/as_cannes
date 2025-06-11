@@ -1954,7 +1954,7 @@ def streamlit_application(df_individual):
         if df_filtré[df_filtré['Joueur + Information'] == joueur]['Poste'].iloc[0] != 'Gardien':
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
-                list(kpi_by_position.keys()),
+                [k for k in kpi_by_position.keys() if k != "Gardien"],
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
         else:
@@ -2171,11 +2171,18 @@ def streamlit_application(df_individual):
 
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
-        poste = st.selectbox(
-            "Sélectionnez la base de comparaison (poste) pour l'analyse",
-            list(kpi_by_position.keys()),
-            help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
-        )
+        if df_filtré_1[df_filtré_1['Joueur + Information'] == joueur_1]['Poste'].iloc[0] != 'Gardien' and df_filtré_2[df_filtré_2['Joueur + Information'] == joueur_2]['Poste'].iloc[0] != 'Gardien':
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                [k for k in kpi_by_position.keys() if k != "Gardien"],
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
+        else:
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                "Gardien",
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
 
         if st.button("Comparer"):
             fig = create_comparison_radar(df_individual, joueur_1, joueur_2, poste)
