@@ -72,6 +72,16 @@ league_rating = {
 }
 
 smart_goal = {
+    "J. Aymes": [
+        ["Tirs contre", "Arrêts", "Arrêts réflexes"],
+        ["Passes", "Passes précises", "% de passes précises"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+    ],
+    "F. Vanni": [
+        ["Tirs contre", "Arrêts", "Arrêts réflexes"],
+        ["Passes", "Passes précises", "% de passes précises"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+    ],
     "M. Fischer": [
         ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
         ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
@@ -296,8 +306,8 @@ metrics_by_position = [
         "metrics": {
             "Passes\nreçues": "Passes réceptionnées par 90",
             "Passes": "Passes par 90",
-            "Précision\npasses": "Passes précises, %",
-            "Passes longues": "Passes en avant précises, %",
+            "Passes\nréussies": "Passes précises, %",
+            "Passes longues": "Passes longues par 90",
             "Passes\nlongues réussies": "Longues passes précises, %",
             "Buts concédés": "Buts concédés par 90",
             "xG concédés": "xG contre par 90",
@@ -557,6 +567,30 @@ kpi_by_position = {
             "Tirs contrés par 90": 0.25,
             "Actions défensives réussies par 90": 0.75
         }
+    },
+
+    "Gardien": {
+        "Participe au jeu": {
+            "Passes réceptionnées par 90": 1
+        },
+        "Jeu long": {
+            "Passes longues par 90": 0.5,
+            "Longues passes précises, %": 0.5
+        },
+        "Jeu court": {
+            "Passes courtes / moyennes par 90": 0.5,
+            "Passes courtes / moyennes précises, %": 0.5,
+        },
+        "Sortie": {
+            "Sorties par 90": 1
+        },
+        "Présence aérienne": {
+            "Duels aériens par 90": 0.5,
+            "Duels aériens gagnés, %": 0.5
+        },
+        "Efficacité sur sa ligne": {
+            "Buts évités par 90": 1
+        }
     }
 }
 
@@ -608,6 +642,14 @@ kpi_coefficients_by_position = {
         "Jeu défensif": 4,
         "Jeu aérien": 4,
         "Protection de la surface": 3
+    },
+    "Gardien": {
+        "Participe au jeu": 2,
+        "Jeu long": 3,
+        "Jeu court": 2,
+        "Sortie": 1,
+        "Présence aérienne": 3,
+        "Efficacité sur sa ligne": 8
     }
 }
 
@@ -774,6 +816,22 @@ indicateurs_pressing = [
 ]
 
 coeffs_postes_complets = {
+    'Gardien': {
+        'ratio_tirs': 0,
+        'ratio_centres': 0,
+        'ratio_dribbles': 0,
+        'ratio_duels_offensifs': 0,
+        'ratio_duels_aériens': 2,
+        'ratio_duels_défensifs': 1,
+        'ratio_duels_ballons': 0,
+        'ratio_tacles_glissés': 0.5,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 1,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    },
     'Défenseur central': {
         'ratio_tirs': 0,
         'ratio_centres': 0,
@@ -1507,7 +1565,7 @@ def performance_index(df_player, poste, match):
     denominateur = sum(coeffs[k] for k in coeffs)
     note = numerateur / denominateur
 
-    bonus = df_match['But'].sum() * 1.5 + df_match['Passe décisive'].sum() * 1.0 + df_match['Récupérations'].sum() * 0.05 + df_match['Récupérations dans le terrain adverse'].sum() * 0.1 + df_match['Interceptions'].sum() * 0.05
+    bonus = df_match['But'].sum() * 1.5 + df_match['Passe décisive'].sum() * 1.0 + df_match['Récupérations'].sum() * 0.05 + df_match['Récupérations dans le terrain adverse'].sum() * 0.1 + df_match['Interceptions'].sum() * 0.05 + (df_match['Arrêts'].sum() - df_match['Arrêts réflexes'].sum()) * 0.25 + df_match['Arrêts réflexes'].sum() * 0.5
     malus = df_match['Cartons rouges'].sum() * 1.5 + df_match['Cartons jaunes'].sum() * 0.5 + df_match['Pertes'].sum() * 0.05 + df_match['Pertes dans le propre terrain'].sum() * 0.1 + df_match['Faute'].sum() * 0.05
 
     score_str = match.split()[-1]
@@ -1517,9 +1575,11 @@ def performance_index(df_player, poste, match):
     score_adv = score_b if "Cannes" in equipe_dom else score_a
 
     bonus_resultat = 1 if score_cannes > score_adv else -1 if score_cannes < score_adv else 0
-    bonus_clean_sheet = 1 if poste in ['Défenseur central', 'Latéral', 'Milieu'] and score_adv == 0 else 0
+    bonus_clean_sheet = 1 if poste in ['Gardien', 'Défenseur central', 'Latéral', 'Milieu'] and score_adv == 0 else 0
 
-    note_finale = note + bonus - malus + bonus_resultat + bonus_clean_sheet
+    malus_buts_condédés = score_adv if poste in ['Gardien', 'Défenseur central', 'Latéral', 'Milieu'] else score_adv / 2
+
+    note_finale = note + bonus - malus + bonus_resultat + bonus_clean_sheet - malus_buts_condédés
 
     return max(0, min(10, round(note_finale, 1)))
 
@@ -1533,7 +1593,8 @@ def ajouter_pourcentages(df):
         "% de passes longues précises": ("Passes longues précises", "Passes longues"),
         "% de passes en avant précises": ("Passes en avant précises", "Passes en avant"),
         "% de passes dans le 3ème tiers précises": ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"),
-        "% de duels offensifs gagnés": ("Duels offensifs gagnés", "Duels offensifs")
+        "% de duels offensifs gagnés": ("Duels offensifs gagnés", "Duels offensifs"),
+        "% de passes précises": ("Passes précises", "Passes")
     }
 
     for new_col, (num, den) in pourcentages.items():
@@ -1881,7 +1942,11 @@ def streamlit_application(df_individual):
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
         else:
-            poste = 'Gardien'
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                "Gardien",
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
         
         if team == "Cannes":
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Match"])
@@ -1914,7 +1979,10 @@ def streamlit_application(df_individual):
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
-            metrics_label  = st.selectbox("Sélectionnez une base de comparaison", metrics_x_y.keys())
+            if poste != 'Gardien': 
+                metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
+            else:
+                metrics_label = "Buts évités"
 
             x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
             description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
@@ -1923,10 +1991,6 @@ def streamlit_application(df_individual):
             st.plotly_chart(fig, use_container_width=True)
 
         with tab4:
-            if poste == 'Gardien':
-                st.warning("⚠️ Aucun KPI n'a encore été défini pour ce poste.")
-                st.stop()
-        
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
