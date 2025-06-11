@@ -57,7 +57,7 @@ def load_all_files_from_drive():
     files = list_files_in_folder(service, folder_id)
 
     if not files:
-        st.warning("Aucun fichier trouvé dans le dossier Drive.")
+        st.warning("⚠️ Aucun fichier trouvé dans le dossier Drive.")
         return
 
     for file in files:
@@ -69,6 +69,93 @@ league_rating = {
     "National 1": 0.807142174,
     "National 2": 0.746953201,
     "National 3": 0.669607688
+}
+
+smart_goal = {
+    "M. Fischer": [
+        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ["Centres", "Centres précis", "% de centres précis"]
+    ],
+    "L. Vinci": [
+        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"]
+    ],
+    "G. Pineau": [
+        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+    ],
+    "H. Abderrahmane": [
+        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+    ],
+    "J. Smith": [
+        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+    ],
+    "C. N'Doye": [
+        ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+        ["Récupérations"]
+    ],
+    "H. Hafidi": [
+        ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+        ["Récupérations", "Touches de balle dans la surface de réparation"]
+    ],
+    "A. N'Diaye": [
+        ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+        ["Touches de balle dans la surface de réparation"]
+    ],
+    "C. Gonçalves": [
+        ["Passes longues", "Passes longues précises", "% de passes longues précises"],
+        ["Récupérations", "Touches de balle dans la surface de réparation"]
+    ],
+    "T. Trinker": [
+        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+        ["Passes dans le 3ème tiers", "Passes dans le 3ème tiers précises", "% de passes dans le 3ème tiers précises"],
+        ["Touches de balle dans la surface de réparation"]
+    ],
+    "M. Blanc": [
+        ["Passes dans le 3ème tiers", "Passes dans le 3ème tiers précises", "% de passes dans le 3ème tiers précises"],
+        ["Touches de balle dans la surface de réparation"]
+    ],
+    "Alexis Gonçalves": [
+        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+        ["Centres", "Centres précis", "% de centres précis"],
+        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+    ],
+    "C. Abbas": [
+        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+        ["Centres", "Centres précis", "% de centres précis"],
+        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+    ],
+    "D. Mai": [
+        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+        ["Centres", "Centres précis", "% de centres précis"],
+        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+    ],
+    "M. Lopes": [
+        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+        ["Centres", "Centres précis", "% de centres précis"],
+        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+    ],
+    "J. Mambu": [
+        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+        ["Centres", "Centres précis", "% de centres précis"],
+        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+    ],
+    "J. Domingues": [
+        ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+        ["Touches de balle dans la surface de réparation"]
+    ],
+    "D. Segbe-Azankpo": [
+        ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+        ["Touches de balle dans la surface de réparation"]
+    ],
+    "M. Mamadou Kamissoko": []
 }
 
 metrics_by_position = [
@@ -659,6 +746,187 @@ indicateurs_pressing = [
     'Récupérations élevé',
     'Récupérations moyen',
     'Pertes bas'
+]
+
+coeffs_postes_complets = {
+    'Défenseur central': {
+        'ratio_tirs': 0,
+        'ratio_centres': 0,
+        'ratio_dribbles': 0,
+        'ratio_duels_offensifs': 0,
+        'ratio_duels_aériens': 2,
+        'ratio_duels_défensifs': 2.5,
+        'ratio_duels_ballons': 0.5,
+        'ratio_tacles_glissés': 1,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 1,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    },
+    'Latéral': {
+        'ratio_tirs': 0,
+        'ratio_centres': 1,
+        'ratio_dribbles': 1,
+        'ratio_duels_offensifs': 0.5,
+        'ratio_duels_aériens': 0.5,
+        'ratio_duels_défensifs': 1,
+        'ratio_duels_ballons': 0.5,
+        'ratio_tacles_glissés': 0.5,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 0,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    },
+    'Milieu': {
+        'ratio_tirs': 0,
+        'ratio_centres': 0,
+        'ratio_dribbles': 0.5,
+        'ratio_duels_offensifs': 0.5,
+        'ratio_duels_aériens': 1.5,
+        'ratio_duels_défensifs': 2,
+        'ratio_duels_ballons': 0.5,
+        'ratio_tacles_glissés': 0.5,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 0,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    },
+    'Milieu offensif': {
+        'ratio_tirs': 0.5,
+        'ratio_centres': 0,
+        'ratio_dribbles': 1,
+        'ratio_duels_offensifs': 1,
+        'ratio_duels_aériens': 0,
+        'ratio_duels_défensifs': 0,
+        'ratio_duels_ballons': 0.5,
+        'ratio_tacles_glissés': 0,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 0,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    },
+    'Ailier': {
+        'ratio_tirs': 0.5,
+        'ratio_centres': 1,
+        'ratio_dribbles': 1,
+        'ratio_duels_offensifs': 2,
+        'ratio_duels_aériens': 0,
+        'ratio_duels_défensifs': 0,
+        'ratio_duels_ballons': 0.5,
+        'ratio_tacles_glissés': 0,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 0,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    },
+    'Buteur': {
+        'ratio_tirs': 2,
+        'ratio_centres': 0,
+        'ratio_dribbles': 1,
+        'ratio_duels_offensifs': 2,
+        'ratio_duels_aériens': 1,
+        'ratio_duels_défensifs': 0,
+        'ratio_duels_ballons': 0.5,
+        'ratio_tacles_glissés': 0,
+        'ratio_passes': 2,
+        'ratio_passes_longues': 0,
+        'ratio_passes_profondeur': 0,
+        'ratio_passes_tiers3': 0,
+        'ratio_passes_surface': 0,
+        'ratio_passes_avant': 0
+    }
+}
+
+journées = {
+    "J24": [
+        'Anglet Genets Foot VS Le Puy Foot 43',
+        'Angoulême Charente FC VS Andrézieux-Bouthéon FC',
+        'AS Saint-Priest VS Jura Sud Foot',
+        'EFC Fréjus Saint-Raphaël VS AS Cannes',
+        'FC Istres VS Bergerac Périgord FC',
+        'Goal FC VS SC Toulon',
+        'Hyeres FC VS GFA Rumilly Vallieres',
+        'RCP Grasse VS Marignane Gignac FC'
+    ],
+    "J25": [
+        'Andrézieux-Bouthéon FC VS EFC Fréjus Saint-Raphaël',
+        'AS Cannes VS Goal FC',
+        'Bergerac Périgord FC VS RCP Grasse',
+        'GFA Rumilly Vallieres VS Angoulême Charente FC',
+        'Jura Sud Foot VS Anglet Genets Foot',
+        'Le Puy Foot 43 VS Hyeres FC',
+        'Marignane Gignac FC VS AS Saint-Priest',
+        'SC Toulon VS FC Istres'
+    ],
+    "J26": [
+        'Anglet Genets Foot VS Marignane Gignac FC',
+        'Angoulême Charente FC VS Le Puy Foot 43',
+        'Bergerac Périgord FC VS SC Toulon',
+        'EFC Fréjus Saint-Raphaël VS GFA Rumilly Vallieres',
+        'FC Istres VS AS Cannes',
+        'Goal FC VS Andrézieux-Bouthéon FC',
+        'Hyeres FC VS Jura Sud Foot',
+        'RCP Grasse VS AS Saint-Priest'
+    ],
+    "J27": [
+        "Andrézieux-Bouthéon FC VS FC Istres",
+        "AS Cannes VS Bergerac Périgord FC",
+        "AS Saint-Priest VS Anglet Genets Foot",
+        "GFA Rumilly Vallieres VS Goal FC",
+        "Jura Sud Foot VS Angoulême Charente FC",
+        "Le Puy Foot 43 VS EFC Fréjus Saint-Raphaël",
+        "Marignane Gignac FC VS Hyeres FC",
+        "SC Toulon VS RCP Grasse"
+    ],
+    "J28": [
+        "Angoulême Charente FC VS Marignane Gignac FC",
+        "Bergerac Périgord FC VS Andrézieux-Bouthéon FC",
+        "EFC Fréjus Saint-Raphaël VS Jura Sud Foot",
+        "FC Istres VS GFA Rumilly Vallieres",
+        "Goal FC VS Le Puy Foot 43",
+        "Hyeres FC VS AS Saint-Priest",
+        "RCP Grasse VS Anglet Genets Foot",
+        "SC Toulon VS AS Cannes"
+    ],
+    "J29": [
+        "Andrézieux-Bouthéon FC VS SC Toulon",
+        "Anglet Genets Foot VS Hyeres FC",
+        "AS Saint-Priest VS Angoulême Charente FC",
+        "GFA Rumilly Vallieres VS Bergerac Périgord FC",
+        "Jura Sud Foot VS Goal FC",
+        "Le Puy Foot 43 VS FC Istres",
+        "Marignane Gignac FC VS EFC Fréjus Saint-Raphaël",
+        "RCP Grasse VS AS Cannes"
+    ]
+}
+
+équipes = [
+    "Andrézieux",
+    "Anglet Genets",
+    "Angoulême",
+    "Bergerac",
+    "Cannes",
+    "Fréjus St-Raphaël",
+    "GOAL FC",
+    "Grasse",
+    "Hyères FC",
+    "Istres",
+    "Jura Sud Foot",
+    "Le Puy F.43 Auvergne",
+    "Marignane Gignac CB",
+    "Rumilly Vallières",
+    "Saint-Priest",
+    "Toulon"
 ]
 
 def read_with_competition(filepath):
@@ -1252,105 +1520,6 @@ def creation_moyenne_anglaise(résultats, type_classement, journée_début, jour
     return df_ranking
 
 def performance_index(df_player, poste, match):
-    coeffs_postes_complets = {
-        'Défenseur central': {
-            'ratio_tirs': 0,
-            'ratio_centres': 0,
-            'ratio_dribbles': 0,
-            'ratio_duels_offensifs': 0,
-            'ratio_duels_aériens': 2,
-            'ratio_duels_défensifs': 2.5,
-            'ratio_duels_ballons': 0.5,
-            'ratio_tacles_glissés': 1,
-            'ratio_passes': 2,
-            'ratio_passes_longues': 1,
-            'ratio_passes_profondeur': 0,
-            'ratio_passes_tiers3': 0,
-            'ratio_passes_surface': 0,
-            'ratio_passes_avant': 0
-        },
-        'Latéral': {
-            'ratio_tirs': 0,
-            'ratio_centres': 1,
-            'ratio_dribbles': 1,
-            'ratio_duels_offensifs': 0.5,
-            'ratio_duels_aériens': 0.5,
-            'ratio_duels_défensifs': 1,
-            'ratio_duels_ballons': 0.5,
-            'ratio_tacles_glissés': 0.5,
-            'ratio_passes': 2,
-            'ratio_passes_longues': 0,
-            'ratio_passes_profondeur': 0,
-            'ratio_passes_tiers3': 0,
-            'ratio_passes_surface': 0,
-            'ratio_passes_avant': 0
-        },
-        'Milieu': {
-            'ratio_tirs': 0,
-            'ratio_centres': 0,
-            'ratio_dribbles': 0.5,
-            'ratio_duels_offensifs': 0.5,
-            'ratio_duels_aériens': 1.5,
-            'ratio_duels_défensifs': 2,
-            'ratio_duels_ballons': 0.5,
-            'ratio_tacles_glissés': 0.5,
-            'ratio_passes': 2,
-            'ratio_passes_longues': 0,
-            'ratio_passes_profondeur': 0,
-            'ratio_passes_tiers3': 0,
-            'ratio_passes_surface': 0,
-            'ratio_passes_avant': 0
-        },
-        'Milieu offensif': {
-            'ratio_tirs': 0.5,
-            'ratio_centres': 0,
-            'ratio_dribbles': 1,
-            'ratio_duels_offensifs': 1,
-            'ratio_duels_aériens': 0,
-            'ratio_duels_défensifs': 0,
-            'ratio_duels_ballons': 0.5,
-            'ratio_tacles_glissés': 0,
-            'ratio_passes': 2,
-            'ratio_passes_longues': 0,
-            'ratio_passes_profondeur': 0,
-            'ratio_passes_tiers3': 0,
-            'ratio_passes_surface': 0,
-            'ratio_passes_avant': 0
-        },
-        'Ailier': {
-            'ratio_tirs': 0.5,
-            'ratio_centres': 1,
-            'ratio_dribbles': 1,
-            'ratio_duels_offensifs': 2,
-            'ratio_duels_aériens': 0,
-            'ratio_duels_défensifs': 0,
-            'ratio_duels_ballons': 0.5,
-            'ratio_tacles_glissés': 0,
-            'ratio_passes': 2,
-            'ratio_passes_longues': 0,
-            'ratio_passes_profondeur': 0,
-            'ratio_passes_tiers3': 0,
-            'ratio_passes_surface': 0,
-            'ratio_passes_avant': 0
-        },
-        'Buteur': {
-            'ratio_tirs': 2,
-            'ratio_centres': 0,
-            'ratio_dribbles': 1,
-            'ratio_duels_offensifs': 2,
-            'ratio_duels_aériens': 1,
-            'ratio_duels_défensifs': 0,
-            'ratio_duels_ballons': 0.5,
-            'ratio_tacles_glissés': 0,
-            'ratio_passes': 2,
-            'ratio_passes_longues': 0,
-            'ratio_passes_profondeur': 0,
-            'ratio_passes_tiers3': 0,
-            'ratio_passes_surface': 0,
-            'ratio_passes_avant': 0
-        }
-    }
-
     df_match = df_player[df_player["Match"] == match]
 
     def safe_ratio(n, d):
@@ -1395,6 +1564,27 @@ def performance_index(df_player, poste, match):
     note_finale = note + bonus - malus + bonus_resultat + bonus_clean_sheet
 
     return max(0, min(10, round(note_finale, 1)))
+
+def ajouter_pourcentages(df):
+    pourcentages = {
+        "% de dribbles réussis": ("Dribbles réussis", "Dribbles"),
+        "% de duels défensifs gagnés": ("Duels défensifs gagnés", "Duels défensifs"),
+        "% de duels aériens gagnés": ("Duels aériens gagnés", "Duels aériens"),
+        "% de tirs cadrés": ("Tirs cadrés", "Tirs"),
+        "% de centres précis": ("Centres précis", "Centres"),
+        "% de passes longues précises": ("Passes longues précises", "Passes longues"),
+        "% de passes en avant précises": ("Passes en avant précises", "Passes en avant"),
+        "% de passes dans le 3ème tiers précises": ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"),
+        "% de duels offensifs gagnés": ("Duels offensifs gagnés", "Duels offensifs")
+    }
+
+    for new_col, (num, den) in pourcentages.items():
+        df[new_col] = df.apply(
+            lambda row: (row[num] / row[den] * 100) if pd.notnull(row[den]) and row[den] > 0 else 0,
+            axis=1
+        )
+
+    return df
 
 def streamlit_application(df_individual):
     with st.sidebar:
@@ -1458,7 +1648,7 @@ def streamlit_application(df_individual):
             journée_fin = st.number_input("Sélectionnez la journée de fin", min_value=1, max_value=30, value=30)
 
         if journée_fin < journée_début:
-            st.warning("La journée de fin doit être supérieure ou égale à la journée de début.")
+            st.warning("⚠️ La journée de fin doit être supérieure ou égale à la journée de début.")
 
         else:
             url = f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
@@ -1484,69 +1674,6 @@ def streamlit_application(df_individual):
     elif page == "Vidéo des buts":
         st.header("Vidéo des buts")
 
-        journées = {
-            "J24": [
-                'Anglet Genets Foot VS Le Puy Foot 43',
-                'Angoulême Charente FC VS Andrézieux-Bouthéon FC',
-                'AS Saint-Priest VS Jura Sud Foot',
-                'EFC Fréjus Saint-Raphaël VS AS Cannes',
-                'FC Istres VS Bergerac Périgord FC',
-                'Goal FC VS SC Toulon',
-                'Hyeres FC VS GFA Rumilly Vallieres',
-                'RCP Grasse VS Marignane Gignac FC'
-            ],
-            "J25": [
-                'Andrézieux-Bouthéon FC VS EFC Fréjus Saint-Raphaël',
-                'AS Cannes VS Goal FC',
-                'Bergerac Périgord FC VS RCP Grasse',
-                'GFA Rumilly Vallieres VS Angoulême Charente FC',
-                'Jura Sud Foot VS Anglet Genets Foot',
-                'Le Puy Foot 43 VS Hyeres FC',
-                'Marignane Gignac FC VS AS Saint-Priest',
-                'SC Toulon VS FC Istres'
-            ],
-            "J26": [
-                'Anglet Genets Foot VS Marignane Gignac FC',
-                'Angoulême Charente FC VS Le Puy Foot 43',
-                'Bergerac Périgord FC VS SC Toulon',
-                'EFC Fréjus Saint-Raphaël VS GFA Rumilly Vallieres',
-                'FC Istres VS AS Cannes',
-                'Goal FC VS Andrézieux-Bouthéon FC',
-                'Hyeres FC VS Jura Sud Foot',
-                'RCP Grasse VS AS Saint-Priest'
-            ],
-            "J27": [
-                "Andrézieux-Bouthéon FC VS FC Istres",
-                "AS Cannes VS Bergerac Périgord FC",
-                "AS Saint-Priest VS Anglet Genets Foot",
-                "GFA Rumilly Vallieres VS Goal FC",
-                "Jura Sud Foot VS Angoulême Charente FC",
-                "Le Puy Foot 43 VS EFC Fréjus Saint-Raphaël",
-                "Marignane Gignac FC VS Hyeres FC",
-                "SC Toulon VS RCP Grasse"
-            ],
-            "J28": [
-                "Angoulême Charente FC VS Marignane Gignac FC",
-                "Bergerac Périgord FC VS Andrézieux-Bouthéon FC",
-                "EFC Fréjus Saint-Raphaël VS Jura Sud Foot",
-                "FC Istres VS GFA Rumilly Vallieres",
-                "Goal FC VS Le Puy Foot 43",
-                "Hyeres FC VS AS Saint-Priest",
-                "RCP Grasse VS Anglet Genets Foot",
-                "SC Toulon VS AS Cannes"
-            ],
-            "J29": [
-                "Andrézieux-Bouthéon FC VS SC Toulon",
-                "Anglet Genets Foot VS Hyeres FC",
-                "AS Saint-Priest VS Angoulême Charente FC",
-                "GFA Rumilly Vallieres VS Bergerac Périgord FC",
-                "Jura Sud Foot VS Goal FC",
-                "Le Puy Foot 43 VS FC Istres",
-                "Marignane Gignac FC VS EFC Fréjus Saint-Raphaël",
-                "RCP Grasse VS AS Cannes"
-            ]
-        }
-
         col1, col2 = st.columns([1, 3])
 
         with col1:
@@ -1558,29 +1685,10 @@ def streamlit_application(df_individual):
         if os.path.exists(f"data/{journée} - {match}.mp4"):
             st.video(f"data/{journée} - {match}.mp4")
         else:
-            st.warning("Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
+            st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
     elif page == "Analyse collective":
         st.header("Analyse collective")
-
-        équipes = [
-            "Andrézieux",
-            "Anglet Genets",
-            "Angoulême",
-            "Bergerac",
-            "Cannes",
-            "Fréjus St-Raphaël",
-            "GOAL FC",
-            "Grasse",
-            "Hyères FC",
-            "Istres",
-            "Jura Sud Foot",
-            "Le Puy F.43 Auvergne",
-            "Marignane Gignac CB",
-            "Rumilly Vallières",
-            "Saint-Priest",
-            "Toulon"
-        ]
 
         team = st.selectbox("Sélectionnez une équipe", équipes, index=équipes.index("Cannes"))
 
@@ -1781,8 +1889,13 @@ def streamlit_application(df_individual):
         if team == "Cannes":
             with tab5:
                 joueur = joueur.split(" - ")[0]
+                file_path = f"Données individuelles par matchs/Player stats {joueur}.xlsx"
 
-                df_player = pd.read_excel(f"data/Player stats {joueur}.xlsx")
+                if os.path.exists(file_path):
+                    df_player = pd.read_excel(file_path)
+                else:
+                    st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}")
+                    st.stop()
 
                 colonnes = [
                     "Match",
@@ -1862,27 +1975,51 @@ def streamlit_application(df_individual):
                 # Renommer les colonnes
                 df_player.columns = colonnes
 
-                match = st.selectbox("Sélectionnez le match à analyser", df_player["Match"].unique())
+                df_player = ajouter_pourcentages(df_player)
 
+                match = st.selectbox("Sélectionnez le match à analyser", df_player["Match"].unique())
                 df_player = df_player[df_player["Match"] == match]
 
-                st.dataframe(df_player, use_container_width=True, hide_index=True)
-
                 note = performance_index(df_player, poste, match)
+
+                st.subheader('Statistiques générales')
 
                 col1, col2, col3, col4 = st.columns(4)
 
                 with col1:
-                    bordered_metric(col1, "Minutes jouées", df_player[df_player["Match"] == match]["Minutes jouées"].values[0], 165)
+                    bordered_metric(col1, "Minutes jouées", df_player["Minutes jouées"].values[0], 165)
 
                 with col2:
-                    bordered_metric(col2, "Buts", df_player[df_player["Match"] == match]["But"].values[0], 165)
+                    bordered_metric(col2, "But", df_player["But"].values[0], 165)
 
                 with col3:
-                    bordered_metric(col3, "Passes décisives", df_player[df_player["Match"] == match]["Passe décisive"].values[0], 165)
+                    bordered_metric(col3, "Passe décisive", df_player["Passe décisive"].values[0], 165)
 
                 with col4:
                     bordered_metric(col4, "Note", note, 165, color="#ac141a")
+
+                st.markdown("---")
+
+                st.subheader('Smart Goals')
+
+                colonnes_smart = smart_goal.get(joueur, [])
+
+                for groupe in colonnes_smart:
+                    cols = st.columns(len(groupe))
+
+                    for i, col_name in enumerate(groupe):
+                        if col_name in df_player.columns:
+                            val = df_player[col_name].values[0]
+                            val = int(val)
+                            
+                            if len(groupe) == 3:
+                                bordered_metric(cols[i], col_name, val, 225)
+                            elif len(groupe) == 2:
+                                bordered_metric(cols[i], col_name, val, 345)
+                            elif len(groupe) == 1:
+                                bordered_metric(cols[i], col_name, val, 705)
+
+                    st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
