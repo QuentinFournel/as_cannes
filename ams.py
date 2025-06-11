@@ -290,6 +290,22 @@ metrics_by_position = [
             "Tirs\ncontrés": "Tirs contrés par 90",
             "Actions déf.\nréussies": "Actions défensives réussies par 90"
         }
+    },
+    {
+        "position": "Gardien",
+        "metrics": {
+            "Passes\nreçues": "Passes réceptionnées par 90",
+            "Passes": "Passes par 90",
+            "Précision\npasses": "Passes précises, %",
+            "Passes longues": "Passes en avant précises, %",
+            "Passes\nlongues réussies": "Longues passes précises, %",
+            "Buts concédés": "Buts concédés par 90",
+            "xG concédés": "xG contre par 90",
+            "Buts évités": "Buts évités par 90",
+            "Sorties": "Sorties par 90",
+            "Duels\naériens": "Duels aériens par 90",
+            "Duels\naériens gagnés": "Duels aériens gagnés, %"
+        }
     }
 ]
 
@@ -676,6 +692,15 @@ metrics_x_y = {
             "Joue peu de duels aériens<br>et en remporte peu",
             "Joue beaucoup de duels aériens<br>mais en remporte peu"
         ]
+    },
+    "Buts évités": {
+        "metrics": ["xG contre par 90", "Buts concédés par 90"],
+        "descriptions": [
+            "Concède peu d'occasions<br>mais encaise beaucoup de buts",
+            "Concède beaucoup d'occasions<br>et encaise beaucoup de buts",
+            "Concède peu d'occasions<br>et encaise peu de buts",
+            "Concède beaucoup d'occasions<br>mais encaise peu de buts",
+        ]
     }
 }
 
@@ -1031,6 +1056,7 @@ def collect_individual_data():
     ligue1_lateral = read_with_competition('data/Ligue 1 - Latéral.xlsx')
     ligue1_milieu = read_with_competition('data/Ligue 1 - Milieu.xlsx')
     ligue1_milieu_offensif = read_with_competition('data/Ligue 1 - Milieu offensif.xlsx')
+    ligue1_gardien = read_with_competition('data/Ligue 1 - Gardien.xlsx')
 
     # Ligue 2
     ligue2_ailier = read_with_competition('data/Ligue 2 - Ailier.xlsx')
@@ -1039,6 +1065,7 @@ def collect_individual_data():
     ligue2_lateral = read_with_competition('data/Ligue 2 - Latéral.xlsx')
     ligue2_milieu = read_with_competition('data/Ligue 2 - Milieu.xlsx')
     ligue2_milieu_offensif = read_with_competition('data/Ligue 2 - Milieu offensif.xlsx')
+    ligue2_gardien = read_with_competition('data/Ligue 2 - Gardien.xlsx')
 
     # National 1
     nat1_ailier = read_with_competition('data/National 1 - Ailier.xlsx')
@@ -1047,6 +1074,7 @@ def collect_individual_data():
     nat1_lateral = read_with_competition('data/National 1 - Latéral.xlsx')
     nat1_milieu = read_with_competition('data/National 1 - Milieu.xlsx')
     nat1_milieu_offensif = read_with_competition('data/National 1 - Milieu offensif.xlsx')
+    nat1_gardien = read_with_competition('data/National 1 - Gardien.xlsx')
 
     # National 2
     nat2_ailier = read_with_competition('data/National 2 - Ailier.xlsx')
@@ -1055,13 +1083,14 @@ def collect_individual_data():
     nat2_lateral = read_with_competition('data/National 2 - Latéral.xlsx')
     nat2_milieu = read_with_competition('data/National 2 - Milieu.xlsx')
     nat2_milieu_offensif = read_with_competition('data/National 2 - Milieu offensif.xlsx')
+    nat2_gardien = read_with_competition('data/National 2 - Gardien.xlsx')
 
     # Concaténation de tous les DataFrames dans un giga DataFrame
     df_individual = pd.concat([
-        ligue1_ailier, ligue1_buteur, ligue1_defenseur_central, ligue1_lateral, ligue1_milieu, ligue1_milieu_offensif,
-        ligue2_ailier, ligue2_buteur, ligue2_defenseur_central, ligue2_lateral, ligue2_milieu, ligue2_milieu_offensif,
-        nat1_ailier, nat1_buteur, nat1_defenseur_central, nat1_lateral, nat1_milieu, nat1_milieu_offensif,
-        nat2_ailier, nat2_buteur, nat2_defenseur_central, nat2_lateral, nat2_milieu, nat2_milieu_offensif
+        ligue1_ailier, ligue1_buteur, ligue1_defenseur_central, ligue1_lateral, ligue1_milieu, ligue1_milieu_offensif, ligue1_gardien,
+        ligue2_ailier, ligue2_buteur, ligue2_defenseur_central, ligue2_lateral, ligue2_milieu, ligue2_milieu_offensif, ligue2_gardien,
+        nat1_ailier, nat1_buteur, nat1_defenseur_central, nat1_lateral, nat1_milieu, nat1_milieu_offensif, nat1_gardien,
+        nat2_ailier, nat2_buteur, nat2_defenseur_central, nat2_lateral, nat2_milieu, nat2_milieu_offensif, nat2_gardien
     ], ignore_index=True)
 
     df_individual.columns = df_individual.columns.str.strip()
@@ -1143,15 +1172,26 @@ def compute_weighted_stats_by_minutes(df_joueur):
 
 def rank_columns(df):
     df_copy = df.copy()
-    # Sélection des colonnes numériques sauf 'Minutes jouées'
+    
+    # Colonnes numériques sauf 'Minutes jouées' et 'Âge'
     numeric_cols = df_copy.select_dtypes(include=['number']).columns
     numeric_cols = numeric_cols.drop(['Minutes jouées', 'Âge'], errors='ignore')
 
-    # Calcul des rangs
-    ranked_df = df_copy[numeric_cols].rank(pct=True, method='average') * 100
+    # Colonnes où un score plus faible est meilleur
+    lower_is_better = ['Buts concédés par 90']  # Ajoute d'autres si besoin
+
+    ranked_df = pd.DataFrame(index=df_copy.index)
+
+    for col in numeric_cols:
+        if col in lower_is_better:
+            # Inverser le rang : plus bas = mieux
+            ranked_df[col] = df_copy[col].rank(pct=True, ascending=False, method='average') * 100
+        else:
+            # Normal : plus haut = mieux
+            ranked_df[col] = df_copy[col].rank(pct=True, ascending=True, method='average') * 100
+
     ranked_df = ranked_df.fillna(0).astype(int)
 
-    # Remplacement des colonnes dans le DataFrame original
     df_copy[numeric_cols] = ranked_df
     return df_copy
 
@@ -1834,11 +1874,14 @@ def streamlit_application(df_individual):
 
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
 
-        poste = st.selectbox(
-            "Sélectionnez la base de comparaison (poste) pour l'analyse",
-            list(kpi_by_position.keys()),
-            help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
-        )
+        if df_filtré[df_filtré['Joueur + Information'] == joueur]['Poste'].iloc[0] != 'Gardien':
+            poste = st.selectbox(
+                "Sélectionnez la base de comparaison (poste) pour l'analyse",
+                list(kpi_by_position.keys()),
+                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+            )
+        else:
+            poste = 'Gardien'
         
         if team == "Cannes":
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Match"])
@@ -1855,10 +1898,16 @@ def streamlit_application(df_individual):
                 bordered_metric(col2, "Minutes jouées", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0], 165)
 
             with col3:
-                bordered_metric(col3, "Buts", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0], 165)
+                if poste != 'Gardien':
+                    bordered_metric(col3, "Buts", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0], 165)
+                else:
+                    bordered_metric(col3, "Buts concédés", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts concédés'].values[0]), 165)
 
             with col4:
-                bordered_metric(col4, "Passes décisives", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0], 165)
+                if poste != 'Gardien':
+                    bordered_metric(col4, "Passes décisives", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0], 165)
+                else:
+                    bordered_metric(col4, "xG concédés", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['xG contre'].values[0], 165)
 
         with tab2:
             fig = create_individual_radar(df_individual, joueur, poste)
@@ -1874,6 +1923,10 @@ def streamlit_application(df_individual):
             st.plotly_chart(fig, use_container_width=True)
 
         with tab4:
+            if poste == 'Gardien':
+                st.warning("⚠️ Aucun KPI n'a encore été défini pour ce poste.")
+                st.stop()
+        
             scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
@@ -1894,7 +1947,7 @@ def streamlit_application(df_individual):
                 if os.path.exists(file_path):
                     df_player = pd.read_excel(file_path)
                 else:
-                    st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}")
+                    st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}.")
                     st.stop()
 
                 colonnes = [
