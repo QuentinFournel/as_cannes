@@ -31,9 +31,25 @@ def authenticate_google_drive():
 
 # Lister tous les fichiers présents directement dans un dossier Google Drive (non récursif)
 def list_files_in_folder(service, folder_id):
-    query = f"'{folder_id}' in parents and trashed=false"
-    results = service.files().list(q=query, fields="files(id, name)").execute()
-    return results.get('files', [])
+    files = []
+    page_token = None
+
+    while True:
+        response = service.files().list(
+            q=f"'{folder_id}' in parents and trashed=false",
+            spaces='drive',
+            fields='nextPageToken, files(id, name)',
+            pageToken=page_token,
+            pageSize=1000
+        ).execute()
+
+        files.extend(response.get('files', []))
+        page_token = response.get('nextPageToken', None)
+
+        if page_token is None:
+            break
+
+    return files
 
 # Télécharger un fichier depuis Google Drive et le sauvegarder dans ./data/
 def download_file(service, file_id, file_name, output_folder="data"):
