@@ -1889,7 +1889,7 @@ def streamlit_application(df_individual):
         if team == "Cannes":
             with tab5:
                 joueur = joueur.split(" - ")[0]
-                file_path = f"Données individuelles par matchs/Player stats {joueur}.xlsx"
+                file_path = f"data/Player stats {joueur}.xlsx"
 
                 if os.path.exists(file_path):
                     df_player = pd.read_excel(file_path)
