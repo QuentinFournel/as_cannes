@@ -1653,7 +1653,7 @@ def compute_similarity(df, joueur, poste):
     # 2. Garder uniquement les colonnes d’intérêt
     feature_weights = get_position_feature_weights("Buteur", kpi_by_position, kpi_coefficients_by_position)
     selected_features = list(feature_weights.keys())
-    df_filtré = df_filtré[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration'] + selected_features].dropna()
+    df_filtré = df_filtré[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration'] + selected_features]
 
     # 3. Normalisation des features
     scaler = StandardScaler()
