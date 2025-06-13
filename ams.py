@@ -1675,10 +1675,10 @@ def compute_similarity(df, joueur, poste):
     similarities = 1 - distances
 
     # Création du DataFrame final
-    df_filtré['Similarity Score'] = (similarities * 100).round(2)
-    df_sorted = df_filtré.sort_values(by='Similarity Score', ascending=False)
+    df_filtré['Score de similarité'] = (similarities * 100).round(2)
+    df_sorted = df_filtré.sort_values(by='Score de similarité', ascending=False)
     
-    return df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Similarity Score']].iloc[1:]
+    return df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']].iloc[1:]
 
 def streamlit_application(df_individual):
     with st.sidebar:
