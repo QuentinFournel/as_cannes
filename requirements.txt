@@ -7,6 +7,7 @@ openpyxl
 requests
 lxml
 streamlit_option_menu
+scikit-learn
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
