@@ -11,6 +11,8 @@ import requests
 import unicodedata
 from streamlit_option_menu import option_menu
 import math
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics.pairwise import cosine_distances
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -339,9 +341,9 @@ kpi_by_position = {
     "Buteur": {
         "Finition": {
             "Buts hors penalty par 90": 0.35,
-            "xG par 90": 0.3,
-            "Taux de conversion but/tir": 0.2,
-            "Tirs à la cible, %": 0.15
+            "xG par 90": 0.1,
+            "Taux de conversion but/tir": 0.35,
+            "Tirs à la cible, %": 0.2
         },
         "Apport offensif": {
             "Attaques réussies par 90": 0.3,
@@ -378,9 +380,9 @@ kpi_by_position = {
     "Ailier": {
         "Finition": {
             "Buts hors penalty par 90": 0.35,
-            "xG par 90": 0.3,
-            "Taux de conversion but/tir": 0.2,
-            "Tirs à la cible, %": 0.15
+            "xG par 90": 0.1,
+            "Taux de conversion but/tir": 0.35,
+            "Tirs à la cible, %": 0.2
         },
         "Apport offensif": {
             "Centres par 90": 0.15,
@@ -423,9 +425,9 @@ kpi_by_position = {
     "Milieu offensif": {
         "Finition": {
             "Buts hors penalty par 90": 0.35,
-            "xG par 90": 0.3,
-            "Taux de conversion but/tir": 0.2,
-            "Tirs à la cible, %": 0.15
+            "xG par 90": 0.1,
+            "Taux de conversion but/tir": 0.35,
+            "Tirs à la cible, %": 0.2
         },
         "Apport offensif": {
             "Attaques réussies par 90": 0.3,
@@ -646,9 +648,9 @@ kpi_coefficients_by_position = {
     "Latéral": {
         "Apport offensif": 4,
         "Qualité de passe": 2,
-        "Vision du jeu": 3,
-        "Percussion": 2,
-        "Jeu défensif": 3,
+        "Vision du jeu": 2,
+        "Percussion": 3,
+        "Jeu défensif": 4,
         "Jeu aérien": 1
     },
     "Défenseur central": {
@@ -1621,6 +1623,63 @@ def ajouter_pourcentages(df):
 
     return df
 
+def get_position_feature_weights(position, kpi_structure, kpi_weights):
+    feature_weights = {}
+
+    for kpi_name, features in kpi_structure[position].items():
+        kpi_weight = kpi_weights[position].get(kpi_name, 1)
+        for feature_name, feature_weight in features.items():
+            total_weight = kpi_weight * feature_weight
+            feature_weights[feature_name] = total_weight + feature_weights.get(feature_name, 0)
+    
+    # Normalisation des poids pour que la somme = 1
+    total = sum(feature_weights.values())
+    for key in feature_weights:
+        feature_weights[key] /= total
+    
+    return feature_weights
+
+def compute_similarity(df, joueur, poste):
+    # 1. Filtrage selon le poste et le temps de jeu
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+
+    if len(joueur_infos) > 1:
+        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    # 2. Garder uniquement les colonnes d’intérêt
+    feature_weights = get_position_feature_weights("Buteur", kpi_by_position, kpi_coefficients_by_position)
+    selected_features = list(feature_weights.keys())
+    df_filtré = df_filtré[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration'] + selected_features].dropna()
+
+    # 3. Normalisation des features
+    scaler = StandardScaler()
+    stats_scaled = scaler.fit_transform(df_filtré[selected_features])
+    df_scaled = pd.DataFrame(stats_scaled, columns=selected_features, index=df_filtré['Joueur + Information'])
+
+    # 4. Pondération & distance cosinus
+    weights = np.array([feature_weights[feat] for feat in selected_features])
+    weights = weights / weights.sum()
+
+    # On applique la pondération
+    weighted_features = df_scaled * weights
+
+    # Récupérer le vecteur du joueur de référence
+    ref_vector = weighted_features.loc[joueur].values.reshape(1, -1)
+
+    # Calcul des distances cosinus pondérées
+    distances = cosine_distances(weighted_features, ref_vector).flatten()
+    similarities = 1 - distances
+
+    # Création du DataFrame final
+    df_filtré['Similarity Score'] = (similarities * 100).round(2)
+    df_sorted = df_filtré.sort_values(by='Similarity Score', ascending=False)
+    
+    return df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Similarity Score']].iloc[1:]
+
 def streamlit_application(df_individual):
     with st.sidebar:
         page = option_menu(
@@ -2195,7 +2254,7 @@ def streamlit_application(df_individual):
 
         min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_individual['Âge'].min()), max_value=int(df_individual['Âge'].max()), value=(int(df_individual['Âge'].min()), int(df_individual['Âge'].max())), step=1)
 
-        tab1, tab2 = st.tabs(["Classement", "Recommandation"])
+        tab1, tab2, tab3 = st.tabs(["Classement", "Recommandation", "Similarité"])
 
         with tab1:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
@@ -2224,6 +2283,19 @@ def streamlit_application(df_individual):
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
             st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+
+        with tab3:
+            team = st.selectbox("Sélectionnez une équipe", df_individual['Équipe dans la période sélectionnée'].unique(), index=list(df_individual['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
+            df_filtré = df_individual[df_individual['Équipe dans la période sélectionnée'] == team]
+
+            joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
+            
+            similar_players = compute_similarity(df_individual, joueur, poste)
+            similar_players = similar_players[(similar_players['Âge'] >= min_age) & (similar_players['Âge'] <= max_age)]
+
+            similar_players.insert(0, "Classement", range(1, len(similar_players) + 1))
+
+            st.dataframe(similar_players.head(10), use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
