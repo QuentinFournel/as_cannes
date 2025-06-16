@@ -1763,6 +1763,8 @@ def streamlit_application(df_individual):
             moyenne_anglaise = creation_moyenne_anglaise(df_résultats, type_classement, journée_début, journée_fin)
             classement = classement.merge(moyenne_anglaise, on="Equipes", how="left")
 
+            classement = classement.rename(columns={'Rangs': 'Classement'})
+
             st.dataframe(classement, use_container_width=True, hide_index=True)
 
     elif page == "Vidéo des buts":
@@ -2010,17 +2012,23 @@ def streamlit_application(df_individual):
 
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
 
-        if df_filtré[df_filtré['Joueur + Information'] == joueur]['Poste'].iloc[0] != 'Gardien':
+        poste_du_joueur = df_filtré[df_filtré['Joueur + Information'] == joueur]['Poste'].iloc[0]
+
+        if poste_du_joueur != 'Gardien':
+            postes_disponibles = [k for k in kpi_by_position.keys() if k != "Gardien"]
+            index_poste = postes_disponibles.index(poste_du_joueur) if poste_du_joueur in postes_disponibles else 0
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
-                [k for k in kpi_by_position.keys() if k != "Gardien"],
+                postes_disponibles,
+                index=index_poste,
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
         else:
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
-                "Gardien",
-                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+                ["Gardien"],
+                index=0,
+                help="Le joueur est gardien, la comparaison est donc limitée à ce poste."
             )
         
         if team == "Cannes":
@@ -2239,16 +2247,23 @@ def streamlit_application(df_individual):
 
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
-        if df_filtré_1[df_filtré_1['Joueur + Information'] == joueur_1]['Poste'].iloc[0] != 'Gardien' and df_filtré_2[df_filtré_2['Joueur + Information'] == joueur_2]['Poste'].iloc[0] != 'Gardien':
+        poste_1 = df_filtré_1[df_filtré_1['Joueur + Information'] == joueur_1]['Poste'].iloc[0]
+        poste_2 = df_filtré_2[df_filtré_2['Joueur + Information'] == joueur_2]['Poste'].iloc[0]
+
+        if poste_1 == 'Gardien' or poste_2 == 'Gardien':
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
-                [k for k in kpi_by_position.keys() if k != "Gardien"],
-                help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
+                ["Gardien"],
+                index=0,
+                help="Un des deux joueurs est gardien, la comparaison est donc limitée à ce poste."
             )
         else:
+            postes_disponibles = [k for k in kpi_by_position.keys() if k != "Gardien"]
+            index_poste = postes_disponibles.index(poste_1) if poste_1 in postes_disponibles else 0
             poste = st.selectbox(
                 "Sélectionnez la base de comparaison (poste) pour l'analyse",
-                "Gardien",
+                postes_disponibles,
+                index=index_poste,
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
 
