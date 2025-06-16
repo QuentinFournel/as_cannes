@@ -1651,7 +1651,7 @@ def compute_similarity(df, joueur, poste):
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
     # 2. Garder uniquement les colonnes d’intérêt
-    feature_weights = get_position_feature_weights("Buteur", kpi_by_position, kpi_coefficients_by_position)
+    feature_weights = get_position_feature_weights(poste, kpi_by_position, kpi_coefficients_by_position)
     selected_features = list(feature_weights.keys())
     df_filtré = df_filtré[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration'] + selected_features]
 
@@ -2024,9 +2024,9 @@ def streamlit_application(df_individual):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Joueur similaire", "Match"])
         else:
-            tab1, tab2, tab3, tab4 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI"])
+            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Joueur similaire"])
 
         with tab1:
             col1, col2, col3, col4 = st.columns(4)
@@ -2078,8 +2078,17 @@ def streamlit_application(df_individual):
             with colonnes[-1]:
                 bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
 
+        with tab5:
+            nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
+
+            similar_players = compute_similarity(df_individual, joueur, poste)
+
+            similar_players.insert(0, "Classement", range(1, len(similar_players) + 1))
+
+            st.dataframe(similar_players.head(nombre_joueur), use_container_width=True, hide_index=True)
+
         if team == "Cannes":
-            with tab5:
+            with tab6:
                 joueur = joueur.split(" - ")[0]
                 file_path = f"data/Player stats {joueur}.xlsx"
 
@@ -2254,7 +2263,7 @@ def streamlit_application(df_individual):
 
         min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_individual['Âge'].min()), max_value=int(df_individual['Âge'].max()), value=(int(df_individual['Âge'].min()), int(df_individual['Âge'].max())), step=1)
 
-        tab1, tab2, tab3 = st.tabs(["Classement", "Recommandation", "Similarité"])
+        tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
         with tab1:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
@@ -2283,19 +2292,6 @@ def streamlit_application(df_individual):
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
             st.dataframe(recommended_players, use_container_width=True, hide_index=True)
-
-        with tab3:
-            team = st.selectbox("Sélectionnez une équipe", df_individual['Équipe dans la période sélectionnée'].unique(), index=list(df_individual['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
-            df_filtré = df_individual[df_individual['Équipe dans la période sélectionnée'] == team]
-
-            joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
-            
-            similar_players = compute_similarity(df_individual, joueur, poste)
-            similar_players = similar_players[(similar_players['Âge'] >= min_age) & (similar_players['Âge'] <= max_age)]
-
-            similar_players.insert(0, "Classement", range(1, len(similar_players) + 1))
-
-            st.dataframe(similar_players.head(10), use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
