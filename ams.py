@@ -304,7 +304,7 @@ metrics_by_position = [
             "Précision\npasses": "Passes précises, %",
             "Passes\navant": "Passes avant par 90",
             "Passes\navant réussies": "Passes en avant précises, %",
-            "Passes longues": "Passes en avant précises, %",
+            "Passes\nlongues": "Passes longues par 90",
             "Passes\nlongues réussies": "Longues passes précises, %",
             "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
@@ -325,7 +325,7 @@ metrics_by_position = [
             "Passes\nreçues": "Passes réceptionnées par 90",
             "Passes": "Passes par 90",
             "Passes\nréussies": "Passes précises, %",
-            "Passes longues": "Passes longues par 90",
+            "Passes\nlongues": "Passes longues par 90",
             "Passes\nlongues réussies": "Longues passes précises, %",
             "Buts concédés": "Buts concédés par 90",
             "xG concédés": "xG contre par 90",
@@ -657,9 +657,9 @@ kpi_coefficients_by_position = {
         "Qualité de passe": 2,
         "Vision du jeu": 2,
         "Percussion": 1,
-        "Jeu défensif": 4,
-        "Jeu aérien": 4,
-        "Protection de la surface": 3
+        "Jeu défensif": 5,
+        "Jeu aérien": 5,
+        "Protection de la surface": 4
     },
     "Gardien": {
         "Participe au jeu": 2,
