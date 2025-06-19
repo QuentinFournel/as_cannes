@@ -2064,14 +2064,12 @@ def streamlit_application(all_df):
         df = all_df[sélection_dataframe]
 
         col1, col2 = st.columns(2)
-            
+
         with col1:
-            équipes_disponibles = df['Équipe dans la période sélectionnée'].unique()
-            if "Cannes" in équipes_disponibles:
-                index_default = list(équipes_disponibles).index("Cannes")
-                team = st.selectbox("Sélectionnez une équipe", équipes_disponibles, index=index_default)
+            if sélection_dataframe != "Joueur du Top 5 Européen":
+                team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                team = st.selectbox("Sélectionnez une équipe", équipes_disponibles)
+                team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
             
             df_filtré = df[df['Équipe dans la période sélectionnée'] == team]
 
@@ -2305,23 +2303,19 @@ def streamlit_application(all_df):
         col1, col2 = st.columns(2)
 
         with col1:
-            équipes_disponibles = df['Équipe dans la période sélectionnée'].unique()
-            if "Cannes" in équipes_disponibles:
-                index_team_1 = list(équipes_disponibles).index("Cannes")
-                team_1 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 1', index=index_team_1)
+            if sélection_dataframe != "Joueur du Top 5 Européen":
+                team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                team_1 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 1')
+                team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
 
             df_filtré_1 = df[df['Équipe dans la période sélectionnée'] == team_1]
             joueur_1 = st.selectbox("Sélectionnez un joueur", df_filtré_1['Joueur + Information'].unique(), key='joueur 1')
 
         with col2:
-            équipes_disponibles = df['Équipe dans la période sélectionnée'].unique()
-            if "Cannes" in équipes_disponibles:
-                index_team_2 = list(équipes_disponibles).index("Cannes")
-                team_2 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 2', index=index_team_2)
+            if sélection_dataframe != "Joueur du Top 5 Européen":
+                team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                team_2 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 2')
+                team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
 
             df_filtré_2 = df[df['Équipe dans la période sélectionnée'] == team_2]
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
