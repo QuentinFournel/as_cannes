@@ -2150,6 +2150,8 @@ def streamlit_application(all_df):
             with colonnes[-1]:
                 bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
 
+            st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
+
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du Top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab5:
