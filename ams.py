@@ -1079,17 +1079,45 @@ def collect_individual_data():
     nat2_milieu_offensif = read_with_competition('data/National 2 - Milieu offensif.xlsx')
     nat2_gardien = read_with_competition('data/National 2 - Gardien.xlsx')
 
+    # Français
+    français_ailier = read_with_competition('data/Français - Ailier.xlsx')
+    français_buteur = read_with_competition('data/Français - Buteur.xlsx')
+    français_defenseur_central = read_with_competition('data/Français - Défenseur central.xlsx')
+    français_lateral = read_with_competition('data/Français - Latéral.xlsx')
+    français_milieu = read_with_competition('data/Français - Milieu.xlsx')
+    français_milieu_offensif = read_with_competition('data/Français - Milieu offensif.xlsx')
+    français_gardien = read_with_competition('data/Français - Gardien.xlsx')
+
+    # Top 5 Européen
+    top5europe_ailier = read_with_competition('data/Top 5 Européen - Ailier.xlsx')
+    top5europe_buteur = read_with_competition('data/Top 5 Européen - Buteur.xlsx')
+    top5europe_defenseur_central = read_with_competition('data/Top 5 Européen - Défenseur central.xlsx')
+    top5europe_lateral = read_with_competition('data/Top 5 Européen - Latéral.xlsx')
+    top5europe_milieu = read_with_competition('data/Top 5 Européen - Milieu.xlsx')
+    top5europe_milieu_offensif = read_with_competition('data/Top 5 Européen - Milieu offensif.xlsx')
+    top5europe_gardien = read_with_competition('data/Top 5 Européen - Gardien.xlsx')
+
     # Concaténation de tous les DataFrames dans un giga DataFrame
-    df_individual = pd.concat([
+    df_championnat_de_france = pd.concat([
         ligue1_ailier, ligue1_buteur, ligue1_defenseur_central, ligue1_lateral, ligue1_milieu, ligue1_milieu_offensif, ligue1_gardien,
         ligue2_ailier, ligue2_buteur, ligue2_defenseur_central, ligue2_lateral, ligue2_milieu, ligue2_milieu_offensif, ligue2_gardien,
         nat1_ailier, nat1_buteur, nat1_defenseur_central, nat1_lateral, nat1_milieu, nat1_milieu_offensif, nat1_gardien,
         nat2_ailier, nat2_buteur, nat2_defenseur_central, nat2_lateral, nat2_milieu, nat2_milieu_offensif, nat2_gardien
     ], ignore_index=True)
 
-    df_individual.columns = df_individual.columns.str.strip()
+    df_français = pd.concat([
+        français_ailier, français_buteur, français_defenseur_central, français_lateral, français_milieu, français_milieu_offensif, français_gardien
+    ])
 
-    return df_individual
+    df_top5européen = pd.concat([
+        top5europe_ailier, top5europe_buteur, top5europe_defenseur_central, top5europe_lateral, top5europe_milieu, top5europe_milieu_offensif, top5europe_gardien
+    ])
+
+    df_championnat_de_france.columns = df_championnat_de_france.columns.str.strip()
+    df_français.columns = df_français.columns.str.strip()
+    df_top5européen.columns = df_top5européen.columns.str.strip()
+
+    return df_championnat_de_france, df_français, df_top5européen
 
 def bordered_metric(container, label, value, size, color="#3d3a2a"):
     style = f"""
@@ -1639,9 +1667,9 @@ def get_position_feature_weights(position, kpi_structure, kpi_weights):
     
     return feature_weights
 
-def compute_similarity(df, joueur, poste):
+def compute_similarity(df_avec_joueur, df, joueur, poste):
     # 1. Filtrage selon le poste et le temps de jeu
-    joueur_infos = df[df['Joueur + Information'] == joueur]
+    joueur_infos = df_avec_joueur[df_avec_joueur['Joueur + Information'] == joueur]
 
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
@@ -1679,7 +1707,7 @@ def compute_similarity(df, joueur, poste):
     
     return df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']].iloc[1:]
 
-def streamlit_application(df_individual):
+def streamlit_application(df_championnat_de_france, df_français, df_top5européen):
     with st.sidebar:
         page = option_menu(
             menu_title="",
@@ -2006,8 +2034,8 @@ def streamlit_application(df_individual):
     elif page == "Analyse individuelle":
         st.header("Analyse individuelle")
 
-        team = st.selectbox("Sélectionnez une équipe", df_individual['Équipe dans la période sélectionnée'].unique(), index=list(df_individual['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
-        df_filtré = df_individual[df_individual['Équipe dans la période sélectionnée'] == team]
+        team = st.selectbox("Sélectionnez une équipe", df_championnat_de_france['Équipe dans la période sélectionnée'].unique(), index=list(df_championnat_de_france['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
+        df_filtré = df_championnat_de_france[df_championnat_de_france['Équipe dans la période sélectionnée'] == team]
 
         joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
 
@@ -2039,25 +2067,25 @@ def streamlit_application(df_individual):
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-                bordered_metric(col1, "Matchs joués", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Matchs joués'].values[0], 165)
+                bordered_metric(col1, "Matchs joués", compute_weighted_stats_by_minutes(df_championnat_de_france[df_championnat_de_france['Joueur + Information'] == joueur])['Matchs joués'].values[0], 165)
 
             with col2:
-                bordered_metric(col2, "Minutes jouées", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Minutes jouées'].values[0], 165)
+                bordered_metric(col2, "Minutes jouées", compute_weighted_stats_by_minutes(df_championnat_de_france[df_championnat_de_france['Joueur + Information'] == joueur])['Minutes jouées'].values[0], 165)
 
             with col3:
                 if poste != 'Gardien':
-                    bordered_metric(col3, "Buts", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts'].values[0], 165)
+                    bordered_metric(col3, "Buts", compute_weighted_stats_by_minutes(df_championnat_de_france[df_championnat_de_france['Joueur + Information'] == joueur])['Buts'].values[0], 165)
                 else:
-                    bordered_metric(col3, "Buts concédés", int(compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Buts concédés'].values[0]), 165)
+                    bordered_metric(col3, "Buts concédés", int(compute_weighted_stats_by_minutes(df_championnat_de_france[df_championnat_de_france['Joueur + Information'] == joueur])['Buts concédés'].values[0]), 165)
 
             with col4:
                 if poste != 'Gardien':
-                    bordered_metric(col4, "Passes décisives", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['Passes décisives'].values[0], 165)
+                    bordered_metric(col4, "Passes décisives", compute_weighted_stats_by_minutes(df_championnat_de_france[df_championnat_de_france['Joueur + Information'] == joueur])['Passes décisives'].values[0], 165)
                 else:
-                    bordered_metric(col4, "xG concédés", compute_weighted_stats_by_minutes(df_individual[df_individual['Joueur + Information'] == joueur])['xG contre'].values[0], 165)
+                    bordered_metric(col4, "xG concédés", compute_weighted_stats_by_minutes(df_championnat_de_france[df_championnat_de_france['Joueur + Information'] == joueur])['xG contre'].values[0], 165)
 
         with tab2:
-            fig = create_individual_radar(df_individual, joueur, poste)
+            fig = create_individual_radar(df_championnat_de_france, joueur, poste)
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
@@ -2069,11 +2097,11 @@ def streamlit_application(df_individual):
             x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
             description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
 
-            fig = plot_player_metrics(df_individual, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
+            fig = plot_player_metrics(df_championnat_de_france, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
         with tab4:
-            scores_df = calcul_scores_par_kpi(df_individual, joueur, poste)
+            scores_df = calcul_scores_par_kpi(df_championnat_de_france, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
             colonnes = st.columns(len(kpis_poste) + 1)
@@ -2086,9 +2114,18 @@ def streamlit_application(df_individual):
                 bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
 
         with tab5:
+            dataframe_sélectionné = st.selectbox("Sélectionnez avec quelles bases de joueurs vous souhaitez comparer le joueur", ['Joueur du Championnat de France', 'Joueur français', 'Joueur du Top 5 Européen'])
+
+            if dataframe_sélectionné == 'Joueur du Championnat de France':
+                df = df_championnat_de_france
+            elif dataframe_sélectionné == 'Joueur français':
+                df = df_français
+            elif dataframe_sélectionné == 'Joueur du Top 5 Européen':
+                df = df_top5européen
+
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
-            similar_players = compute_similarity(df_individual, joueur, poste)
+            similar_players = compute_similarity(df_championnat_de_france, df, joueur, poste)
 
             similar_players.insert(0, "Classement", range(1, len(similar_players) + 1))
 
@@ -2235,14 +2272,14 @@ def streamlit_application(df_individual):
         col1, col2 = st.columns(2)
 
         with col1:
-            team_1 = st.selectbox("Sélectionnez une équipe", df_individual['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df_individual['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
-            df_filtré_1 = df_individual[df_individual['Équipe dans la période sélectionnée'] == team_1]
+            team_1 = st.selectbox("Sélectionnez une équipe", df_championnat_de_france['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df_championnat_de_france['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
+            df_filtré_1 = df_championnat_de_france[df_championnat_de_france['Équipe dans la période sélectionnée'] == team_1]
 
             joueur_1 = st.selectbox("Sélectionnez un joueur", df_filtré_1['Joueur + Information'].unique(), key='joueur 1')
 
         with col2:
-            team_2 = st.selectbox("Sélectionnez une équipe", df_individual['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df_individual['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
-            df_filtré_2 = df_individual[df_individual['Équipe dans la période sélectionnée'] == team_2]
+            team_2 = st.selectbox("Sélectionnez une équipe", df_championnat_de_france['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df_championnat_de_france['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
+            df_filtré_2 = df_championnat_de_france[df_championnat_de_france['Équipe dans la période sélectionnée'] == team_2]
 
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
@@ -2267,7 +2304,7 @@ def streamlit_application(df_individual):
             )
 
         if st.button("Comparer"):
-            fig = create_comparison_radar(df_individual, joueur_1, joueur_2, poste)
+            fig = create_comparison_radar(df_championnat_de_france, joueur_1, joueur_2, poste)
             st.pyplot(fig, use_container_width=True)
             
     elif page == "Scouting":
@@ -2275,14 +2312,14 @@ def streamlit_application(df_individual):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
-        min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_individual['Âge'].min()), max_value=int(df_individual['Âge'].max()), value=(int(df_individual['Âge'].min()), int(df_individual['Âge'].max())), step=1)
+        min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df_championnat_de_france['Âge'].min()), max_value=int(df_championnat_de_france['Âge'].max()), value=(int(df_championnat_de_france['Âge'].min()), int(df_championnat_de_france['Âge'].max())), step=1)
 
         tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
         with tab1:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
-            top_players = search_top_players(df_individual, poste)
+            top_players = search_top_players(df_championnat_de_france, poste)
             top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
@@ -2291,7 +2328,7 @@ def streamlit_application(df_individual):
             st.dataframe(top_players, use_container_width=True, hide_index=True)
 
         with tab2:
-            colonnes_filtrées = [col for col in df_individual.columns if 'par 90' in col.lower() or '%' in col]
+            colonnes_filtrées = [col for col in df_championnat_de_france.columns if 'par 90' in col.lower() or '%' in col]
             
             métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
@@ -2299,7 +2336,7 @@ def streamlit_application(df_individual):
             for métrique in métriques_selectionnées:
                 thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
-            recommended_players = search_recommended_players(df_individual, poste, thresholds)
+            recommended_players = search_recommended_players(df_championnat_de_france, poste, thresholds)
             recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
@@ -2358,5 +2395,5 @@ if __name__ == '__main__':
                     st.error("Nom d'utilisateur ou mot de passe incorrect")
 
     if st.session_state.authenticated:
-        df_individual = collect_individual_data()
-        streamlit_application(df_individual)
+        df_championnat_de_france, df_français, df_top5européen = collect_individual_data()
+        streamlit_application(df_championnat_de_france, df_français, df_top5européen)
