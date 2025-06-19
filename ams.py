@@ -1118,9 +1118,9 @@ def collect_individual_data():
     df_top5européen.columns = df_top5européen.columns.str.strip()
 
     all_df = {
-        'Joueur du Championnat de France': df_championnat_de_france,
+        'Joueur du championnat de France': df_championnat_de_france,
         'Joueur français': df_français,
-        'Joueur du Top 5 Européen': df_top5européen
+        'Joueur du top 5 européen': df_top5européen
     }
 
     return all_df
@@ -2066,7 +2066,7 @@ def streamlit_application(all_df):
         col1, col2 = st.columns(2)
 
         with col1:
-            if sélection_dataframe != "Joueur du Top 5 Européen":
+            if sélection_dataframe != "Joueur du top 5 européen":
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
@@ -2152,7 +2152,7 @@ def streamlit_application(all_df):
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
-            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du Top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
+            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab5:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
@@ -2307,7 +2307,7 @@ def streamlit_application(all_df):
         col1, col2 = st.columns(2)
 
         with col1:
-            if sélection_dataframe != "Joueur du Top 5 Européen":
+            if sélection_dataframe != "Joueur du top 5 européen":
                 team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
                 team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
@@ -2316,7 +2316,7 @@ def streamlit_application(all_df):
             joueur_1 = st.selectbox("Sélectionnez un joueur", df_filtré_1['Joueur + Information'].unique(), key='joueur 1')
 
         with col2:
-            if sélection_dataframe != "Joueur du Top 5 Européen":
+            if sélection_dataframe != "Joueur du top 5 européen":
                 team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
                 team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
@@ -2371,7 +2371,7 @@ def streamlit_application(all_df):
 
             st.dataframe(top_players, use_container_width=True, hide_index=True)
 
-            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du Top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
+            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab2:
             colonnes_filtrées = [col for col in df.columns if 'par 90' in col.lower() or '%' in col]
