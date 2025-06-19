@@ -2060,13 +2060,19 @@ def streamlit_application(all_df):
     elif page == "Analyse individuelle":
         st.header("Analyse individuelle")
 
-        sélection_dataframe = st.selectbox("Sélectionnez avec quelles bases de joueurs vous souhaitez comparer le joueur", all_df.keys())
+        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", all_df.keys())
         df = all_df[sélection_dataframe]
 
         col1, col2 = st.columns(2)
             
         with col1:
-            team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
+            équipes_disponibles = df['Équipe dans la période sélectionnée'].unique()
+            if "Cannes" in équipes_disponibles:
+                index_default = list(équipes_disponibles).index("Cannes")
+                team = st.selectbox("Sélectionnez une équipe", équipes_disponibles, index=index_default)
+            else:
+                team = st.selectbox("Sélectionnez une équipe", équipes_disponibles)
+            
             df_filtré = df[df['Équipe dans la période sélectionnée'] == team]
 
         with col2:
@@ -2293,21 +2299,31 @@ def streamlit_application(all_df):
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
 
-        sélection_dataframe = st.selectbox("Sélectionnez avec quelles bases de joueurs vous souhaitez comparer le joueur", all_df.keys())
+        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", all_df.keys())
         df = all_df[sélection_dataframe]
 
         col1, col2 = st.columns(2)
 
         with col1:
-            team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
-            df_filtré_1 = df[df['Équipe dans la période sélectionnée'] == team_1]
+            équipes_disponibles = df['Équipe dans la période sélectionnée'].unique()
+            if "Cannes" in équipes_disponibles:
+                index_team_1 = list(équipes_disponibles).index("Cannes")
+                team_1 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 1', index=index_team_1)
+            else:
+                team_1 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 1')
 
+            df_filtré_1 = df[df['Équipe dans la période sélectionnée'] == team_1]
             joueur_1 = st.selectbox("Sélectionnez un joueur", df_filtré_1['Joueur + Information'].unique(), key='joueur 1')
 
         with col2:
-            team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
-            df_filtré_2 = df[df['Équipe dans la période sélectionnée'] == team_2]
+            équipes_disponibles = df['Équipe dans la période sélectionnée'].unique()
+            if "Cannes" in équipes_disponibles:
+                index_team_2 = list(équipes_disponibles).index("Cannes")
+                team_2 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 2', index=index_team_2)
+            else:
+                team_2 = st.selectbox("Sélectionnez une équipe", équipes_disponibles, key='team 2')
 
+            df_filtré_2 = df[df['Équipe dans la période sélectionnée'] == team_2]
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
 
         poste_1 = df_filtré_1[df_filtré_1['Joueur + Information'] == joueur_1]['Poste'].iloc[0]
@@ -2337,7 +2353,7 @@ def streamlit_application(all_df):
     elif page == "Scouting":
         st.header("Scouting")
 
-        sélection_dataframe = st.selectbox("Sélectionnez avec quelles bases de joueurs vous souhaitez comparer le joueur", all_df.keys())
+        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", all_df.keys())
         df = all_df[sélection_dataframe]
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
