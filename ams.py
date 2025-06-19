@@ -1705,7 +1705,15 @@ def compute_similarity(df_avec_joueur, df, joueur, poste):
     df_filtré['Score de similarité'] = ((similarities + 1) / 2 * 100).round(2)
     df_sorted = df_filtré.sort_values(by='Score de similarité', ascending=False)
     
-    return df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']].iloc[1:]
+    df_sorted = df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']]
+
+    # Extraire le nom à comparer depuis ta variable 'joueur'
+    nom_du_joueur = joueur.strip().split(' - ')[0]
+
+    # Supprimer les lignes dans df_sorted où le nom correspond
+    df_sorted = df_sorted[~df_sorted['Joueur + Information'].str.startswith(nom_du_joueur)]
+
+    return df_sorted
 
 def streamlit_application(df_championnat_de_france, df_français, df_top5européen):
     with st.sidebar:
