@@ -1707,10 +1707,8 @@ def compute_similarity(df_avec_joueur, df, joueur, poste):
     
     df_sorted = df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']]
 
-    # Extraire le nom à comparer depuis ta variable 'joueur'
+    # Supprimer les lignes correspondantes au joueur
     nom_du_joueur = joueur.strip().split(' - ')[0]
-
-    # Supprimer les lignes dans df_sorted où le nom correspond
     df_sorted = df_sorted[~df_sorted['Joueur + Information'].str.startswith(nom_du_joueur)]
 
     return df_sorted
