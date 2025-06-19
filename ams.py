@@ -2150,6 +2150,8 @@ def streamlit_application(all_df):
             with colonnes[-1]:
                 bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
 
+            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du Top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
+
         with tab5:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
@@ -2366,6 +2368,8 @@ def streamlit_application(all_df):
             top_players.insert(0, "Classement", range(1, len(top_players) + 1))
 
             st.dataframe(top_players, use_container_width=True, hide_index=True)
+
+            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du Top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab2:
             colonnes_filtrées = [col for col in df.columns if 'par 90' in col.lower() or '%' in col]
