@@ -713,6 +713,7 @@ kpi_coefficients_by_position = {
 metrics_x_y = {
     "Finition": {
         "metrics": ["xG par 90", "Buts par 90"],
+        "names": ["xG par 90", "Buts par 90"],
         "descriptions": [
             "Se procure peu d'occasions<br>mais marque beaucoup",
             "Se procure beaucoup d'occasions<br>et marque beaucoup",
@@ -721,7 +722,8 @@ metrics_x_y = {
         ]
     },
     "Apport par la passe": {
-        "metrics": ["Passes judicieuses par 90", "Passes intelligentes précises, %"],
+        "metrics": ["Passes judicieuses / Passes", "Passes intelligentes précises, %"],
+        "names": ["Passes judicieuses / Passes", "Passes judicieuses réussies, %"],
         "descriptions": [
             "Tente peu de passes<br>judicieuses mais<br>en réussit beaucoup",
             "Tente beaucoup de passes<br>judicieuses et<br>en réussit beaucoup",
@@ -731,6 +733,7 @@ metrics_x_y = {
     },
     "Progression du ballon": {
         "metrics": ["Courses progressives par 90", "Passes progressives par 90"],
+        "names": ["Courses progressives par 90", "Passes progressives par 90"],
         "descriptions": [
             "Progresse peu par la course<br>mais beaucoup par la passe",
             "Progresse beaucoup par la course<br>et par la passe",
@@ -740,6 +743,7 @@ metrics_x_y = {
     },
     "Dribble": {
         "metrics": ["Dribbles par 90", "Dribbles réussis, %"],
+        "names": ["Dribbles par 90", "Dribbles réussis, %"],
         "descriptions": [
             "Dribble peu<br>mais réussit beaucoup",
             "Dribble beaucoup<br>et réussit beaucoup",
@@ -749,6 +753,7 @@ metrics_x_y = {
     },
     "Qualité de centre": {
         "metrics": ["Centres par 90", "Сentres précises, %"],
+        "names": ["Centres par 90", "Centres réussis, %"],
         "descriptions": [
             "Centre peu<br>mais en réussit beaucoup",
             "Centre beaucoup<br>et en réussit beaucoup",
@@ -758,6 +763,7 @@ metrics_x_y = {
     },
     "Apport défensif/offensif": {
         "metrics": ["Actions défensives réussies par 90", "Attaques réussies par 90"],
+        "names": ["Actions défensives réussies par 90", "Attaques réussies par 90"],
         "descriptions": [
             "Apporte peu défensivement<br>mais beaucoup offensivement",
             "Apporte beaucoup défensivement<br>et offensivement",
@@ -767,6 +773,7 @@ metrics_x_y = {
     },
     "Duel": {
         "metrics": ["Duels par 90", "Duels gagnés, %"],
+        "names": ["Duels par 90", "Duels gagnés, %"],
         "descriptions": [
             "Joue peu de duels<br>mais en remporte beaucoup",
             "Joue beaucoup de duels<br>et en remporte beaucoup",
@@ -774,8 +781,19 @@ metrics_x_y = {
             "Joue beaucoup de duels<br>mais en remporte peu"
         ]
     },
+    "Duel offensif": {
+        "metrics": ["Duels offensifs par 90", "Duels de marquage, %"],
+        "names": ["Duels offensifs par 90", "Duels offensifs gagnés, %"],
+        "descriptions": [
+            "Joue peu de duels offensifs<br>mais en remporte beaucoup",
+            "Joue beaucoup de duels offensifs<br>et en remporte beaucoup",
+            "Joue peu de duels offensifs<br>et en remporte peu",
+            "Joue beaucoup de duels offensifs<br>mais en remporte peu"
+        ]
+    },
     "Duel défensif": {
         "metrics": ["Duels défensifs par 90", "Duels défensifs gagnés, %"],
+        "names": ["Duels défensifs par 90", "Duels défensifs gagnés, %"],
         "descriptions": [
             "Joue peu de duels défensifs<br>mais en remporte beaucoup",
             "Joue beaucoup de duels défensifs<br>et en remporte beaucoup",
@@ -785,6 +803,7 @@ metrics_x_y = {
     },
     "Duel aérien": {
         "metrics": ["Duels aériens par 90", "Duels aériens gagnés, %"],
+        "names": ["Duels aériens par 90", "Duels aériens gagnés, %"],
         "descriptions": [
             "Joue peu de duels aériens<br>mais en remporte beaucoup",
             "Joue beaucoup de duels aériens<br>et en remporte beaucoup",
@@ -794,6 +813,7 @@ metrics_x_y = {
     },
     "Buts évités": {
         "metrics": ["xG contre par 90", "Buts concédés par 90"],
+        "names": ["xG contre par 90", "Buts concédés par 90"],
         "descriptions": [
             "Concède peu d'occasions<br>mais encaise beaucoup de buts",
             "Concède beaucoup d'occasions<br>et encaise beaucoup de buts",
@@ -1497,7 +1517,7 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
 
     return fig
 
-def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4):
+def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4):
     joueur_infos = df[df['Joueur + Information'] == joueur]
 
     if len(joueur_infos) > 1:
@@ -1555,8 +1575,8 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, de
         plot_bgcolor="#f4f3ed",
         annotations=annotations,
         showlegend=False,
-        xaxis_title=x_metric,
-        yaxis_title=y_metric,
+        xaxis_title=nom_x_metric,
+        yaxis_title=nom_y_metric,
         width=1000,
         height=600,
         xaxis=dict(
@@ -2192,9 +2212,10 @@ def streamlit_application(all_df):
                 metrics_label = "Buts évités"
 
             x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
+            nom_x_metric, nom_y_metric = metrics_x_y[metrics_label]["names"]
             description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
 
-            fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, description_1, description_2, description_3, description_4)
+            fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
         with tab4:
