@@ -324,8 +324,8 @@ metrics_by_position = [
         "metrics": {
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes avant\n/ Passes": "Passes avant / Passes",
-            "Passes\navant réussies": "Passes en avant précises, %",
+            "Passes courtes\n/ Passes": "Passes courtes / Passes",
+            "Passes\courtes réussies": "Passes courtes / moyennes précises, %",
             "Passes longues\n/ Passes": "Passes longues / Passes",
             "Passes\nlongues réussies": "Longues passes précises, %",
             "Buts\nconcédés": "Buts concédés par 90",
@@ -343,250 +343,285 @@ metrics_by_position = [
 kpi_by_position = {
     "Buteur": {
         "Finition": {
-            "Buts hors penalty par 90": 0.35,
-            "xG par 90": 0.1,
-            "Taux de conversion but/tir": 0.35,
-            "Tirs à la cible, %": 0.2
+            "Buts - xG": 0.75,
+            "Tirs à la cible, %": 0.15,
+            "Taux de conversion but/tir": 0.1
         },
         "Apport offensif": {
-            "Attaques réussies par 90": 0.3,
-            "xA par 90": 0.4,
-            "Touches de balle dans la surface de réparation sur 90": 0.3
+            "Attaques réussies par 90": 0.5,
+            "Touches de balle dans la surface de réparation sur 90": 0.3,
+            "Duels offensifs par 90": 0.1,
+            "Duels de marquage, %": 0.1
         },
         "Qualité de passe": {
-            "Passes précises, %": 0.3,
-            "Longues passes précises, %": 0.2,
-            "Passes en avant précises, %":0.4,
-            "Passes en profondeur précises, %": 0.1
+            "Passes intelligentes précises, %": 0.3,
+            "Longues passes précises, %": 0.25,
+            "Passes courtes / moyennes précises, %": 0.15,
+            "Passes vers la surface de réparation précises, %": 0.1,
+            "Passes dans tiers adverse précises, %": 0.08,
+            "Passes progressives précises, %": 0.06,
+            "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "Passes pénétrantes par 90": 0.15,
-            "Passes progressives par 90": 0.15,
-            "Passes dans tiers adverse par 90": 0.15,
-            "Passes vers la surface de réparation par 90": 0.2,
-            "Passes avant par 90": 0.05,
-            "Passes judicieuses par 90": 0.3
+            "xA / Passes": 0.25,
+            "Passes clés / Passes": 0.2,
+            "Passes avant tir / Passes": 0.15,
+            "Passes judicieuses / Passes": 0.15,
+            "Passes dans la zone dangereuse / Passes": 0.1,
+            "Passes vers la surface / Passes": 0.05,
+            "Passes dans le tiers adverse / Passes": 0.04,
+            "Passes progressives / Passes": 0.03,
+            "Passes en profondeur / Passes": 0.03
         },
         "Percussion": {
-            "Dribbles par 90": 0.1,
-            "Dribbles réussis, %": 0.1,
-            "Duels offensifs par 90": 0.1,
-            "Courses progressives par 90": 0.35,
-            "Accélérations par 90": 0.35
+            "Courses progressives par 90": 0.3,
+            "Accélérations par 90": 0.3,
+            "Dribbles par 90": 0.2,
+            "Dribbles réussis, %": 0.2
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.4,
-            "Duels aériens gagnés, %": 0.6
+            "Duels aériens par 90": 0.5,
+            "Duels aériens gagnés, %": 0.5
         }
     },
 
     "Ailier": {
         "Finition": {
-            "Buts hors penalty par 90": 0.35,
-            "xG par 90": 0.1,
-            "Taux de conversion but/tir": 0.35,
-            "Tirs à la cible, %": 0.2
+            "Buts - xG": 0.75,
+            "Tirs à la cible, %": 0.15,
+            "Taux de conversion but/tir": 0.1
         },
         "Apport offensif": {
-            "Centres par 90": 0.15,
-            "Сentres précises, %": 0.15,
-            "Attaques réussies par 90": 0.2,
-            "xA par 90": 0.3,
-            "Touches de balle dans la surface de réparation sur 90": 0.2
+            "Attaques réussies par 90": 0.4,
+            "Centres par 90": 0.3,
+            "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Duels offensifs par 90": 0.05,
+            "Duels de marquage, %": 0.05
         },
         "Qualité de passe": {
-            "Passes précises, %": 0.3,
-            "Longues passes précises, %": 0.2,
-            "Passes en avant précises, %":0.4,
-            "Passes en profondeur précises, %": 0.1
+            "Сentres précises, %": 0.3,
+            "Longues passes précises, %": 0.25,
+            "Passes courtes / moyennes précises, %": 0.15,
+            "Passes intelligentes précises, %": 0.15,
+            "Passes vers la surface de réparation précises, %": 0.05,
+            "Passes dans tiers adverse précises, %": 0.04,
+            "Passes progressives précises, %": 0.03,
+            "Passes en profondeur précises, %": 0.03
         },
         "Vision du jeu": {
-            "Passes pénétrantes par 90": 0.15,
-            "Passes progressives par 90": 0.15,
-            "Passes dans tiers adverse par 90": 0.15,
-            "Passes vers la surface de réparation par 90": 0.2,
-            "Passes avant par 90": 0.05,
-            "Passes judicieuses par 90": 0.3
+            "xA / Passes": 0.25,
+            "Passes clés / Passes": 0.2,
+            "Passes avant tir / Passes": 0.15,
+            "Passes judicieuses / Passes": 0.15,
+            "Passes dans la zone dangereuse / Passes": 0.1,
+            "Passes vers la surface / Passes": 0.05,
+            "Passes dans le tiers adverse / Passes": 0.04,
+            "Passes progressives / Passes": 0.03,
+            "Passes en profondeur / Passes": 0.03
         },
         "Percussion": {
-            "Dribbles par 90": 0.1,
-            "Dribbles réussis, %": 0.1,
-            "Duels offensifs par 90": 0.1,
-            "Courses progressives par 90": 0.35,
-            "Accélérations par 90": 0.35
+            "Courses progressives par 90": 0.3,
+            "Accélérations par 90": 0.3,
+            "Dribbles par 90": 0.2,
+            "Dribbles réussis, %": 0.2
         },
         "Jeu défensif": {
-            "Duels défensifs par 90": 0.2,
-            "Duels défensifs gagnés, %": 0.2,
-            "Interceptions par 90": 0.15,
-            "Tacles glissés par 90": 0.05,
-            "Tirs contrés par 90": 0.05,
-            "Actions défensives réussies par 90": 0.35
+            "Actions défensives réussies par 90": 0.35,
+            "Interceptions PAdj": 0.25,
+            "Duels défensifs par 90": 0.15,
+            "Duels défensifs gagnés, %": 0.15,
+            "Tacles glissés PAdj": 0.05,
+            "Tirs contrés par 90": 0.05
         }
     },
 
     "Milieu offensif": {
         "Finition": {
-            "Buts hors penalty par 90": 0.35,
-            "xG par 90": 0.1,
-            "Taux de conversion but/tir": 0.35,
-            "Tirs à la cible, %": 0.2
+            "Buts - xG": 0.75,
+            "Tirs à la cible, %": 0.15,
+            "Taux de conversion but/tir": 0.1
         },
         "Apport offensif": {
-            "Attaques réussies par 90": 0.3,
-            "xA par 90": 0.4,
-            "Touches de balle dans la surface de réparation sur 90": 0.3
+            "Attaques réussies par 90": 0.5,
+            "Touches de balle dans la surface de réparation sur 90": 0.3,
+            "Duels offensifs par 90": 0.1,
+            "Duels de marquage, %": 0.1
         },
         "Qualité de passe": {
-            "Passes précises, %": 0.3,
-            "Longues passes précises, %": 0.2,
-            "Passes en avant précises, %":0.4,
-            "Passes en profondeur précises, %": 0.1
+            "Passes intelligentes précises, %": 0.3,
+            "Longues passes précises, %": 0.25,
+            "Passes courtes / moyennes précises, %": 0.15,
+            "Passes vers la surface de réparation précises, %": 0.1,
+            "Passes dans tiers adverse précises, %": 0.08,
+            "Passes progressives précises, %": 0.06,
+            "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "Passes pénétrantes par 90": 0.15,
-            "Passes progressives par 90": 0.15,
-            "Passes dans tiers adverse par 90": 0.15,
-            "Passes vers la surface de réparation par 90": 0.2,
-            "Passes avant par 90": 0.05,
-            "Passes judicieuses par 90": 0.3
+            "xA / Passes": 0.25,
+            "Passes clés / Passes": 0.2,
+            "Passes avant tir / Passes": 0.15,
+            "Passes judicieuses / Passes": 0.15,
+            "Passes dans la zone dangereuse / Passes": 0.1,
+            "Passes vers la surface / Passes": 0.05,
+            "Passes dans le tiers adverse / Passes": 0.04,
+            "Passes progressives / Passes": 0.03,
+            "Passes en profondeur / Passes": 0.03
         },
         "Percussion": {
-            "Dribbles par 90": 0.1,
-            "Dribbles réussis, %": 0.1,
-            "Duels offensifs par 90": 0.1,
-            "Courses progressives par 90": 0.35,
-            "Accélérations par 90": 0.35
+            "Courses progressives par 90": 0.3,
+            "Accélérations par 90": 0.3,
+            "Dribbles par 90": 0.2,
+            "Dribbles réussis, %": 0.2
         },
         "Jeu défensif": {
-            "Duels défensifs par 90": 0.2,
-            "Duels défensifs gagnés, %": 0.2,
-            "Interceptions par 90": 0.15,
-            "Tacles glissés par 90": 0.05,
-            "Tirs contrés par 90": 0.05,
-            "Actions défensives réussies par 90": 0.35
+            "Actions défensives réussies par 90": 0.35,
+            "Interceptions PAdj": 0.25,
+            "Duels défensifs par 90": 0.15,
+            "Duels défensifs gagnés, %": 0.15,
+            "Tacles glissés PAdj": 0.05,
+            "Tirs contrés par 90": 0.05
         }
     },
 
     "Milieu": {
         "Apport offensif": {
-            "Attaques réussies par 90": 0.3,
-            "xA par 90": 0.4,
-            "Touches de balle dans la surface de réparation sur 90": 0.3
+            "Attaques réussies par 90": 0.5,
+            "Touches de balle dans la surface de réparation sur 90": 0.3,
+            "Duels offensifs par 90": 0.1,
+            "Duels de marquage, %": 0.1
         },
         "Qualité de passe": {
-            "Passes précises, %": 0.3,
-            "Longues passes précises, %": 0.2,
-            "Passes en avant précises, %":0.4,
-            "Passes en profondeur précises, %": 0.1
+            "Passes intelligentes précises, %": 0.3,
+            "Longues passes précises, %": 0.25,
+            "Passes courtes / moyennes précises, %": 0.15,
+            "Passes vers la surface de réparation précises, %": 0.1,
+            "Passes dans tiers adverse précises, %": 0.08,
+            "Passes progressives précises, %": 0.06,
+            "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "Passes pénétrantes par 90": 0.15,
-            "Passes progressives par 90": 0.15,
-            "Passes dans tiers adverse par 90": 0.15,
-            "Passes vers la surface de réparation par 90": 0.2,
-            "Passes avant par 90": 0.05,
-            "Passes judicieuses par 90": 0.3
+            "xA / Passes": 0.25,
+            "Passes clés / Passes": 0.2,
+            "Passes avant tir / Passes": 0.15,
+            "Passes judicieuses / Passes": 0.15,
+            "Passes dans la zone dangereuse / Passes": 0.1,
+            "Passes vers la surface / Passes": 0.05,
+            "Passes dans le tiers adverse / Passes": 0.04,
+            "Passes progressives / Passes": 0.03,
+            "Passes en profondeur / Passes": 0.03
         },
         "Percussion": {
-            "Dribbles par 90": 0.1,
-            "Dribbles réussis, %": 0.1,
-            "Duels offensifs par 90": 0.1,
-            "Courses progressives par 90": 0.35,
-            "Accélérations par 90": 0.35
+            "Courses progressives par 90": 0.3,
+            "Accélérations par 90": 0.3,
+            "Dribbles par 90": 0.2,
+            "Dribbles réussis, %": 0.2
         },
         "Jeu défensif": {
-            "Duels défensifs par 90": 0.2,
-            "Duels défensifs gagnés, %": 0.2,
-            "Interceptions par 90": 0.15,
-            "Tacles glissés par 90": 0.05,
-            "Tirs contrés par 90": 0.05,
-            "Actions défensives réussies par 90": 0.35
+            "Actions défensives réussies par 90": 0.35,
+            "Interceptions PAdj": 0.25,
+            "Duels défensifs par 90": 0.15,
+            "Duels défensifs gagnés, %": 0.15,
+            "Tacles glissés PAdj": 0.05,
+            "Tirs contrés par 90": 0.05
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.4,
-            "Duels aériens gagnés, %": 0.6
+            "Duels aériens par 90": 0.5,
+            "Duels aériens gagnés, %": 0.5
         }
     },
 
     "Latéral": {
         "Apport offensif": {
-            "Centres par 90": 0.15,
-            "Сentres précises, %": 0.15,
-            "Attaques réussies par 90": 0.2,
-            "xA par 90": 0.3,
-            "Touches de balle dans la surface de réparation sur 90": 0.2
+            "Attaques réussies par 90": 0.4,
+            "Centres par 90": 0.3,
+            "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Duels offensifs par 90": 0.05,
+            "Duels de marquage, %": 0.05
         },
         "Qualité de passe": {
-            "Passes précises, %": 0.3,
-            "Longues passes précises, %": 0.2,
-            "Passes en avant précises, %":0.4,
-            "Passes en profondeur précises, %": 0.1
+            "Сentres précises, %": 0.3,
+            "Longues passes précises, %": 0.25,
+            "Passes courtes / moyennes précises, %": 0.15,
+            "Passes intelligentes précises, %": 0.15,
+            "Passes vers la surface de réparation précises, %": 0.05,
+            "Passes dans tiers adverse précises, %": 0.04,
+            "Passes progressives précises, %": 0.03,
+            "Passes en profondeur précises, %": 0.03
         },
         "Vision du jeu": {
-            "Passes pénétrantes par 90": 0.15,
-            "Passes progressives par 90": 0.15,
-            "Passes dans tiers adverse par 90": 0.15,
-            "Passes vers la surface de réparation par 90": 0.2,
-            "Passes avant par 90": 0.05,
-            "Passes judicieuses par 90": 0.3
+            "xA / Passes": 0.25,
+            "Passes clés / Passes": 0.2,
+            "Passes avant tir / Passes": 0.15,
+            "Passes judicieuses / Passes": 0.15,
+            "Passes dans la zone dangereuse / Passes": 0.1,
+            "Passes vers la surface / Passes": 0.05,
+            "Passes dans le tiers adverse / Passes": 0.04,
+            "Passes progressives / Passes": 0.03,
+            "Passes en profondeur / Passes": 0.03
         },
         "Percussion": {
-            "Dribbles par 90": 0.1,
-            "Dribbles réussis, %": 0.1,
-            "Duels offensifs par 90": 0.1,
-            "Courses progressives par 90": 0.35,
-            "Accélérations par 90": 0.35
+            "Courses progressives par 90": 0.3,
+            "Accélérations par 90": 0.3,
+            "Dribbles par 90": 0.2,
+            "Dribbles réussis, %": 0.2
         },
         "Jeu défensif": {
-            "Duels défensifs par 90": 0.2,
-            "Duels défensifs gagnés, %": 0.2,
-            "Interceptions par 90": 0.15,
-            "Tacles glissés par 90": 0.05,
-            "Tirs contrés par 90": 0.05,
-            "Actions défensives réussies par 90": 0.35
+            "Actions défensives réussies par 90": 0.35,
+            "Interceptions PAdj": 0.25,
+            "Duels défensifs par 90": 0.15,
+            "Duels défensifs gagnés, %": 0.15,
+            "Tacles glissés PAdj": 0.05,
+            "Tirs contrés par 90": 0.05
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.4,
-            "Duels aériens gagnés, %": 0.6
+            "Duels aériens par 90": 0.5,
+            "Duels aériens gagnés, %": 0.5
         }
     },
 
     "Défenseur central": {
+        "Discipline": {
+            "Fautes par 90": 0.5,
+            "Cartons jaunes par 90": 0.3,
+            "Cartons rouges par 90": 0.2
+        },
         "Qualité de passe": {
-            "Passes précises, %": 0.3,
-            "Longues passes précises, %": 0.2,
-            "Passes en avant précises, %":0.4,
-            "Passes en profondeur précises, %": 0.1
+            "Passes intelligentes précises, %": 0.3,
+            "Longues passes précises, %": 0.25,
+            "Passes courtes / moyennes précises, %": 0.15,
+            "Passes vers la surface de réparation précises, %": 0.1,
+            "Passes dans tiers adverse précises, %": 0.08,
+            "Passes progressives précises, %": 0.06,
+            "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "Passes pénétrantes par 90": 0.15,
-            "Passes progressives par 90": 0.15,
-            "Passes dans tiers adverse par 90": 0.15,
-            "Passes vers la surface de réparation par 90": 0.2,
-            "Passes avant par 90": 0.05,
-            "Passes judicieuses par 90": 0.3
+            "xA / Passes": 0.25,
+            "Passes clés / Passes": 0.2,
+            "Passes avant tir / Passes": 0.15,
+            "Passes judicieuses / Passes": 0.15,
+            "Passes dans la zone dangereuse / Passes": 0.1,
+            "Passes vers la surface / Passes": 0.05,
+            "Passes dans le tiers adverse / Passes": 0.04,
+            "Passes progressives / Passes": 0.03,
+            "Passes en profondeur / Passes": 0.03
         },
         "Percussion": {
-            "Dribbles par 90": 0.1,
-            "Dribbles réussis, %": 0.1,
-            "Duels offensifs par 90": 0.1,
-            "Courses progressives par 90": 0.35,
-            "Accélérations par 90": 0.35
+            "Courses progressives par 90": 0.3,
+            "Accélérations par 90": 0.3,
+            "Dribbles par 90": 0.2,
+            "Dribbles réussis, %": 0.2
         },
         "Jeu défensif": {
-            "Duels défensifs par 90": 0.35,
-            "Duels défensifs gagnés, %": 0.35,
-            "Interceptions par 90": 0.2,
-            "Tacles glissés par 90": 0.1
+            "Actions défensives réussies par 90": 0.35,
+            "Interceptions PAdj": 0.25,
+            "Duels défensifs par 90": 0.15,
+            "Duels défensifs gagnés, %": 0.15,
+            "Tacles glissés PAdj": 0.05,
+            "Tirs contrés par 90": 0.05
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.4,
-            "Duels aériens gagnés, %": 0.6
-        },
-        "Protection de la surface": {
-            "Tirs contrés par 90": 0.25,
-            "Actions défensives réussies par 90": 0.75
+            "Duels aériens par 90": 0.5,
+            "Duels aériens gagnés, %": 0.5
         }
     },
 
@@ -594,13 +629,13 @@ kpi_by_position = {
         "Participe au jeu": {
             "Passes réceptionnées par 90": 1
         },
-        "Jeu long": {
-            "Passes longues par 90": 0.5,
-            "Longues passes précises, %": 0.5
-        },
         "Jeu court": {
-            "Passes courtes / moyennes par 90": 0.5,
+            "Passes courtes / Passes": 0.5,
             "Passes courtes / moyennes précises, %": 0.5,
+        },
+        "Jeu long": {
+            "Passes longues / Passes": 0.5,
+            "Longues passes précises, %": 0.5
         },
         "Sortie": {
             "Sorties par 90": 1
@@ -610,7 +645,8 @@ kpi_by_position = {
             "Duels aériens gagnés, %": 0.5
         },
         "Efficacité sur sa ligne": {
-            "Buts évités par 90": 1
+            "Buts évités par 90": 0.75,
+            "Enregistrer, %": 0.25
         }
     }
 }
@@ -622,55 +658,55 @@ kpi_coefficients_by_position = {
         "Qualité de passe": 2,
         "Vision du jeu": 2,
         "Percussion": 1,
-        "Jeu aérien": 2
+        "Jeu aérien": 1
     },
     "Ailier": {
         "Finition": 3,
         "Apport offensif": 4,
-        "Qualité de passe": 2,
-        "Vision du jeu": 3,
-        "Percussion": 3,
+        "Qualité de passe": 3,
+        "Vision du jeu": 5,
+        "Percussion": 5,
         "Jeu défensif": 1
     },
     "Milieu offensif": {
         "Finition": 2,
         "Apport offensif": 3,
-        "Qualité de passe": 3,
-        "Vision du jeu": 4,
+        "Qualité de passe": 4,
+        "Vision du jeu": 5,
         "Percussion": 2,
         "Jeu défensif": 1
     },
     "Milieu": {
-        "Apport offensif": 2,
+        "Apport offensif": 1,
         "Qualité de passe": 3,
-        "Vision du jeu": 4,
-        "Percussion": 2,
-        "Jeu défensif": 3,
-        "Jeu aérien": 1
+        "Vision du jeu": 3,
+        "Percussion": 1,
+        "Jeu défensif": 4,
+        "Jeu aérien": 4
     },
     "Latéral": {
         "Apport offensif": 4,
         "Qualité de passe": 2,
         "Vision du jeu": 2,
-        "Percussion": 3,
+        "Percussion": 4,
         "Jeu défensif": 4,
         "Jeu aérien": 1
     },
     "Défenseur central": {
+        "Discipline": 1,
         "Qualité de passe": 2,
-        "Vision du jeu": 2,
+        "Vision du jeu": 1,
         "Percussion": 1,
         "Jeu défensif": 5,
-        "Jeu aérien": 5,
-        "Protection de la surface": 4
+        "Jeu aérien": 5
     },
     "Gardien": {
-        "Participe au jeu": 2,
-        "Jeu long": 3,
-        "Jeu court": 2,
+        "Participe au jeu": 1,
+        "Jeu court": 1,
+        "Jeu long": 2,
         "Sortie": 1,
         "Présence aérienne": 3,
-        "Efficacité sur sa ligne": 8
+        "Efficacité sur sa ligne": 6
     }
 }
 
@@ -1047,6 +1083,7 @@ def add_new_columns(all_df):
         df['Buts - xG'] = df['Buts par 90'] - df['xG par 90']
         df['xG / Tirs'] = df['xG par 90'] / df['Tirs par 90']
         df['xA / Passes'] = df['xA par 90'] / df['Passes par 90']
+        df['Passes courtes / Passes'] = df['Passes courtes / moyennes par 90'] / df['Passes par 90']
         df['Passes avant / Passes'] = df['Passes avant par 90'] / df['Passes par 90']
         df['Passes longues / Passes'] = df['Passes longues par 90'] / df['Passes par 90']
         df['Passes clés / Passes'] = df['Passes quasi décisives par 90'] / df['Passes par 90']
@@ -1056,6 +1093,7 @@ def add_new_columns(all_df):
         df['Passes dans le tiers adverse / Passes'] = df['Passes dans tiers adverse par 90'] / df['Passes par 90']
         df['Passes avant tir / Passes'] = df['Passes décisives avec tir par 90'] / df['Passes par 90']
         df['Passes progressives / Passes'] = df['Passes progressives par 90'] / df['Passes par 90']
+        df['Passes dans la zone dangereuse / Passes'] = df['Réalisations en profondeur par 90'] / df['Passes par 90']
         all_df[name] = df
     return all_df
 
@@ -1228,7 +1266,7 @@ def rank_columns(df):
     numeric_cols = numeric_cols.drop(['Minutes jouées', 'Âge'], errors='ignore')
 
     # Colonnes où un score plus faible est meilleur
-    lower_is_better = ['Buts concédés par 90']  # Ajoute d'autres si besoin
+    lower_is_better = ['Buts concédés par 90', 'Fautes par 90', 'Cartons jaunes par 90', 'Cartons rouges par 90']
 
     ranked_df = pd.DataFrame(index=df_copy.index)
 
