@@ -213,7 +213,7 @@ metrics_by_position = [
         "position": "Ailier",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
-            "xG\n/ Tirs": "xG / Tirs",
+            "Buts - xG": "Buts - xG",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "xA\n/ Passes": "xA / Passes",
