@@ -192,19 +192,19 @@ metrics_by_position = [
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
             "Buts\nhors penalty": "Buts hors penalty par 90",
-            "xG": "xG par 90",
-            "Précision\ntirs": "Tirs à la cible, %",
-            "Conversion\ntirs": "Taux de conversion but/tir",
-            "xA": "xA par 90",
+            "Buts\n/ Tirs": "Taux de conversion but/tir",
+            "xG\n/ Tirs": "xG / Tirs",
+            "Tirs cadrés\n/ Tirs": "Tirs à la cible, %",
+            "Touches\ndans la surface": "Touches de balle dans la surface de réparation sur 90",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes\njudicieuses": "Passes judicieuses par 90",
-            "Passes\nreçues": "Passes réceptionnées par 90",
-            "Touches\nsurface": "Touches de balle dans la surface de réparation sur 90",
+            "xA\n/ Passes": "xA / Passes",
+            "Passes clés \n/ Passes": "Passes clés / Passes",
+            "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
-            "Dribbles": "Dribbles par 90",
-            "Dribbles\nréussiss": "Dribbles réussis, %",
             "Duels\noffensifs": "Duels offensifs par 90",
+            "Duels\noffensifs gagnés": "Duels de marquage, %",
             "Duels\naériens": "Duels aériens par 90",
             "Duels\naériens gagnés": "Duels aériens gagnés, %"
         }
@@ -213,37 +213,37 @@ metrics_by_position = [
         "position": "Ailier",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
-            "xG": "xG par 90",
-            "xA": "xA par 90",
+            "xG\n/ Tirs": "xG / Tirs",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes\nquasi décisives": "Passes quasi décisives par 90",
-            "Passes\njudicieuses": "Passes judicieuses par 90",
-            "Passes\nsurface": "Passes vers la surface de réparation par 90",
-            "Passes\npénétrantes": "Passes pénétrantes par 90",
-            "Passes\ntiers adverse": "Passes dans tiers adverse par 90",
-            "Passes\nprogressives": "Passes progressives par 90",
+            "xA\n/ Passes": "xA / Passes",
+            "Passes clés\n/ Passes": "Passes clés / Passes",
+            "Passes judicieuses\n/ Passes": "Passes judicieuses / Passes",
+            "Passes surface\n/ Passes": "Passes vers la surface / Passes",
+            "Passes tiers adv.\n/ Passes": "Passes dans le tiers adverse / Passes",
+            "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
+            "Passes progressives\n/ Passes": "Passes progressives / Passes",
             "Centres": "Centres par 90",
             "Centres\nréussis": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
-            "Dribbles\nréussis": "Dribbles réussis, %",
-            "Duels\noffensifs": "Duels offensifs par 90"
+            "Dribbles\nréussis": "Dribbles réussis, %"
         }
     },
     {
         "position": "Milieu offensif",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
-            "xG": "xG par 90",
-            "xA": "xA par 90",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes\nquasi décisives": "Passes quasi décisives par 90",
-            "Passes\njudicieuses": "Passes judicieuses par 90",
-            "Passes\nsurface": "Passes vers la surface de réparation par 90",
-            "Passes\npénétrantes": "Passes pénétrantes par 90",
-            "Passes\ntiers adverse": "Passes dans tiers adverse par 90",
-            "Passes\nprogressives": "Passes progressives par 90",
+            "xA\n/ Passes": "xA / Passes",
+            "Passes clés\n/ Passes": "Passes clés / Passes",
+            "Passes judicieuses\n/ Passes": "Passes judicieuses / Passes",
+            "Passes surface\n/ Passes": "Passes vers la surface / Passes",
+            "Passes tiers adv.\n/ Passes": "Passes dans le tiers adverse / Passes",
+            "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
+            "Passes progressives\n/ Passes": "Passes progressives / Passes",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
@@ -257,79 +257,82 @@ metrics_by_position = [
         "position": "Milieu",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
-            "xA": "xA par 90",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes\navant": "Passes avant par 90",
-            "Passes\njudicieuses": "Passes judicieuses par 90",
-            "Passes\ntiers adverse": "Passes dans tiers adverse par 90",
-            "Passes\nprogressives": "Passes progressives par 90",
+            "xA\n/ Passes": "xA / Passes",
+            "Passes avant\n/ Passes": "Passes avant / Passes",
+            "Passes clés\n/ Passes": "Passes clés / Passes",
+            "Passes progressives\n/ Passes": "Passes progressives / Passes",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
+            "Duels\ndéfensifs": "Duels défensifs par 90",
+            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
             "Duels\naériens": "Duels aériens par 90",
             "Duels\naériens gagnés": "Duels aériens gagnés, %",
-            "Duels": "Duels par 90",
-            "Duels\ngagnés": "Duels gagnés, %",
-            "Tacles\nglissés": "Tacles glissés par 90",
-            "Interceptions": "Interceptions par 90",
+            "Tacles\nglissés": "Tacles glissés PAdj",
+            "Interceptions": "Interceptions PAdj",
             "Tirs\ncontrés": "Tirs contrés par 90",
-            "Actions déf.\nréussies": "Actions défensives réussies par 90"
+            "Actions\ndéf. réussies": "Actions défensives réussies par 90"
         }
     },
     {
         "position": "Latéral",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
-            "xA": "xA par 90",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes\nsurface": "Passes vers la surface de réparation par 90",
-            "Passes\nprogressives": "Passes progressives par 90",
+            "xA\n/ Passes": "xA / Passes",
+            "Passes avant\n/ Passes": "Passes avant / Passes",
             "Centres": "Centres par 90",
             "Centres\nréussis": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
+            "Duels\ndéfensifs": "Duels défensifs par 90",
+            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
             "Duels\naériens": "Duels aériens par 90",
             "Duels\naériens gagnés": "Duels aériens gagnés, %",
-            "Duels": "Duels par 90",
-            "Duels\ngagnés": "Duels gagnés, %",
-            "Tacles\nglissés": "Tacles glissés par 90",
-            "Interceptions": "Interceptions par 90",
+            "Tacles\nglissés": "Tacles glissés PAdj",
+            "Interceptions": "Interceptions PAdj",
             "Tirs\ncontrés": "Tirs contrés par 90",
-            "Actions déf.\nréussies": "Actions défensives réussies par 90"
+            "Actions\ndéf. réussies": "Actions défensives réussies par 90"
         }
     },
     {
         "position": "Défenseur central",
         "metrics": {
-            "Buts tête": "Buts de la tête par 90",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes\navant": "Passes avant par 90",
+            "Passes avant\n/ Passes": "Passes avant / Passes",
             "Passes\navant réussies": "Passes en avant précises, %",
-            "Passes\nlongues": "Passes longues par 90",
+            "Passes longues\n/ Passes": "Passes longues / Passes",
             "Passes\nlongues réussies": "Longues passes précises, %",
-            "Passes\nprogressives": "Passes progressives par 90",
+            "Passes progressives\n/ Passes": "Passes progressives / Passes",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
+            "Duels\ndéfensifs": "Duels défensifs par 90",
+            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
             "Duels\naériens": "Duels aériens par 90",
             "Duels\naériens gagnés": "Duels aériens gagnés, %",
-            "Duels\ndéf.": "Duels défensifs par 90",
-            "Duels\ndéf. gagnés": "Duels défensifs gagnés, %",
-            "Tacles\nglissés": "Tacles glissés par 90",
-            "Interceptions": "Interceptions par 90",
+            "Tacles\nglissés": "Tacles glissés PAdj",
+            "Interceptions": "Interceptions PAdj",
             "Tirs\ncontrés": "Tirs contrés par 90",
-            "Actions déf.\nréussies": "Actions défensives réussies par 90"
+            "Actions\ndéf. réussies": "Actions défensives réussies par 90"
         }
     },
     {
         "position": "Gardien",
         "metrics": {
-            "Passes\nreçues": "Passes réceptionnées par 90",
-            "Passes": "Passes par 90",
-            "Passes\nréussies": "Passes précises, %",
-            "Passes\nlongues": "Passes longues par 90",
+            "Ballons\nreçus": "Passes réceptionnées par 90",
+            "Précision\npasses": "Passes précises, %",
+            "Passes avant\n/ Passes": "Passes avant / Passes",
+            "Passes\navant réussies": "Passes en avant précises, %",
+            "Passes longues\n/ Passes": "Passes longues / Passes",
             "Passes\nlongues réussies": "Longues passes précises, %",
-            "Buts concédés": "Buts concédés par 90",
-            "xG concédés": "xG contre par 90",
-            "Buts évités": "Buts évités par 90",
+            "Buts\nconcédés": "Buts concédés par 90",
+            "xG\nconcédés": "xG contre par 90",
+            "Buts\névités": "Buts évités par 90",
+            "Tirs\nconcédés": "Tirs contre par 90",
+            "Arrêts": "Enregistrer, %",
             "Sorties": "Sorties par 90",
             "Duels\naériens": "Duels aériens par 90",
             "Duels\naériens gagnés": "Duels aériens gagnés, %"
@@ -1039,6 +1042,23 @@ def collect_collective_data(équipe):
 
     return df_collective
 
+def add_new_columns(all_df):
+    for name, df in all_df.items():
+        df['Buts - xG'] = df['Buts par 90'] - df['xG par 90']
+        df['xG / Tirs'] = df['xG par 90'] / df['Tirs par 90']
+        df['xA / Passes'] = df['xA par 90'] / df['Passes par 90']
+        df['Passes avant / Passes'] = df['Passes avant par 90'] / df['Passes par 90']
+        df['Passes longues / Passes'] = df['Passes longues par 90'] / df['Passes par 90']
+        df['Passes clés / Passes'] = df['Passes quasi décisives par 90'] / df['Passes par 90']
+        df['Passes judicieuses / Passes'] = df['Passes judicieuses par 90'] / df['Passes par 90']
+        df['Passes vers la surface / Passes'] = df['Passes vers la surface de réparation par 90'] / df['Passes par 90']
+        df['Passes en profondeur / Passes'] = df['Passes pénétrantes par 90'] / df['Passes par 90']
+        df['Passes dans le tiers adverse / Passes'] = df['Passes dans tiers adverse par 90'] / df['Passes par 90']
+        df['Passes avant tir / Passes'] = df['Passes décisives avec tir par 90'] / df['Passes par 90']
+        df['Passes progressives / Passes'] = df['Passes progressives par 90'] / df['Passes par 90']
+        all_df[name] = df
+    return all_df
+
 @st.cache_data
 def collect_individual_data():
     load_all_files_from_drive()
@@ -1122,6 +1142,8 @@ def collect_individual_data():
         'Joueur français': df_français,
         'Joueur du top 5 européen': df_top5européen
     }
+
+    all_df = add_new_columns(all_df)
 
     return all_df
 
@@ -1354,10 +1376,10 @@ def create_individual_radar(df, joueur, poste):
         blank_alpha=0.4,
         kwargs_slices=dict(edgecolor="#3d3a2a", zorder=2, linewidth=1),
         kwargs_params=dict(
-            color="#3d3a2a", fontsize=11, va="center"
+            color="#3d3a2a", fontsize=9, va="center"
         ),
         kwargs_values=dict(
-            color="#f4f3ed", fontsize=11, zorder=3,
+            color="#f4f3ed", fontsize=9, zorder=3,
             bbox=dict(
                 edgecolor="#3d3a2a", facecolor="cornflowerblue",
                 boxstyle="round,pad=0.2", lw=1
