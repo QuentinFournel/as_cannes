@@ -2035,9 +2035,14 @@ def streamlit_application(all_df):
                 df_temp = df_stats_moyennes[base_cols + [col]].copy()
                 ascending = True if col in colonnes_bas_mieux else False
                 df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
-                cols_order = ['Classement'] + base_cols + [col]
+
+                display_col = f"{col} (par 90)"
+                df_temp.rename(columns={col: display_col}, inplace=True)
+
+                cols_order = ['Classement'] + base_cols + [display_col]
                 df_temp = df_temp[cols_order]
-                df_temp = df_temp.sort_values(by=col, ascending=ascending)
+                df_temp = df_temp.sort_values(by=display_col, ascending=ascending)
+
                 dfs[col] = df_temp
 
             metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
