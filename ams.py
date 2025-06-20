@@ -1818,7 +1818,7 @@ def streamlit_application(all_df):
         page = option_menu(
             menu_title="",
             options=st.secrets['roles'].get(st.session_state.username, []),
-            icons=["house", "bar-chart", "camera-video", "people", "person", "graph-up-arrow", "search"],
+            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search"],
             menu_icon="cast",
             default_index=0,
             orientation="vertical",
