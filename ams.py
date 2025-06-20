@@ -192,7 +192,7 @@ metrics_by_position = [
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
             "Buts\nhors penalty": "Buts hors penalty par 90",
-            "Buts\n/ Tirs": "Taux de conversion but/tir",
+            "Buts - xG": "Buts - xG",
             "xG\n/ Tirs": "xG / Tirs",
             "Tirs cadrés\n/ Tirs": "Tirs à la cible, %",
             "Touches\ndans la surface": "Touches de balle dans la surface de réparation sur 90",
