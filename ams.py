@@ -13,6 +13,7 @@ from streamlit_option_menu import option_menu
 import math
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_distances
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -1799,10 +1800,11 @@ def compute_similarity(df, joueur, poste):
     ref_vector = weighted_features.loc[joueur].values.reshape(1, -1)
 
     # Calcul des distances cosinus pondérées
-    similarities = cosine_similarity(weighted_features, ref_vector).flatten()
+    distances = cosine_distances(weighted_features, ref_vector).flatten()
+    similarities = 1 - distances
 
     # Création du DataFrame final
-    df_filtré['Score de similarité'] = ((similarities + 1) / 2 * 100).round(2)
+    df_filtré['Score de similarité'] = (similarities * 100).round(2)
     df_sorted = df_filtré.sort_values(by='Score de similarité', ascending=False)
     
     df_sorted = df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']]
