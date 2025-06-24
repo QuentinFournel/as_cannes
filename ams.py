@@ -1281,27 +1281,34 @@ def compute_weighted_stats_by_minutes(df_joueur):
 
 def rank_columns(df):
     df_copy = df.copy()
-    
+
     # Colonnes numériques sauf 'Minutes jouées' et 'Âge'
     numeric_cols = df_copy.select_dtypes(include=['number']).columns
     numeric_cols = numeric_cols.drop(['Minutes jouées', 'Âge'], errors='ignore')
 
     # Colonnes où un score plus faible est meilleur
-    lower_is_better = ['Buts concédés par 90', 'Fautes par 90', 'Cartons jaunes par 90', 'Cartons rouges par 90']
+    lower_is_better = [
+        'Buts concédés par 90', 'Fautes par 90', 
+        'Cartons jaunes par 90', 'Cartons rouges par 90'
+    ]
 
-    ranked_df = pd.DataFrame(index=df_copy.index)
+    # Calculer tous les rangs d'un coup dans un dict
+    ranked_data = {
+        col: df_copy[col].rank(
+            pct=True,
+            ascending=False if col in lower_is_better else True,
+            method='average'
+        ) * 100
+        for col in numeric_cols
+    }
 
-    for col in numeric_cols:
-        if col in lower_is_better:
-            # Inverser le rang : plus bas = mieux
-            ranked_df[col] = df_copy[col].rank(pct=True, ascending=False, method='average') * 100
-        else:
-            # Normal : plus haut = mieux
-            ranked_df[col] = df_copy[col].rank(pct=True, ascending=True, method='average') * 100
-
+    # Création du DataFrame de rangs d'un coup (évite la fragmentation)
+    ranked_df = pd.DataFrame(ranked_data, index=df_copy.index)
     ranked_df = ranked_df.fillna(0).astype(int)
 
+    # Remplacer les colonnes originales
     df_copy[numeric_cols] = ranked_df
+
     return df_copy
 
 def create_plot_stats(indicateurs, équipe_analysée, nom_équipe_analysée, adversaire, nom_adversaire):
@@ -1800,11 +1807,10 @@ def compute_similarity(df, joueur, poste):
     ref_vector = weighted_features.loc[joueur].values.reshape(1, -1)
 
     # Calcul des distances cosinus pondérées
-    distances = cosine_distances(weighted_features, ref_vector).flatten()
-    similarities = 1 - distances
+    similarities = cosine_similarity(weighted_features, ref_vector).flatten()
 
     # Création du DataFrame final
-    df_filtré['Score de similarité'] = (similarities * 100).round(2)
+    df_filtré['Score de similarité'] = ((similarities + 1) / 2 * 100).round(1)
     df_sorted = df_filtré.sort_values(by='Score de similarité', ascending=False)
     
     df_sorted = df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']]
