@@ -712,6 +712,16 @@ kpi_coefficients_by_position = {
 }
 
 metrics_x_y = {
+    "Apport offensif": {
+        "metrics": ["xG par 90", "xA par 90"],
+        "names": ["xG par 90", "xA par 90"],
+        "descriptions": [
+            "Se procure peu d'occasions<br>mais crée en crée beaucoup",
+            "Se procure beaucoup d'occasions<br>et crée en crée beaucoup",
+            "Se procure peu d'occasions<br>et crée en crée peu",
+            "Se procure beaucoup d'occasions<br>mais crée en crée peu"
+        ]
+    },
     "Finition": {
         "metrics": ["xG par 90", "Buts par 90"],
         "names": ["xG par 90", "Buts par 90"],
