@@ -2047,7 +2047,7 @@ def streamlit_application(all_df):
             tab3, tab4 = st.tabs(['Statistiques joueurs', 'Statistiques équipes'])
 
             with tab3:
-                df = all_df('Joueur du championnat de France')
+                df = all_df['Joueur du championnat de France']
 
                 df_filtré = df[df['Équipe dans la période sélectionnée'].isin(équipes)]
 
