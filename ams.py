@@ -2500,7 +2500,17 @@ def streamlit_application(all_df):
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab2:
-            colonnes_filtrées = [col for col in df.columns if 'par 90' in col.lower() or '%' in col]
+            colonnes_à_exclure = [
+                'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
+                'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
+                'Cartons jaunes', 'Cartons rouges', 'Buts hors penaltyButs hors penalty',
+                'Tir', 'Buts de la tête'
+            ]
+
+            colonnes_filtrées = [
+                col for col in df.select_dtypes(include='number').columns
+                if col not in colonnes_à_exclure
+            ]
             
             métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
