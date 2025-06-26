@@ -2044,28 +2044,86 @@ def streamlit_application(all_df):
             }
         
         with tab1:
-            dfs = {}
+            tab3, tab4 = st.tabs(['Statistiques joueurs', 'Statistiques équipes'])
 
-            base_cols = ['Équipe', 'Matchs analysés']
-            other_cols = [col for col in df_stats_moyennes.columns if col not in base_cols]
+            with tab3:
+                df = all_df('Joueur du championnat de France')
 
-            for col in other_cols:
-                df_temp = df_stats_moyennes[base_cols + [col]].copy()
-                ascending = True if col in colonnes_bas_mieux else False
-                df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
+                df_filtré = df[df['Équipe dans la période sélectionnée'].isin(équipes)]
 
-                display_col = f"{col} (par 90)"
-                df_temp.rename(columns={col: display_col}, inplace=True)
+                colonnes_à_exclure = [
+                    'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
+                    'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
+                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penaltyButs hors penalty',
+                    'Tir', 'Buts de la tête'
+                ]
 
-                cols_order = ['Classement'] + base_cols + [display_col]
-                df_temp = df_temp[cols_order]
-                df_temp = df_temp.sort_values(by=display_col, ascending=ascending)
+                colonnes_filtrées = [
+                    col for col in df_filtré.select_dtypes(include='number').columns
+                    if col not in colonnes_à_exclure
+                ]
 
-                dfs[col] = df_temp
+                # Création des DataFrames avec classement par colonne sélectionnée
+                dfs = {}
 
-            metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
+                for col in colonnes_filtrées:
+                    df_temp = df_filtré[['Joueur', 'Équipe dans la période sélectionnée', 'Matchs joués', col]].copy()
 
-            st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
+                    # Classement sans supprimer les NaN
+                    ranked = df_temp[col].rank(ascending=False, method='min')
+
+                    # On place les NaN à la fin
+                    df_temp['Classement'] = ranked.fillna(len(df_temp) + 1).astype(int)
+
+                    # Ajout conditionnel de (par 90)
+                    if "par 90" or "%" in col.lower():
+                        display_col = col
+                    else:
+                        display_col = f"{col} (par 90)"
+
+                    # Renommage des colonnes pour affichage uniquement
+                    df_temp.rename(columns={
+                        col: display_col,
+                        'Équipe dans la période sélectionnée': 'Équipe',
+                        'Matchs joués': 'Matchs analysés'
+                    }, inplace=True)
+
+                    # Réorganisation des colonnes
+                    cols_order = ['Classement', 'Joueur', 'Équipe', 'Matchs analysés', display_col]
+                    df_temp = df_temp[cols_order]
+
+                    # Tri final
+                    df_temp = df_temp.sort_values(by=['Classement', 'Joueur'])
+
+                    dfs[col] = df_temp
+
+                metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
+
+                st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
+
+            with tab4:
+                dfs = {}
+
+                base_cols = ['Équipe', 'Matchs analysés']
+                other_cols = [col for col in df_stats_moyennes.columns if col not in base_cols]
+
+                for col in other_cols:
+                    df_temp = df_stats_moyennes[base_cols + [col]].copy()
+                    ascending = True if col in colonnes_bas_mieux else False
+                    df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
+
+                    display_col = f"{col} (par 90)"
+                    df_temp.rename(columns={col: display_col}, inplace=True)
+
+                    cols_order = ['Classement'] + base_cols + [display_col]
+                    df_temp = df_temp[cols_order]
+                    df_temp = df_temp.sort_values(by=display_col, ascending=ascending)
+
+                    dfs[col] = df_temp
+
+                metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
+
+                st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
         
         with tab2:
             team = st.selectbox("Sélectionnez une équipe", équipes, index=équipes.index("Cannes"))
