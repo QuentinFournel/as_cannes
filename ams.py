@@ -1813,6 +1813,9 @@ def compute_similarity(df, joueur, poste):
     # On applique la pondération
     weighted_features = df_scaled * weights
 
+    # Remplacer les NaN et inf par 0
+    weighted_features = weighted_features.replace([np.inf, -np.inf], np.nan).fillna(0)
+
     # Récupérer le vecteur du joueur de référence
     ref_vector = weighted_features.loc[joueur].values.reshape(1, -1)
 
