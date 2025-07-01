@@ -2550,7 +2550,10 @@ def streamlit_application(all_df):
                 match = st.selectbox("Sélectionnez le match à analyser", df_player["Match"].unique())
                 df_player = df_player[df_player["Match"] == match]
 
-                note = performance_index(df_player, poste, match)
+                if poste != 'Gardien':
+                    note = performance_index(df_player, poste, match)
+                else:
+                    note = 6
 
                 st.subheader('Statistiques générales')
 
