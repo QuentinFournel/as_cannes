@@ -1502,7 +1502,7 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
 
     return fig
 
-def plot_team_metrics(df, x_metric, y_metric, all_logos):
+def plot_team_metrics(df, x_metric, y_metric):
     df = df.copy()
     x_mean = df[x_metric].mean()
     y_mean = df[y_metric].mean()
