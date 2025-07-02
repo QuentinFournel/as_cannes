@@ -1502,68 +1502,42 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
 
     return fig
 
-import plotly.graph_objects as go
-import requests
-from PIL import Image
-from io import BytesIO
-
-def plot_team_metrics(df, x_metric, y_metric):
-    # Dictionnaire des URLs de logos
-    logos_dict = {
-        "Andrézieux": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d1/Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg/langfr-1024px-Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg.png",
-        "Anglet Genets": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/84/Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg/langfr-1024px-Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg.png",
-        "Angoulême": "https://upload.wikimedia.org/wikipedia/fr/thumb/c/c5/Angoul%C3%AAme_CFC_2020.svg/langfr-1024px-Angoul%C3%AAme_CFC_2020.svg.png",
-        "Bergerac": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Logo_Bergerac_P%C3%A9rigord_FC.svg/langfr-800px-Logo_Bergerac_P%C3%A9rigord_FC.svg.png",
-        "Cannes": "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png",
-        "Fréjus St-Raphaël": "https://upload.wikimedia.org/wikipedia/fr/thumb/5/55/Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg/langfr-1024px-Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg.png",
-        "GOAL FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/de/Logo_GOAL_FC_-_2020.svg/langfr-800px-Logo_GOAL_FC_-_2020.svg.png",
-        "Grasse": "https://upload.wikimedia.org/wikipedia/fr/thumb/f/f8/Logo_RC_Pays_Grasse_2022.svg/langfr-1024px-Logo_RC_Pays_Grasse_2022.svg.png",
-        "Hyères FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/3/3f/Logo_Hy%C3%A8res_83_Football_Club_-_2021.svg/langfr-800px-Logo_Hy%C3%A8res_83_Football_Club_-_2021.svg.png",
-        "Istres": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/b0/Logo_Istres_FC_-_2022.svg/langfr-800px-Logo_Istres_FC_-_2022.svg.png",
-        "Jura Sud Foot": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/ba/Logo_Jura_Sud_Foot.svg/langfr-1280px-Logo_Jura_Sud_Foot.svg.png",
-        "Le Puy F.43 Auvergne": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/88/Logo_Puy_Foot_43_Auvergne_2017.svg/langfr-800px-Logo_Puy_Foot_43_Auvergne_2017.svg.png",
-        "Marignane Gignac CB": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/bb/Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg/langfr-800px-Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg.png",
-        "Rumilly Vallières": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/40/Logo_Groupement_Football_Albanais_74_-_2021.svg/langfr-800px-Logo_Groupement_Football_Albanais_74_-_2021.svg.png",
-        "Saint-Priest": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/46/Logo_AS_St_Priest.svg/langfr-800px-Logo_AS_St_Priest.svg.png",
-        "Toulon": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d6/Logo_SC_Toulon.svg/langfr-800px-Logo_SC_Toulon.svg.png"
-    }
-
+def plot_team_metrics(df, x_metric, y_metric, all_logos):
+    df = df.copy()
     x_mean = df[x_metric].mean()
     y_mean = df[y_metric].mean()
+
     fig = go.Figure()
 
+    # Affiche chaque équipe comme un logo
     for _, row in df.iterrows():
-        url = logos_dict.get(row["Équipe"])
-        if url is None:
+        logo_img = all_logos.get(row["Équipe"])
+        if not logo_img:
+            st.write('ERREUR !')
             continue
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                img = Image.open(BytesIO(response.content))
-                fig.add_layout_image(
-                    dict(
-                        source=img,
-                        xref="x",
-                        yref="y",
-                        x=row[x_metric],
-                        y=row[y_metric],
-                        sizex=(df[x_metric].max() - df[x_metric].min()) * 0.045,
-                        sizey=(df[y_metric].max() - df[y_metric].min()) * 0.045,
-                        xanchor="center",
-                        yanchor="middle",
-                        layer="above"
-                    )
-                )
-            # Ajoute le hover (invisible marker)
-            fig.add_trace(go.Scatter(
-                x=[row[x_metric]], y=[row[y_metric]],
-                mode="markers",
-                marker=dict(opacity=0),
-                hovertemplate=f"<b>{row['Équipe']}</b><extra></extra>"
-            ))
-        except Exception as e:
-            print(f"Erreur pour {row['Équipe']}: {e}")
+        fig.add_layout_image(
+            dict(
+                source=logo_img,
+                xref="x",
+                yref="y",
+                x=row[x_metric],
+                y=row[y_metric],
+                sizex=(df[x_metric].max() - df[x_metric].min()) * 0.045,
+                sizey=(df[y_metric].max() - df[y_metric].min()) * 0.045,
+                xanchor="center",
+                yanchor="middle",
+                layer="above"
+            )
+        )
+        # Ajoute un marker invisible pour l'hover
+        fig.add_trace(go.Scatter(
+            x=[row[x_metric]], y=[row[y_metric]],
+            mode="markers",
+            marker=dict(opacity=0),
+            hovertemplate=f"<b>{row['Équipe']}</b><extra></extra>"
+        ))
 
+    # Lignes de moyennes
     fig.add_vline(x=x_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
     fig.add_hline(y=y_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
 
@@ -1590,6 +1564,7 @@ def plot_team_metrics(df, x_metric, y_metric):
             zeroline=False
         )
     )
+
     return fig
 
 def search_top_players(df, poste):
@@ -2191,7 +2166,7 @@ def preload_all_logos():
             all_logos[team] = None
     return all_logos
 
-def streamlit_application(all_df):
+def streamlit_application(all_df, all_logos):
     with st.sidebar:
         page = option_menu(
             menu_title="",
@@ -2499,7 +2474,7 @@ def streamlit_application(all_df):
                     with col2:
                         y_metric = st.selectbox("Sélectionnez la métrique Y", metrics)
 
-                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric)
+                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric, all_logos)
                     st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
@@ -3018,6 +2993,6 @@ if __name__ == '__main__':
                     st.error("Nom d'utilisateur ou mot de passe incorrect")
 
     if st.session_state.authenticated:
-        # all_logos = preload_all_logos()
+        all_logos = preload_all_logos()
         all_df = collect_individual_data()
-        streamlit_application(all_df)
+        streamlit_application(all_df, all_logos)
