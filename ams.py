@@ -1439,16 +1439,11 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
         lambda x: "Joueur sélectionné" if x == joueur else "Autres joueurs"
     )
 
-    df_filtré["Taille"] = df_filtré["Catégorie"].apply(
-        lambda x: 24 if x == "Joueur sélectionné" else 12
-    )
-
     fig = px.scatter(
         df_filtré,
         x=x_metric,
         y=y_metric,
         color="Catégorie",
-        size="Size",
         color_discrete_map={
             "Autres joueurs": "rgba(61,58,42,0.2)",
             "Joueur sélectionné": "#ac141a"
