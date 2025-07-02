@@ -2613,10 +2613,16 @@ def streamlit_application(all_df):
                     bordered_metric(col1, "Minutes jouées", df_player["Minutes jouées"].values[0], 165)
 
                 with col2:
-                    bordered_metric(col2, "But", df_player["But"].values[0], 165)
+                    if poste != 'Gardien':
+                        bordered_metric(col2, "But", df_player["But"].values[0], 165)
+                    else:
+                        bordered_metric(col2, "Buts concédés", df_player["Buts concédés"].values[0], 165)
 
                 with col3:
-                    bordered_metric(col3, "Passe décisive", df_player["Passe décisive"].values[0], 165)
+                    if poste != 'Gardien':
+                        bordered_metric(col3, "Passe décisive", df_player["Passe décisive"].values[0], 165)
+                    else:
+                        bordered_metric(col3, "xG concédés", df_player["xCG"].values[0], 165)
 
                 with col4:
                     bordered_metric(col4, "Note", note, 165, color="#ac141a")
