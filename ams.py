@@ -1904,6 +1904,28 @@ def performance_index(df_player, poste, match):
             if key in df_match.columns:
                 note += df_match[key].sum() * coef
 
+        equipes_score = match.split(" ")
+        equipes = " ".join(equipes_score[:-1])
+        score_str = equipes_score[-1]
+
+        equipe_dom, _ = equipes.split(" - ")
+        score_dom, score_ext = map(int, score_str.split(":"))
+
+        if "Cannes" in equipe_dom:
+            buts_cannes = score_dom
+            buts_adverse = score_ext
+        else:
+            buts_cannes = score_ext
+            buts_adverse = score_dom
+
+        if buts_cannes > buts_adverse:
+            note += 0.5
+        elif buts_cannes < buts_adverse:
+            note -= 0.5
+
+        if poste in ["Défenseur central", "Latéral", "Gardien"]:
+            note -= 0.25 * df_match["Buts concédés"].sum()
+
     return max(0, min(10, round(note, 1)))
 
 def ajouter_pourcentages(df):
