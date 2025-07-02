@@ -1509,13 +1509,7 @@ def plot_team_metrics(df, x_metric, y_metric, all_logos):
 
     fig = go.Figure()
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.write(sorted(df["Équipe"].unique()))
-
-    with col2:
-        st.write(sorted(all_logos.keys()))
+    st.write(all_logos)
 
     # Affiche chaque équipe comme un logo
     for _, row in df.iterrows():
