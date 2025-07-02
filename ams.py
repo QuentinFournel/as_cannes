@@ -1511,9 +1511,9 @@ def plot_team_metrics(df, x_metric, y_metric, all_logos):
 
     # Affiche chaque équipe comme un logo
     for _, row in df.iterrows():
+        st.write(row["Équipe"])
         logo_img = all_logos.get(row["Équipe"])
         if not logo_img:
-            st.write('ERREUR !')
             continue
         fig.add_layout_image(
             dict(
