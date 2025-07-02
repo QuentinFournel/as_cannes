@@ -1834,13 +1834,66 @@ def performance_index(df_player, poste, match):
             "Hors-jeu": -0.03,
             "Cartons rouges": -2.5,
             "Cartons jaunes": -0.8,
+        },
+        "Gardien": {
+            ("Passes précises", "Passes"): (0.01, -0.005),
+            ("Passes longues précises", "Passes longues"): (0.02, -0.01),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.01, -0.005),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.005, -0.005),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.005, -0.005),
+            ("Passes en avant précises", "Passes en avant"): (0.01, -0.005),
+            ("Passes arrière précises", "Passes arrière"): (0.015, -0.005),
+
+            ("Tirs cadrés", "Tirs"): (0.01, -0.01),
+            ("Centres précis", "Centres"): (0.01, -0.005),
+            ("Dribbles réussis", "Dribbles"): (0.01, -0.01),
+
+            ("Duels gagnés", "Duels"): (0.01, -0.01),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.01, -0.01),
+            ("Duels aériens gagnés", "Duels aériens"): (0.02, -0.01),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.025, -0.015),
+
+            ("Tacles glissés réussis", "Tacles glissés"): (0.02, -0.01),
+
+            "Duels ballons gagnés": 0.015,
+            "Duels ballons perdus": -0.015,
+            "Récupérations": 0.02,
+            "Récupérations dans le terrain adverse": 0.01,
+            "Interceptions": 0.025,
+            "Pertes": -0.03,
+            "Pertes dans le propre terrain": -0.05,
+
+            "But": 2,
+            "Passe décisive": 0.7,
+            "Passes décisives avec tir": 0.05,
+            "Secondes passes décisives": 0.03,
+            "Courses progressives": 0.03,
+            "Touches de balle dans la surface de réparation": 0.01,
+
+            "Fautes subies": 0.02,
+            "Faute": -0.04,
+            "Hors-jeu": -0.02,
+            "Cartons rouges": -2.0,
+            "Cartons jaunes": -0.6,
+
+            "Dégagements": 0.03,
+            "Sorties": 0.04,
+            "Arrêts": 0.2,
+            "Arrêts réflexes": 0.4,
+            "Tirs contre": 0.01,
+
+            ("xCG", "Buts concédés"): 1
         }
     }
 
     coeffs = coefficients[poste]
 
     for key, coef in coeffs.items():
-        if isinstance(key, tuple):
+        if key == ("xCG", "Buts concédés"):
+            xcg = df_match["xCG"].sum()
+            buts = df_match["Buts concédés"].sum()
+            note += (xcg - buts) * coef
+        elif isinstance(key, tuple):
             col_ok, col_tot = key
             coef_success, coef_fail = coef
             ok = df_match[col_ok].sum()
@@ -2550,10 +2603,7 @@ def streamlit_application(all_df):
                 match = st.selectbox("Sélectionnez le match à analyser", df_player["Match"].unique())
                 df_player = df_player[df_player["Match"] == match]
 
-                if poste != 'Gardien':
-                    note = performance_index(df_player, poste, match)
-                else:
-                    note = 6
+                note = performance_index(df_player, poste, match)
 
                 st.subheader('Statistiques générales')
 
