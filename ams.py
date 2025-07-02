@@ -1502,37 +1502,19 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
 
     return fig
 
-def plot_team_metrics(df, x_metric, y_metric, all_logos):
+def plot_team_metrics(df, x_metric, y_metric):
     df = df.copy()
     x_mean = df[x_metric].mean()
     y_mean = df[y_metric].mean()
 
     fig = go.Figure()
 
-    # Affiche chaque équipe comme un logo
+    # Affiche chaque équipe comme un point
     for _, row in df.iterrows():
-        logo_img = all_logos.get(row["Équipe"])
-        if not logo_img:
-            continue
-        fig.add_layout_image(
-            dict(
-                source=logo_img,
-                xref="x",
-                yref="y",
-                x=row[x_metric],
-                y=row[y_metric],
-                sizex=(df[x_metric].max() - df[x_metric].min()) * 0.045,
-                sizey=(df[y_metric].max() - df[y_metric].min()) * 0.045,
-                xanchor="center",
-                yanchor="middle",
-                layer="above"
-            )
-        )
-        # Ajoute un marker invisible pour l'hover
         fig.add_trace(go.Scatter(
             x=[row[x_metric]], y=[row[y_metric]],
             mode="markers",
-            marker=dict(opacity=0),
+            marker=dict(size=16, color="#41505b"),  # tu peux changer la couleur/size ici
             hovertemplate=f"<b>{row['Équipe']}</b><extra></extra>"
         ))
 
@@ -2473,9 +2455,7 @@ def streamlit_application(all_df, all_logos):
                     with col2:
                         y_metric = st.selectbox("Sélectionnez la métrique Y", metrics)
 
-                    st.dataframe(df_stats_moyennes[["Équipe", x_metric, y_metric]])
-
-                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric, all_logos)
+                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric)
                     st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
