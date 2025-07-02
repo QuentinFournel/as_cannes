@@ -1502,19 +1502,37 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
 
     return fig
 
-def plot_team_metrics(df, x_metric, y_metric):
+def plot_team_metrics(df, x_metric, y_metric, all_logos):
     df = df.copy()
     x_mean = df[x_metric].mean()
     y_mean = df[y_metric].mean()
 
     fig = go.Figure()
 
-    # Affiche chaque équipe comme un point
+    # Affiche chaque équipe comme un logo
     for _, row in df.iterrows():
+        logo_img = all_logos.get(row["Équipe"])
+        if not logo_img:
+            continue
+        fig.add_layout_image(
+            dict(
+                source=logo_img,
+                xref="x",
+                yref="y",
+                x=row[x_metric],
+                y=row[y_metric],
+                sizex=(df[x_metric].max() - df[x_metric].min()) * 0.045,
+                sizey=(df[y_metric].max() - df[y_metric].min()) * 0.045,
+                xanchor="center",
+                yanchor="middle",
+                layer="above"
+            )
+        )
+        # Ajoute un marker invisible pour l'hover
         fig.add_trace(go.Scatter(
             x=[row[x_metric]], y=[row[y_metric]],
             mode="markers",
-            marker=dict(size=16, color="#41505b"),  # tu peux changer la couleur/size ici
+            marker=dict(opacity=0),
             hovertemplate=f"<b>{row['Équipe']}</b><extra></extra>"
         ))
 
@@ -2114,7 +2132,7 @@ def compute_similarity(df, joueur, poste):
 
     return df_sorted
 
-@st.cache_data(show_spinner=False)
+@st.cache_data
 def preload_all_logos():
     logos_dict = {
         "Andrézieux": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d1/Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg/langfr-1024px-Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg.png",
@@ -2455,7 +2473,7 @@ def streamlit_application(all_df, all_logos):
                     with col2:
                         y_metric = st.selectbox("Sélectionnez la métrique Y", metrics)
 
-                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric)
+                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric, all_logos)
                     st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
