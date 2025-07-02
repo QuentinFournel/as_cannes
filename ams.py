@@ -1591,36 +1591,36 @@ def performance_index(df_player, poste, match):
     coefficients = {
         "Buteur": {
             # Passes
-            ("Passes précises", "Passes"): (0.005, -0.035),
-            ("Passes longues précises", "Passes longues"): (0.015, -0.02),
-            ("Passes en profondeur précises", "Passes en profondeur"): (0.045, -0.03),
-            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.035, -0.025),
-            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.05, -0.03),
-            ("Passes en avant précises", "Passes en avant"): (0.025, -0.02),
-            ("Passes arrière précises", "Passes arrière"): (0.003, -0.01),
+            ("Passes précises", "Passes"): (0.005, -0.05),
+            ("Passes longues précises", "Passes longues"): (0.015, -0.05),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.045, -0.02),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.025, -0.04),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.045, -0.025),
+            ("Passes en avant précises", "Passes en avant"): (0.015, -0.04),
+            ("Passes arrière précises", "Passes arrière"): (0.001, -0.09),
 
             # Jeu offensif
-            ("Tirs cadrés", "Tirs"): (0.09, -0.035),
-            ("Centres précis", "Centres"): (0.015, -0.01),
-            ("Dribbles réussis", "Dribbles"): (0.05, -0.03),
+            ("Tirs cadrés", "Tirs"): (0.09, -0.02),
+            ("Centres précis", "Centres"): (0.03, -0.01),
+            ("Dribbles réussis", "Dribbles"): (0.06, -0.015),
 
             # Duels
-            ("Duels gagnés", "Duels"): (0.025, -0.02),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.04, -0.03),
-            ("Duels aériens gagnés", "Duels aériens"): (0.035, -0.025),
+            ("Duels gagnés", "Duels"): (0.02, -0.03),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.04, -0.015),
+            ("Duels aériens gagnés", "Duels aériens"): (0.035, -0.015),
             ("Duels défensifs gagnés", "Duels défensifs"): (0.01, -0.01),
 
             # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.01, -0.01),
+            ("Tacles glissés réussis", "Tacles glissés"): (0.01, -0.03),
 
             # Autres
-            "Duels ballons gagnés": 0.03,
-            "Duels ballons perdus": -0.035,
-            "Récupérations": 0.025,
-            "Récupérations dans le terrain adverse": 0.05,
-            "Interceptions": 0.015,
-            "Pertes": -0.05,
-            "Pertes dans le propre terrain": -0.07,
+            "Duels ballons gagnés": 0.02,
+            "Duels ballons perdus": -0.03,
+            "Récupérations": 0.02,
+            "Récupérations dans le terrain adverse": 0.04,
+            "Interceptions": 0.012,
+            "Pertes": -0.06,
+            "Pertes dans le propre terrain": -0.13,
 
             # Finition / Création
             "But": 2.2,
@@ -1628,206 +1628,206 @@ def performance_index(df_player, poste, match):
             "Passes décisives avec tir": 0.12,
             "Secondes passes décisives": 0.07,
             "Courses progressives": 0.05,
-            "Touches de balle dans la surface de réparation": 0.025,
-
-            # Discipline
-            "Fautes subies": 0.025,
-            "Faute": -0.045,
-            "Hors-jeu": -0.08,
-            "Cartons rouges": -2.0,
-            "Cartons jaunes": -0.6,
-        },
-        "Ailier": {
-            # Passes
-            ("Passes précises", "Passes"): (0.008, -0.03),
-            ("Passes longues précises", "Passes longues"): (0.015, -0.02),
-            ("Passes en profondeur précises", "Passes en profondeur"): (0.05, -0.03),
-            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.045, -0.025),
-            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.06, -0.03),
-            ("Passes en avant précises", "Passes en avant"): (0.03, -0.02),
-            ("Passes arrière précises", "Passes arrière"): (0.005, -0.005),
-
-            # Jeu offensif
-            ("Tirs cadrés", "Tirs"): (0.07, -0.025),
-            ("Centres précis", "Centres"): (0.07, -0.035),
-            ("Dribbles réussis", "Dribbles"): (0.08, -0.03),
-
-            # Duels
-            ("Duels gagnés", "Duels"): (0.035, -0.025),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.05, -0.03),
-            ("Duels aériens gagnés", "Duels aériens"): (0.015, -0.01),
-            ("Duels défensifs gagnés", "Duels défensifs"): (0.015, -0.01),
-
-            # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.015, -0.01),
-
-            # Autres
-            "Duels ballons gagnés": 0.035,
-            "Duels ballons perdus": -0.035,
-            "Récupérations": 0.035,
-            "Récupérations dans le terrain adverse": 0.06,
-            "Interceptions": 0.025,
-            "Pertes": -0.045,
-            "Pertes dans le propre terrain": -0.065,
-
-            # Finition / Création
-            "But": 1.4,
-            "Passe décisive": 1.5,
-            "Passes décisives avec tir": 0.12,
-            "Secondes passes décisives": 0.07,
-            "Courses progressives": 0.08,
             "Touches de balle dans la surface de réparation": 0.02,
 
             # Discipline
-            "Fautes subies": 0.04,
-            "Faute": -0.045,
-            "Hors-jeu": -0.06,
-            "Cartons rouges": -1.8,
-            "Cartons jaunes": -0.6,
+            "Fautes subies": 0.02,
+            "Faute": -0.05,
+            "Hors-jeu": -0.08,
+            "Cartons rouges": -2.0,
+            "Cartons jaunes": -0.7,
         },
-        "Milieu offensif": {
+        "Ailier": {
             # Passes
-            ("Passes précises", "Passes"): (0.008, -0.035),
-            ("Passes longues précises", "Passes longues"): (0.02, -0.02),
-            ("Passes en profondeur précises", "Passes en profondeur"): (0.045, -0.03),
-            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.04, -0.025),
-            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.05, -0.03),
-            ("Passes en avant précises", "Passes en avant"): (0.03, -0.02),
-            ("Passes arrière précises", "Passes arrière"): (0.005, -0.005),
+            ("Passes précises", "Passes"): (0.007, -0.055),
+            ("Passes longues précises", "Passes longues"): (0.015, -0.045),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.055, -0.02),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.045, -0.02),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.055, -0.02),
+            ("Passes en avant précises", "Passes en avant"): (0.02, -0.035),
+            ("Passes arrière précises", "Passes arrière"): (0.001, -0.08),
 
             # Jeu offensif
-            ("Tirs cadrés", "Tirs"): (0.06, -0.02),
-            ("Centres précis", "Centres"): (0.04, -0.02),
-            ("Dribbles réussis", "Dribbles"): (0.06, -0.03),
+            ("Tirs cadrés", "Tirs"): (0.07, -0.015),
+            ("Centres précis", "Centres"): (0.07, -0.015),
+            ("Dribbles réussis", "Dribbles"): (0.09, -0.025),
 
             # Duels
-            ("Duels gagnés", "Duels"): (0.035, -0.025),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.045, -0.03),
-            ("Duels aériens gagnés", "Duels aériens"): (0.015, -0.01),
-            ("Duels défensifs gagnés", "Duels défensifs"): (0.015, -0.01),
+            ("Duels gagnés", "Duels"): (0.03, -0.04),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.05, -0.015),
+            ("Duels aériens gagnés", "Duels aériens"): (0.02, -0.015),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.01, -0.025),
 
             # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.015, -0.01),
+            ("Tacles glissés réussis", "Tacles glissés"): (0.015, -0.03),
 
             # Autres
             "Duels ballons gagnés": 0.035,
-            "Duels ballons perdus": -0.035,
-            "Récupérations": 0.035,
-            "Récupérations dans le terrain adverse": 0.055,
-            "Interceptions": 0.03,
-            "Pertes": -0.045,
-            "Pertes dans le propre terrain": -0.06,
-
-            # Finition / Création
-            "But": 1.6,
-            "Passe décisive": 1.4,
-            "Passes décisives avec tir": 0.12,
-            "Secondes passes décisives": 0.08,
-            "Courses progressives": 0.07,
-            "Touches de balle dans la surface de réparation": 0.015,
-
-            # Discipline
-            "Fautes subies": 0.035,
-            "Faute": -0.04,
-            "Hors-jeu": -0.05,
-            "Cartons rouges": -2.0,
-            "Cartons jaunes": -0.6,
-        },
-        "Milieu": {
-            # Passes
-            ("Passes précises", "Passes"): (0.01, -0.05),
-            ("Passes longues précises", "Passes longues"): (0.03, -0.03),
-            ("Passes en profondeur précises", "Passes en profondeur"): (0.035, -0.025),
-            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.03, -0.02),
-            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.03, -0.02),
-            ("Passes en avant précises", "Passes en avant"): (0.025, -0.02),
-            ("Passes arrière précises", "Passes arrière"): (0.01, -0.005),
-
-            # Jeu offensif
-            ("Tirs cadrés", "Tirs"): (0.035, -0.015),
-            ("Centres précis", "Centres"): (0.025, -0.015),
-            ("Dribbles réussis", "Dribbles"): (0.035, -0.02),
-
-            # Duels
-            ("Duels gagnés", "Duels"): (0.045, -0.03),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.035, -0.025),
-            ("Duels aériens gagnés", "Duels aériens"): (0.025, -0.015),
-            ("Duels défensifs gagnés", "Duels défensifs"): (0.045, -0.025),
-
-            # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.04, -0.025),
-
-            # Autres
-            "Duels ballons gagnés": 0.045,
             "Duels ballons perdus": -0.045,
-            "Récupérations": 0.06,
+            "Récupérations": 0.03,
             "Récupérations dans le terrain adverse": 0.07,
-            "Interceptions": 0.05,
+            "Interceptions": 0.018,
             "Pertes": -0.055,
-            "Pertes dans le propre terrain": -0.08,
+            "Pertes dans le propre terrain": -0.09,
 
             # Finition / Création
-            "But": 1.2,
-            "Passe décisive": 1.0,
-            "Passes décisives avec tir": 0.1,
+            "But": 1.5,
+            "Passe décisive": 1.45,
+            "Passes décisives avec tir": 0.13,
             "Secondes passes décisives": 0.07,
-            "Courses progressives": 0.06,
-            "Touches de balle dans la surface de réparation": 0.01,
-
-            # Discipline
-            "Fautes subies": 0.04,
-            "Faute": -0.05,
-            "Hors-jeu": -0.02,
-            "Cartons rouges": -2.2,
-            "Cartons jaunes": -0.75,
-        },
-        "Latéral": {
-            # Passes
-            ("Passes précises", "Passes"): (0.005, -0.04),
-            ("Passes longues précises", "Passes longues"): (0.02, -0.025),
-            ("Passes en profondeur précises", "Passes en profondeur"): (0.03, -0.02),
-            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.035, -0.02),
-            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.04, -0.025),
-            ("Passes en avant précises", "Passes en avant"): (0.025, -0.02),
-            ("Passes arrière précises", "Passes arrière"): (0.01, -0.005),
-
-            # Jeu offensif
-            ("Tirs cadrés", "Tirs"): (0.03, -0.015),
-            ("Centres précis", "Centres"): (0.07, -0.025),
-            ("Dribbles réussis", "Dribbles"): (0.045, -0.025),
-
-            # Duels
-            ("Duels gagnés", "Duels"): (0.035, -0.03),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.03, -0.025),
-            ("Duels aériens gagnés", "Duels aériens"): (0.02, -0.015),
-            ("Duels défensifs gagnés", "Duels défensifs"): (0.05, -0.03),
-
-            # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.045, -0.03),
-
-            # Autres
-            "Duels ballons gagnés": 0.04,
-            "Duels ballons perdus": -0.04,
-            "Récupérations": 0.045,
-            "Récupérations dans le terrain adverse": 0.05,
-            "Interceptions": 0.04,
-            "Pertes": -0.045,
-            "Pertes dans le propre terrain": -0.075,
-
-            # Finition / Création
-            "But": 1.0,
-            "Passe décisive": 1.0,
-            "Passes décisives avec tir": 0.08,
-            "Secondes passes décisives": 0.05,
-            "Courses progressives": 0.06,
-            "Touches de balle dans la surface de réparation": 0.01,
+            "Courses progressives": 0.085,
+            "Touches de balle dans la surface de réparation": 0.02,
 
             # Discipline
             "Fautes subies": 0.03,
             "Faute": -0.05,
-            "Hors-jeu": -0.03,
+            "Hors-jeu": -0.06,
             "Cartons rouges": -2.0,
             "Cartons jaunes": -0.7,
+        },
+        "Milieu offensif": {
+            # Passes
+            ("Passes précises", "Passes"): (0.007, -0.045),
+            ("Passes longues précises", "Passes longues"): (0.017, -0.035),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.06, -0.03),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.045, -0.025),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.055, -0.02),
+            ("Passes en avant précises", "Passes en avant"): (0.02, -0.03),
+            ("Passes arrière précises", "Passes arrière"): (0.003, -0.08),
+
+            # Jeu offensif
+            ("Tirs cadrés", "Tirs"): (0.07, -0.015),
+            ("Centres précis", "Centres"): (0.06, -0.02),
+            ("Dribbles réussis", "Dribbles"): (0.08, -0.015),
+
+            # Duels
+            ("Duels gagnés", "Duels"): (0.035, -0.03),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.045, -0.025),
+            ("Duels aériens gagnés", "Duels aériens"): (0.01, -0.015),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.013, -0.035),
+
+            # Tacles
+            ("Tacles glissés réussis", "Tacles glissés"): (0.02, -0.03),
+
+            # Autres
+            "Duels ballons gagnés": 0.03,
+            "Duels ballons perdus": -0.045,
+            "Récupérations": 0.035,
+            "Récupérations dans le terrain adverse": 0.065,
+            "Interceptions": 0.025,
+            "Pertes": -0.055,
+            "Pertes dans le propre terrain": -0.09,
+
+            # Finition / Création
+            "But": 1.7,
+            "Passe décisive": 1.5,
+            "Passes décisives avec tir": 0.14,
+            "Secondes passes décisives": 0.09,
+            "Courses progressives": 0.09,
+            "Touches de balle dans la surface de réparation": 0.02,
+
+            # Discipline
+            "Fautes subies": 0.03,
+            "Faute": -0.055,
+            "Hors-jeu": -0.05,
+            "Cartons rouges": -2.0,
+            "Cartons jaunes": -0.7,
+        },
+        "Milieu": {
+            # Passes
+            ("Passes précises", "Passes"): (0.007, -0.07),
+            ("Passes longues précises", "Passes longues"): (0.025, -0.04),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.045, -0.02),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.035, -0.025),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.035, -0.015),
+            ("Passes en avant précises", "Passes en avant"): (0.018, -0.04),
+            ("Passes arrière précises", "Passes arrière"): (0.001, -0.11),
+
+            # Jeu offensif
+            ("Tirs cadrés", "Tirs"): (0.04, -0.012),
+            ("Centres précis", "Centres"): (0.018, -0.01),
+            ("Dribbles réussis", "Dribbles"): (0.03, -0.02),
+
+            # Duels
+            ("Duels gagnés", "Duels"): (0.04, -0.045),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.02, -0.035),
+            ("Duels aériens gagnés", "Duels aériens"): (0.02, -0.02),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.05, -0.07),
+
+            # Tacles
+            ("Tacles glissés réussis", "Tacles glissés"): (0.04, -0.045),
+
+            # Autres
+            "Duels ballons gagnés": 0.04,
+            "Duels ballons perdus": -0.055,
+            "Récupérations": 0.065,
+            "Récupérations dans le terrain adverse": 0.09,
+            "Interceptions": 0.06,
+            "Pertes": -0.065,
+            "Pertes dans le propre terrain": -0.12,
+
+            # Finition / Création
+            "But": 1.15,
+            "Passe décisive": 1.1,
+            "Passes décisives avec tir": 0.12,
+            "Secondes passes décisives": 0.07,
+            "Courses progressives": 0.07,
+            "Touches de balle dans la surface de réparation": 0.012,
+
+            # Discipline
+            "Fautes subies": 0.03,
+            "Faute": -0.065,
+            "Hors-jeu": -0.03,
+            "Cartons rouges": -2.3,
+            "Cartons jaunes": -0.8,
+        },
+        "Latéral": {
+            # Passes
+            ("Passes précises", "Passes"): (0.005, -0.06),
+            ("Passes longues précises", "Passes longues"): (0.018, -0.04),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.045, -0.02),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.035, -0.02),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.05, -0.025),
+            ("Passes en avant précises", "Passes en avant"): (0.012, -0.04),
+            ("Passes arrière précises", "Passes arrière"): (0.001, -0.1),
+
+            # Jeu offensif
+            ("Tirs cadrés", "Tirs"): (0.035, -0.012),
+            ("Centres précis", "Centres"): (0.07, -0.01),
+            ("Dribbles réussis", "Dribbles"): (0.055, -0.015),
+
+            # Duels
+            ("Duels gagnés", "Duels"): (0.035, -0.05),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.02, -0.04),
+            ("Duels aériens gagnés", "Duels aériens"): (0.02, -0.03),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.07, -0.08),
+
+            # Tacles
+            ("Tacles glissés réussis", "Tacles glissés"): (0.05, -0.055),
+
+            # Autres
+            "Duels ballons gagnés": 0.04,
+            "Duels ballons perdus": -0.06,
+            "Récupérations": 0.06,
+            "Récupérations dans le terrain adverse": 0.08,
+            "Interceptions": 0.05,
+            "Pertes": -0.055,
+            "Pertes dans le propre terrain": -0.12,
+
+            # Finition / Création
+            "But": 0.95,
+            "Passe décisive": 1.0,
+            "Passes décisives avec tir": 0.09,
+            "Secondes passes décisives": 0.05,
+            "Courses progressives": 0.065,
+            "Touches de balle dans la surface de réparation": 0.01,
+
+            # Discipline
+            "Fautes subies": 0.03,
+            "Faute": -0.06,
+            "Hors-jeu": -0.03,
+            "Cartons rouges": -2.4,
+            "Cartons jaunes": -0.9,
         },
         "Défenseur central": {
             # Passes
@@ -1836,8 +1836,8 @@ def performance_index(df_player, poste, match):
             ("Passes en profondeur précises", "Passes en profondeur"): (0.02, -0.015),
             ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.015, -0.015),
             ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.015, -0.015),
-            ("Passes en avant précises", "Passes en avant"): (0.01, -0.02),
-            ("Passes arrière précises", "Passes arrière"): (0.01, -0.005),
+            ("Passes en avant précises", "Passes en avant"): (0.008, -0.02),
+            ("Passes arrière précises", "Passes arrière"): (0.001, -0.05),
 
             # Jeu offensif
             ("Tirs cadrés", "Tirs"): (0.02, -0.01),
@@ -1845,26 +1845,26 @@ def performance_index(df_player, poste, match):
             ("Dribbles réussis", "Dribbles"): (0.015, -0.015),
 
             # Duels
-            ("Duels gagnés", "Duels"): (0.05, -0.035),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.025, -0.03),
-            ("Duels aériens gagnés", "Duels aériens"): (0.07, -0.035),
-            ("Duels défensifs gagnés", "Duels défensifs"): (0.08, -0.035),
+            ("Duels gagnés", "Duels"): (0.05, -0.05),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.025, -0.01),
+            ("Duels aériens gagnés", "Duels aériens"): (0.07, -0.1),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.08, -0.1),
 
             # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.06, -0.03),
+            ("Tacles glissés réussis", "Tacles glissés"): (0.03, -0.06),
 
             # Autres
-            "Duels ballons gagnés": 0.06,
-            "Duels ballons perdus": -0.05,
+            "Duels ballons gagnés": 0.05,
+            "Duels ballons perdus": -0.075,
             "Récupérations": 0.07,
             "Récupérations dans le terrain adverse": 0.08,
             "Interceptions": 0.06,
-            "Pertes": -0.05,
-            "Pertes dans le propre terrain": -0.08,
+            "Pertes": -0.08,
+            "Pertes dans le propre terrain": -0.1,
 
             # Finition / Création
-            "But": 0.8,
-            "Passe décisive": 0.5,
+            "But": 1,
+            "Passe décisive": 0.75,
             "Passes décisives avec tir": 0.03,
             "Secondes passes décisives": 0.02,
             "Courses progressives": 0.015,
@@ -1879,13 +1879,13 @@ def performance_index(df_player, poste, match):
         },
         "Gardien": {
             # Passes
-            ("Passes précises", "Passes"): (0.005, -0.05),
-            ("Passes longues précises", "Passes longues"): (0.015, -0.025),
-            ("Passes en profondeur précises", "Passes en profondeur"): (0.01, -0.02),
-            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.005, -0.01),
-            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.005, -0.01),
-            ("Passes en avant précises", "Passes en avant"): (0.01, -0.015),
-            ("Passes arrière précises", "Passes arrière"): (0.015, -0.01),
+            ("Passes précises", "Passes"): (0.005, -0.1),
+            ("Passes longues précises", "Passes longues"): (0.01, -0.04),
+            ("Passes en profondeur précises", "Passes en profondeur"): (0.007, -0.03),
+            ("Passes dans le 3ème tiers précises", "Passes dans le 3ème tiers"): (0.002, -0.03),
+            ("Passes vers la surface de réparation précises", "Passes vers la surface de réparation"): (0.003, -0.03),
+            ("Passes en avant précises", "Passes en avant"): (0.003, -0.03),
+            ("Passes arrière précises", "Passes arrière"): (0.001, -0.12),
 
             # Jeu offensif
             ("Tirs cadrés", "Tirs"): (0.01, -0.01),
@@ -1893,41 +1893,41 @@ def performance_index(df_player, poste, match):
             ("Dribbles réussis", "Dribbles"): (0.01, -0.01),
 
             # Duels
-            ("Duels gagnés", "Duels"): (0.02, -0.02),
-            ("Duels offensifs gagnés", "Duels offensifs"): (0.015, -0.02),
-            ("Duels aériens gagnés", "Duels aériens"): (0.04, -0.02),
-            ("Duels défensifs gagnés", "Duels défensifs"): (0.04, -0.025),
+            ("Duels gagnés", "Duels"): (0.015, -0.05),
+            ("Duels offensifs gagnés", "Duels offensifs"): (0.015, -0.05),
+            ("Duels aériens gagnés", "Duels aériens"): (0.03, -0.07),
+            ("Duels défensifs gagnés", "Duels défensifs"): (0.04, -0.08),
 
             # Tacles
-            ("Tacles glissés réussis", "Tacles glissés"): (0.03, -0.02),
+            ("Tacles glissés réussis", "Tacles glissés"): (0.02, -0.04),
 
             # Autres
             "Duels ballons gagnés": 0.03,
-            "Duels ballons perdus": -0.03,
-            "Récupérations": 0.03,
-            "Récupérations dans le terrain adverse": 0.015,
-            "Interceptions": 0.04,
-            "Pertes": -0.05,
-            "Pertes dans le propre terrain": -0.08,
+            "Duels ballons perdus": -0.06,
+            "Récupérations": 0.025,
+            "Récupérations dans le terrain adverse": 0.01,
+            "Interceptions": 0.025,
+            "Pertes": -0.12,
+            "Pertes dans le propre terrain": -0.2,
 
             # Finition / Création
             "But": 2.0,
-            "Passe décisive": 1.0,
-            "Passes décisives avec tir": 0.05,
-            "Secondes passes décisives": 0.03,
-            "Courses progressives": 0.02,
+            "Passe décisive": 0.8,
+            "Passes décisives avec tir": 0.03,
+            "Secondes passes décisives": 0.01,
+            "Courses progressives": 0.01,
             "Touches de balle dans la surface de réparation": 0.01,
 
             # Discipline
-            "Fautes subies": 0.03,
-            "Faute": -0.05,
+            "Fautes subies": 0.01,
+            "Faute": -0.07,
             "Hors-jeu": -0.01,
-            "Cartons rouges": -2.5,
-            "Cartons jaunes": -0.7,
+            "Cartons rouges": -3.0,
+            "Cartons jaunes": -1.0,
 
             # Spécificités gardien
-            "Dégagements": 0.05,
-            "Sorties": 0.07,
+            "Dégagements": 0.04,
+            "Sorties": 0.09,
             "Arrêts": 0.25,
             "Arrêts réflexes": 0.5,
             "Tirs contre": 0.01,
