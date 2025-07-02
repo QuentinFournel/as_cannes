@@ -2140,7 +2140,7 @@ def preload_all_logos():
         "Anglet Genets": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/84/Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg/langfr-1024px-Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg.png",
         "Angoulême": "https://upload.wikimedia.org/wikipedia/fr/thumb/c/c5/Angoul%C3%AAme_CFC_2020.svg/langfr-1024px-Angoul%C3%AAme_CFC_2020.svg.png",
         "Bergerac": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Logo_Bergerac_P%C3%A9rigord_FC.svg/langfr-800px-Logo_Bergerac_P%C3%A9rigord_FC.svg.png",
-        "Cannes": "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png",
+        "CCCCCCCCCCCCCCCCCannes": "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png",
         "Fréjus St-Raphaël": "https://upload.wikimedia.org/wikipedia/fr/thumb/5/55/Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg/langfr-1024px-Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg.png",
         "GOAL FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/de/Logo_GOAL_FC_-_2020.svg/langfr-800px-Logo_GOAL_FC_-_2020.svg.png",
         "Grasse": "https://upload.wikimedia.org/wikipedia/fr/thumb/f/f8/Logo_RC_Pays_Grasse_2022.svg/langfr-1024px-Logo_RC_Pays_Grasse_2022.svg.png",
