@@ -1507,18 +1507,34 @@ def plot_team_metrics(df, x_metric, y_metric, all_logos):
     x_mean = df[x_metric].mean()
     y_mean = df[y_metric].mean()
 
+    logos_dict = {
+        "Andrézieux": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d1/Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg/langfr-1024px-Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg.png",
+        "Anglet Genets": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/84/Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg/langfr-1024px-Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg.png",
+        "Angoulême": "https://upload.wikimedia.org/wikipedia/fr/thumb/c/c5/Angoul%C3%AAme_CFC_2020.svg/langfr-1024px-Angoul%C3%AAme_CFC_2020.svg.png",
+        "Bergerac": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Logo_Bergerac_P%C3%A9rigord_FC.svg/langfr-800px-Logo_Bergerac_P%C3%A9rigord_FC.svg.png",
+        "Cannes": "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png",
+        "Fréjus St-Raphaël": "https://upload.wikimedia.org/wikipedia/fr/thumb/5/55/Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg/langfr-1024px-Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg.png",
+        "GOAL FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/de/Logo_GOAL_FC_-_2020.svg/langfr-800px-Logo_GOAL_FC_-_2020.svg.png",
+        "Grasse": "https://upload.wikimedia.org/wikipedia/fr/thumb/f/f8/Logo_RC_Pays_Grasse_2022.svg/langfr-1024px-Logo_RC_Pays_Grasse_2022.svg.png",
+        "Hyères FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/3/3f/Logo_Hy%C3%A8res_83_Football_Club_-_2021.svg/langfr-800px-Logo_Hy%C3%A8res_83_Football_Club_-_2021.svg.png",
+        "Istres": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/b0/Logo_Istres_FC_-_2022.svg/langfr-800px-Logo_Istres_FC_-_2022.svg.png",
+        "Jura Sud Foot": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/ba/Logo_Jura_Sud_Foot.svg/langfr-1280px-Logo_Jura_Sud_Foot.svg.png",
+        "Le Puy F.43 Auvergne": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/88/Logo_Puy_Foot_43_Auvergne_2017.svg/langfr-800px-Logo_Puy_Foot_43_Auvergne_2017.svg.png",
+        "Marignane Gignac CB": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/bb/Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg/langfr-800px-Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg.png",
+        "Rumilly Vallières": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/40/Logo_Groupement_Football_Albanais_74_-_2021.svg/langfr-800px-Logo_Groupement_Football_Albanais_74_-_2021.svg.png",
+        "Saint-Priest": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/46/Logo_AS_St_Priest.svg/langfr-800px-Logo_AS_St_Priest.svg.png",
+        "Toulon": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d6/Logo_SC_Toulon.svg/langfr-800px-Logo_SC_Toulon.svg.png"
+    }
+
     fig = go.Figure()
 
-    st.write(all_logos)
-
-    # Affiche chaque équipe comme un logo
     for _, row in df.iterrows():
-        logo_img = all_logos.get(row["Équipe"])
-        if not logo_img:
+        logo_url = logos_dict.get(row["Équipe"])
+        if not logo_url:
             continue
         fig.add_layout_image(
             dict(
-                source=logo_img,
+                source=logo_url,
                 xref="x",
                 yref="y",
                 x=row[x_metric],
@@ -1538,7 +1554,6 @@ def plot_team_metrics(df, x_metric, y_metric, all_logos):
             hovertemplate=f"<b>{row['Équipe']}</b><extra></extra>"
         ))
 
-    # Lignes de moyennes
     fig.add_vline(x=x_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
     fig.add_hline(y=y_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
 
@@ -2134,40 +2149,7 @@ def compute_similarity(df, joueur, poste):
 
     return df_sorted
 
-@st.cache_data
-def preload_all_logos():
-    logos_dict = {
-        "Andrézieux": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d1/Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg/langfr-1024px-Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg.png",
-        "Anglet Genets": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/84/Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg/langfr-1024px-Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg.png",
-        "Angoulême": "https://upload.wikimedia.org/wikipedia/fr/thumb/c/c5/Angoul%C3%AAme_CFC_2020.svg/langfr-1024px-Angoul%C3%AAme_CFC_2020.svg.png",
-        "Bergerac": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Logo_Bergerac_P%C3%A9rigord_FC.svg/langfr-800px-Logo_Bergerac_P%C3%A9rigord_FC.svg.png",
-        "Cannes": "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png",
-        "Fréjus St-Raphaël": "https://upload.wikimedia.org/wikipedia/fr/thumb/5/55/Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg/langfr-1024px-Logo_%C3%89FC_Fr%C3%A9jus_Saint-Rapha%C3%ABl_-_2020.svg.png",
-        "GOAL FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/de/Logo_GOAL_FC_-_2020.svg/langfr-800px-Logo_GOAL_FC_-_2020.svg.png",
-        "Grasse": "https://upload.wikimedia.org/wikipedia/fr/thumb/f/f8/Logo_RC_Pays_Grasse_2022.svg/langfr-1024px-Logo_RC_Pays_Grasse_2022.svg.png",
-        "Hyères FC": "https://upload.wikimedia.org/wikipedia/fr/thumb/3/3f/Logo_Hy%C3%A8res_83_Football_Club_-_2021.svg/langfr-800px-Logo_Hy%C3%A8res_83_Football_Club_-_2021.svg.png",
-        "Istres": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/b0/Logo_Istres_FC_-_2022.svg/langfr-800px-Logo_Istres_FC_-_2022.svg.png",
-        "Jura Sud Foot": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/ba/Logo_Jura_Sud_Foot.svg/langfr-1280px-Logo_Jura_Sud_Foot.svg.png",
-        "Le Puy F.43 Auvergne": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/88/Logo_Puy_Foot_43_Auvergne_2017.svg/langfr-800px-Logo_Puy_Foot_43_Auvergne_2017.svg.png",
-        "Marignane Gignac CB": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/bb/Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg/langfr-800px-Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg.png",
-        "Rumilly Vallières": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/40/Logo_Groupement_Football_Albanais_74_-_2021.svg/langfr-800px-Logo_Groupement_Football_Albanais_74_-_2021.svg.png",
-        "Saint-Priest": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/46/Logo_AS_St_Priest.svg/langfr-800px-Logo_AS_St_Priest.svg.png",
-        "Toulon": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d6/Logo_SC_Toulon.svg/langfr-800px-Logo_SC_Toulon.svg.png"
-    }
-    all_logos = {}
-    for team, url in logos_dict.items():
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                img_b64 = "data:image/png;base64," + base64.b64encode(response.content).decode()
-                all_logos[team] = img_b64
-            else:
-                all_logos[team] = None
-        except Exception:
-            all_logos[team] = None
-    return all_logos
-
-def streamlit_application(all_df, all_logos):
+def streamlit_application(all_df):
     with st.sidebar:
         page = option_menu(
             menu_title="",
@@ -2475,7 +2457,7 @@ def streamlit_application(all_df, all_logos):
                     with col2:
                         y_metric = st.selectbox("Sélectionnez la métrique Y", metrics)
 
-                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric, all_logos)
+                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric)
                     st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
@@ -2994,6 +2976,5 @@ if __name__ == '__main__':
                     st.error("Nom d'utilisateur ou mot de passe incorrect")
 
     if st.session_state.authenticated:
-        all_logos = preload_all_logos()
         all_df = collect_individual_data()
-        streamlit_application(all_df, all_logos)
+        streamlit_application(all_df)
