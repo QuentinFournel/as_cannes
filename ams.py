@@ -1476,7 +1476,7 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
     ]
 
     fig.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         plot_bgcolor="#f4f3ed",
         annotations=annotations,
         showlegend=False,
@@ -1545,8 +1545,8 @@ def plot_team_metrics(df, x_metric, y_metric):
                 yref="y",
                 x=row[x_metric],
                 y=row[y_metric],
-                sizex=(df[x_metric].max() - df[x_metric].min()) * 0.045,
-                sizey=(df[y_metric].max() - df[y_metric].min()) * 0.045,
+                sizex=(df[x_metric].max() - df[x_metric].min()) * 0.05,
+                sizey=(df[y_metric].max() - df[y_metric].min()) * 0.05,
                 xanchor="center",
                 yanchor="middle",
                 layer="above"
