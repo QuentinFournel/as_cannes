@@ -1503,6 +1503,12 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
     return fig
 
 def plot_team_metrics(df, x_metric, y_metric):
+    colonnes_bas_mieux = {
+        'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
+        'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
+        'Cartons jaunes', 'Cartons rouges', 'PPDA'
+    }
+
     df = df.copy()
     x_mean = df[x_metric].mean()
     y_mean = df[y_metric].mean()
@@ -1546,7 +1552,6 @@ def plot_team_metrics(df, x_metric, y_metric):
                 layer="above"
             )
         )
-        # Ajoute un marker invisible pour l'hover
         fig.add_trace(go.Scatter(
             x=[row[x_metric]], y=[row[y_metric]],
             mode="markers",
@@ -1557,6 +1562,23 @@ def plot_team_metrics(df, x_metric, y_metric):
     fig.add_vline(x=x_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
     fig.add_hline(y=y_mean, line=dict(color="rgba(61,58,42,0.5)", dash='dash'))
 
+    x_axis = dict(
+        showgrid=True,
+        gridcolor="rgba(61,58,42,0.1)",
+        gridwidth=0.5,
+        griddash="dot",
+        zeroline=False,
+        autorange="reversed" if x_metric in colonnes_bas_mieux else True
+    )
+    y_axis = dict(
+        showgrid=True,
+        gridcolor="rgba(61,58,42,0.1)",
+        gridwidth=0.5,
+        griddash="dot",
+        zeroline=False,
+        autorange="reversed" if y_metric in colonnes_bas_mieux else True
+    )
+
     fig.update_layout(
         template="plotly_white",
         plot_bgcolor="#f4f3ed",
@@ -1565,20 +1587,8 @@ def plot_team_metrics(df, x_metric, y_metric):
         yaxis_title=y_metric,
         width=1000,
         height=600,
-        xaxis=dict(
-            showgrid=True,
-            gridcolor="rgba(61,58,42,0.1)",
-            gridwidth=0.5,
-            griddash="dot",
-            zeroline=False
-        ),
-        yaxis=dict(
-            showgrid=True,
-            gridcolor="rgba(61,58,42,0.1)",
-            gridwidth=0.5,
-            griddash="dot",
-            zeroline=False
-        )
+        xaxis=x_axis,
+        yaxis=y_axis,
     )
 
     return fig
@@ -2356,10 +2366,10 @@ def streamlit_application(all_df):
         df_stats_moyennes = df_stats_moyennes[cols]
 
         colonnes_bas_mieux = {
-                'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
-                'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
-                'Cartons jaunes', 'Cartons rouges', 'PPDA'
-            }
+            'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
+            'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
+            'Cartons jaunes', 'Cartons rouges', 'PPDA'
+        }
         
         with tab1:
             tab3, tab4 = st.tabs(['Statistiques joueurs', 'Statistiques équipes'])
