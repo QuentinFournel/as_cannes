@@ -1623,8 +1623,8 @@ def performance_index(df_player, poste, match):
             "Pertes dans le propre terrain": -0.13,
 
             # Finition / Création
-            "But": 2.2,
-            "Passe décisive": 1.3,
+            "But": 1.5,
+            "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.12,
             "Secondes passes décisives": 0.07,
             "Courses progressives": 0.05,
@@ -1672,7 +1672,7 @@ def performance_index(df_player, poste, match):
 
             # Finition / Création
             "But": 1.5,
-            "Passe décisive": 1.45,
+            "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.13,
             "Secondes passes décisives": 0.07,
             "Courses progressives": 0.085,
@@ -1719,8 +1719,8 @@ def performance_index(df_player, poste, match):
             "Pertes dans le propre terrain": -0.09,
 
             # Finition / Création
-            "But": 1.7,
-            "Passe décisive": 1.5,
+            "But": 1.5,
+            "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.14,
             "Secondes passes décisives": 0.09,
             "Courses progressives": 0.09,
@@ -1767,8 +1767,8 @@ def performance_index(df_player, poste, match):
             "Pertes dans le propre terrain": -0.12,
 
             # Finition / Création
-            "But": 1.15,
-            "Passe décisive": 1.1,
+            "But": 1.5,
+            "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.12,
             "Secondes passes décisives": 0.07,
             "Courses progressives": 0.07,
@@ -1815,7 +1815,7 @@ def performance_index(df_player, poste, match):
             "Pertes dans le propre terrain": -0.12,
 
             # Finition / Création
-            "But": 0.95,
+            "But": 1.5,
             "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.09,
             "Secondes passes décisives": 0.05,
@@ -1863,8 +1863,8 @@ def performance_index(df_player, poste, match):
             "Pertes dans le propre terrain": -0.1,
 
             # Finition / Création
-            "But": 1,
-            "Passe décisive": 0.75,
+            "But": 1.5,
+            "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.03,
             "Secondes passes décisives": 0.02,
             "Courses progressives": 0.015,
@@ -1911,8 +1911,8 @@ def performance_index(df_player, poste, match):
             "Pertes dans le propre terrain": -0.2,
 
             # Finition / Création
-            "But": 2.0,
-            "Passe décisive": 0.8,
+            "But": 1.5,
+            "Passe décisive": 1.0,
             "Passes décisives avec tir": 0.03,
             "Secondes passes décisives": 0.01,
             "Courses progressives": 0.01,
