@@ -2465,6 +2465,8 @@ def streamlit_application(all_df, all_logos):
                 with tab6:
                     metrics = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
 
+                    st.dataframe(df_stats_moyennes[["Passes", "Possession %", "Équipe"]])
+
                     col1, col2 = st.columns(2)
 
                     with col1:
