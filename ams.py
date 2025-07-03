@@ -2752,7 +2752,7 @@ def streamlit_application(all_df):
                 for i, col_name in enumerate(groupe):
                     if col_name in df_player_mean.columns:
                         val = df_player_mean[col_name].values[0]
-                        val = int(val)
+                        val = round(val, 2)
                         
                         if len(groupe) == 3:
                             bordered_metric(cols[i], col_name, val, 225)
