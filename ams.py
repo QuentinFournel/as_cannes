@@ -2158,6 +2158,96 @@ def compute_similarity(df, joueur, poste):
 
     return df_sorted
 
+def create_player_data(joueur):
+    joueur = joueur.split(" - ")[0]
+    file_path = f"data/Player stats {joueur}.xlsx"
+
+    if os.path.exists(file_path):
+        df_player = pd.read_excel(file_path)
+    else:
+        st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}.")
+        st.stop()
+
+    colonnes = [
+        "Match",
+        "Competition",
+        "Date",
+        "Place",
+        "Minutes jouées",
+        "Total actions",
+        "Total actions réussies",
+        "But",
+        "Passe décisive",
+        "Tirs",
+        "Tirs cadrés",
+        "xG",
+        "Passes",
+        "Passes précises",
+        "Passes longues",
+        "Passes longues précises",
+        "Centres",
+        "Centres précis",
+        "Dribbles",
+        "Dribbles réussis",
+        "Duels",
+        "Duels gagnés",
+        "Duels aériens",
+        "Duels aériens gagnés",
+        "Interceptions",
+        "Pertes",
+        "Pertes dans le propre terrain",
+        "Récupérations",
+        "Récupérations dans le terrain adverse",
+        "Carton jaune",
+        "Carton rouge",
+        "Duels défensifs",
+        "Duels défensifs gagnés",
+        "Duels ballons perdus",
+        "Duels ballons gagnés",
+        "Tacles glissés",
+        "Tacles glissés réussis",
+        "Dégagements",
+        "Faute",
+        "Cartons jaunes",
+        "Cartons rouges",
+        "Passes décisives avec tir",
+        "Duels offensifs",
+        "Duels offensifs gagnés",
+        "Touches de balle dans la surface de réparation",
+        "Hors-jeu",
+        "Courses progressives",
+        "Fautes subies",
+        "Passes en profondeur",
+        "Passes en profondeur précises",
+        "xA",
+        "Secondes passes décisives",
+        "Passes dans le 3ème tiers",
+        "Passes dans le 3ème tiers précises",
+        "Passes vers la surface de réparation",
+        "Passes vers la surface de réparation précises",
+        "Passes réceptionnées",
+        "Passes en avant",
+        "Passes en avant précises",
+        "Passes arrière",
+        "Passes arrière précises",
+        "Buts concédés",
+        "xCG",
+        "Tirs contre",
+        "Arrêts",
+        "Arrêts réflexes",
+        "Sorties",
+        "Passes au gardien de but",
+        "Passes au gardien de but précises",
+        "But sur coup franc",
+        "But sur coup franc courtes",
+        "But sur coup franc longues"
+    ]
+
+    # Renommer les colonnes
+    df_player.columns = colonnes
+
+    return df_player
+
 def streamlit_application(all_df):
     with st.sidebar:
         page = option_menu(
@@ -2628,6 +2718,8 @@ def streamlit_application(all_df):
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Joueur similaire"])
 
         with tab1:
+            st.subheader('Statistiques générales')
+
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
@@ -2648,6 +2740,35 @@ def streamlit_application(all_df):
                 else:
                     bordered_metric(col4, "xG concédés", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['xG contre'].values[0], 165)
 
+            if team == "Cannes":
+                st.markdown("---")
+
+                st.subheader('Smart Goals')
+
+                df_player = create_player_data(joueur)
+
+                df_player_mean = df_player.mean(numeric_only=True).to_frame().T
+                df_player_mean = ajouter_pourcentages(df_player_mean)
+
+                colonnes_smart = smart_goal.get(joueur, [])
+
+                for groupe in colonnes_smart:
+                    cols = st.columns(len(groupe))
+
+                    for i, col_name in enumerate(groupe):
+                        if col_name in df_player_mean.columns:
+                            val = df_player_mean[col_name].values[0]
+                            val = int(val)
+                            
+                            if len(groupe) == 3:
+                                bordered_metric(cols[i], col_name, val, 225)
+                            elif len(groupe) == 2:
+                                bordered_metric(cols[i], col_name, val, 345)
+                            elif len(groupe) == 1:
+                                bordered_metric(cols[i], col_name, val, 705)
+
+                    st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
+                
         with tab2:
             fig = create_individual_radar(df, joueur, poste)
             st.pyplot(fig, use_container_width=True)
@@ -2693,92 +2814,7 @@ def streamlit_application(all_df):
 
         if team == "Cannes":
             with tab6:
-                joueur = joueur.split(" - ")[0]
-                file_path = f"data/Player stats {joueur}.xlsx"
-
-                if os.path.exists(file_path):
-                    df_player = pd.read_excel(file_path)
-                else:
-                    st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}.")
-                    st.stop()
-
-                colonnes = [
-                    "Match",
-                    "Competition",
-                    "Date",
-                    "Place",
-                    "Minutes jouées",
-                    "Total actions",
-                    "Total actions réussies",
-                    "But",
-                    "Passe décisive",
-                    "Tirs",
-                    "Tirs cadrés",
-                    "xG",
-                    "Passes",
-                    "Passes précises",
-                    "Passes longues",
-                    "Passes longues précises",
-                    "Centres",
-                    "Centres précis",
-                    "Dribbles",
-                    "Dribbles réussis",
-                    "Duels",
-                    "Duels gagnés",
-                    "Duels aériens",
-                    "Duels aériens gagnés",
-                    "Interceptions",
-                    "Pertes",
-                    "Pertes dans le propre terrain",
-                    "Récupérations",
-                    "Récupérations dans le terrain adverse",
-                    "Carton jaune",
-                    "Carton rouge",
-                    "Duels défensifs",
-                    "Duels défensifs gagnés",
-                    "Duels ballons perdus",
-                    "Duels ballons gagnés",
-                    "Tacles glissés",
-                    "Tacles glissés réussis",
-                    "Dégagements",
-                    "Faute",
-                    "Cartons jaunes",
-                    "Cartons rouges",
-                    "Passes décisives avec tir",
-                    "Duels offensifs",
-                    "Duels offensifs gagnés",
-                    "Touches de balle dans la surface de réparation",
-                    "Hors-jeu",
-                    "Courses progressives",
-                    "Fautes subies",
-                    "Passes en profondeur",
-                    "Passes en profondeur précises",
-                    "xA",
-                    "Secondes passes décisives",
-                    "Passes dans le 3ème tiers",
-                    "Passes dans le 3ème tiers précises",
-                    "Passes vers la surface de réparation",
-                    "Passes vers la surface de réparation précises",
-                    "Passes réceptionnées",
-                    "Passes en avant",
-                    "Passes en avant précises",
-                    "Passes arrière",
-                    "Passes arrière précises",
-                    "Buts concédés",
-                    "xCG",
-                    "Tirs contre",
-                    "Arrêts",
-                    "Arrêts réflexes",
-                    "Sorties",
-                    "Passes au gardien de but",
-                    "Passes au gardien de but précises",
-                    "But sur coup franc",
-                    "But sur coup franc courtes",
-                    "But sur coup franc longues"
-                ]
-
-                # Renommer les colonnes
-                df_player.columns = colonnes
+                df_player = create_player_data(joueur)
 
                 df_player = ajouter_pourcentages(df_player)
 
