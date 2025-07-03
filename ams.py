@@ -2153,8 +2153,8 @@ def compute_similarity(df, joueur, poste):
     df_sorted = df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']]
 
     # Supprimer les lignes correspondantes au joueur
-    nom_du_joueur = joueur.strip().split(' - ')[0]
-    df_sorted = df_sorted[~df_sorted['Joueur + Information'].str.startswith(nom_du_joueur)]
+    nom_joueur = joueur.strip().split(' - ')[0]
+    df_sorted = df_sorted[~df_sorted['Joueur + Information'].str.startswith(nom_joueur)]
 
     return df_sorted
 
@@ -2650,13 +2650,13 @@ def streamlit_application(all_df):
                 else:
                     bordered_metric(col4, "xG concédés", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['xG contre'].values[0], 165)
 
-            joueur = joueur.split(" - ")[0]
-            file_path = f"data/Player stats {joueur}.xlsx"
+            nom_joueur = joueur.split(" - ")[0]
+            file_path = f"data/Player stats {nom_joueur}.xlsx"
 
             if os.path.exists(file_path):
                 df_player = pd.read_excel(file_path)
             else:
-                st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}.")
+                st.warning(f"⚠️ Fichier non trouvé pour le joueur : {nom_joueur}.")
                 st.stop()
 
             colonnes = [
@@ -2808,13 +2808,13 @@ def streamlit_application(all_df):
 
         if team == "Cannes":
             with tab6:
-                joueur = joueur.split(" - ")[0]
-                file_path = f"data/Player stats {joueur}.xlsx"
+                nom_joueur = joueur.split(" - ")[0]
+                file_path = f"data/Player stats {nom_joueur}.xlsx"
 
                 if os.path.exists(file_path):
                     df_player = pd.read_excel(file_path)
                 else:
-                    st.warning(f"⚠️ Fichier non trouvé pour le joueur : {joueur}.")
+                    st.warning(f"⚠️ Fichier non trouvé pour le joueur : {nom_joueur}.")
                     st.stop()
 
                 colonnes = [
