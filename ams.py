@@ -2158,8 +2158,7 @@ def compute_similarity(df, joueur, poste):
 
     return df_sorted
 
-def create_player_data(joueur):
-    nom_joueur = joueur.split(" - ")[0]
+def create_player_data(nom_joueur):
     file_path = f"data/Player stats {nom_joueur}.xlsx"
 
     if os.path.exists(file_path):
@@ -2741,7 +2740,9 @@ def streamlit_application(all_df):
                     bordered_metric(col4, "xG concédés", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['xG contre'].values[0], 165)
 
             if team == "Cannes":
-                df_player = create_player_data(joueur)
+                nom_joueur = joueur.split(" - ")[0]
+
+                df_player = create_player_data(nom_joueur)
 
                 df_player_mean = df_player.mean(numeric_only=True).to_frame().T
                 df_player_mean = ajouter_pourcentages(df_player_mean)
@@ -2750,7 +2751,7 @@ def streamlit_application(all_df):
 
                 st.subheader('Smart Goals (moyenne par match)')
 
-                colonnes_smart = smart_goal.get(joueur, [])
+                colonnes_smart = smart_goal.get(nom_joueur, [])
 
                 for groupe in colonnes_smart:
                     cols = st.columns(len(groupe))
@@ -2814,7 +2815,9 @@ def streamlit_application(all_df):
 
         if team == "Cannes":
             with tab6:
-                df_player = create_player_data(joueur)
+                nom_joueur = joueur.split(" - ")[0]
+
+                df_player = create_player_data(nom_joueur)
 
                 df_player = ajouter_pourcentages(df_player)
 
@@ -2849,7 +2852,7 @@ def streamlit_application(all_df):
 
                 st.subheader('Smart Goals')
 
-                colonnes_smart = smart_goal.get(joueur, [])
+                colonnes_smart = smart_goal.get(nom_joueur, [])
 
                 for groupe in colonnes_smart:
                     cols = st.columns(len(groupe))
