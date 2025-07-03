@@ -2742,7 +2742,7 @@ def streamlit_application(all_df):
 
             st.markdown("---")
 
-            st.subheader('Smart Goals')
+            st.subheader('Smart Goals (moyenne par match)')
 
             colonnes_smart = smart_goal.get(joueur, [])
 
