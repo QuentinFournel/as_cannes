@@ -2757,16 +2757,15 @@ def streamlit_application(all_df):
                     cols = st.columns(len(groupe))
 
                     for i, col_name in enumerate(groupe):
-                        if col_name in df_player_mean.columns:
-                            val = df_player_mean[col_name].values[0]
-                            val = round(val, 2)
-                            
-                            if len(groupe) == 3:
-                                bordered_metric(cols[i], col_name, val, 225)
-                            elif len(groupe) == 2:
-                                bordered_metric(cols[i], col_name, val, 345)
-                            elif len(groupe) == 1:
-                                bordered_metric(cols[i], col_name, val, 705)
+                        val = df_player_mean[col_name].values[0]
+                        val = round(val, 2)
+                        
+                        if len(groupe) == 3:
+                            bordered_metric(cols[i], col_name, val, 225)
+                        elif len(groupe) == 2:
+                            bordered_metric(cols[i], col_name, val, 345)
+                        elif len(groupe) == 1:
+                            bordered_metric(cols[i], col_name, val, 705)
 
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
                 
@@ -2858,16 +2857,18 @@ def streamlit_application(all_df):
                     cols = st.columns(len(groupe))
 
                     for i, col_name in enumerate(groupe):
-                        if col_name in df_player.columns:
-                            val = df_player[col_name].values[0]
-                            val = int(val)
-                            
-                            if len(groupe) == 3:
-                                bordered_metric(cols[i], col_name, val, 225)
-                            elif len(groupe) == 2:
-                                bordered_metric(cols[i], col_name, val, 345)
-                            elif len(groupe) == 1:
-                                bordered_metric(cols[i], col_name, val, 705)
+                        val = df_player[col_name].values[0]
+                        val = int(val)
+
+                        mean_val = df_player_mean[col_name].values[0]
+                        color = "#1aac14" if val > mean_val else "#ac141a"
+
+                        if len(groupe) == 3:
+                            bordered_metric(cols[i], col_name, val, 225, color)
+                        elif len(groupe) == 2:
+                            bordered_metric(cols[i], col_name, val, 345, color)
+                        elif len(groupe) == 1:
+                            bordered_metric(cols[i], col_name, val, 705, color)
 
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
