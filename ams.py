@@ -2158,7 +2158,7 @@ def compute_similarity(df, joueur, poste):
 
     return df_sorted
 
-def create_player_data(nom_joueur):
+def create_player_data(nom_joueur, sélection_dataframe):
     file_path = f"data/Player stats {nom_joueur}.xlsx"
 
     if os.path.exists(file_path):
@@ -2244,6 +2244,9 @@ def create_player_data(nom_joueur):
 
     # Renommer les colonnes
     df_player.columns = colonnes
+
+    if sélection_dataframe == 'Joueur du championnat de France':
+        df_player = df_player[df_player['Competition'] == 'France. National 2']
 
     return df_player
 
@@ -2742,7 +2745,7 @@ def streamlit_application(all_df):
             if team == "Cannes":
                 nom_joueur = joueur.split(" - ")[0]
 
-                df_player = create_player_data(nom_joueur)
+                df_player = create_player_data(nom_joueur, sélection_dataframe)
 
                 df_player_mean = df_player.mean(numeric_only=True).to_frame().T
                 df_player_mean = ajouter_pourcentages(df_player_mean)
@@ -2816,7 +2819,7 @@ def streamlit_application(all_df):
             with tab6:
                 nom_joueur = joueur.split(" - ")[0]
 
-                df_player = create_player_data(nom_joueur)
+                df_player = create_player_data(nom_joueur, sélection_dataframe)
 
                 df_player = ajouter_pourcentages(df_player)
 
