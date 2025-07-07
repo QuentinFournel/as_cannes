@@ -102,8 +102,6 @@ def upload_file_to_drive(service, folder_id, file_path, file_name=None):
         fields='id'
     ).execute()
 
-    return uploaded_file.get('id')
-
 league_rating = {
     "Ligue 1": 1,
     "Ligue 2": 0.875008125,
@@ -3022,13 +3020,13 @@ def streamlit_application(all_df):
 
                 with col1:
                     prenom = st.text_input("Prénom")
-                    position = st.selectbox("Position", ["Buteur", "Ailier", "Milieu offensif", "Milieu", "Latéral", "Défenseur central", "Gardien"])
+                    position = st.text_input("Position")
                     priorite_n1 = st.selectbox("Priorité N1", ["Haute", "Moyenne", "Basse", "Aucune"])
                     age = st.number_input("Âge", min_value=10, max_value=50, step=1)
                     pied = st.selectbox("Pied fort", ["Droit", "Gauche", "Ambidextre"])
                     contrat = st.selectbox("Type de contrat", ["Pro", "Fédéral", "Formation", "Inconnu"])
                     video = st.text_input("Lien vers une vidéo (YouTube, etc.)")
-                    salaire_actuel = st.number_input("Salaire actuel (€)", step=100)
+                    salaire_actuel = st.text_input("Salaire actuel (€)")
                     avantages = st.text_area("Avantages actuels")
 
                 with col2:
@@ -3037,9 +3035,9 @@ def streamlit_application(all_df):
                     priorite_n2 = st.selectbox("Priorité N2", ["Haute", "Moyenne", "Basse", "Aucune"])
                     taille = st.number_input("Taille (cm)", min_value=150, max_value=250, step=1)
                     agent = st.text_input("Nom de l'agent")
-                    duree_contrat = st.number_input("Durée du contrat (en année)", min_value=0, max_value=5, step=1)
+                    duree_contrat = st.text_input("Durée du contrat (en année)")
                     data = st.selectbox("Des données sont-elles disponibles ?", ["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"])
-                    salaire_proposition = st.number_input("Salaire proposé (€)", step=100)
+                    salaire_proposition = st.text_input("Salaire proposé (€)")
                     avantages_prosition = st.text_area("Avantages proposés")
 
                 submit = st.form_submit_button("Enregistrer le joueur")
@@ -3074,7 +3072,7 @@ def streamlit_application(all_df):
                     try:
                         service = authenticate_google_drive()
                         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
-                        uploaded_id = upload_file_to_drive(service, folder_id, DATA_FILE)
+                        upload_file_to_drive(service, folder_id, DATA_FILE)
                         st.success("✅ Joueur enregistré et fichier mis à jour sur Google Drive !")
                     except Exception as e:
                         st.error(f"❌ Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
