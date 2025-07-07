@@ -20,6 +20,7 @@ import base64
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaFileUpload
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -83,6 +84,25 @@ def load_all_files_from_drive():
 
     for file in files:
         download_file(service, file['id'], file['name'])
+
+# Sauvegarder un fichier vers Google Drive
+def upload_file_to_drive(service, folder_id, file_path, file_name=None):
+    if not file_name:
+        file_name = os.path.basename(file_path)
+
+    file_metadata = {
+        'name': file_name,
+        'parents': [folder_id]
+    }
+
+    media = MediaFileUpload(file_path, resumable=True)
+    uploaded_file = service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+
+    return uploaded_file.get('id')
 
 league_rating = {
     "Ligue 1": 1,
@@ -2255,7 +2275,7 @@ def streamlit_application(all_df):
         page = option_menu(
             menu_title="",
             options=st.secrets['roles'].get(st.session_state.username, []),
-            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search"],
+            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search", "file-earmark-plus"],
             menu_icon="cast",
             default_index=0,
             orientation="vertical",
@@ -2976,6 +2996,108 @@ def streamlit_application(all_df):
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
             st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+
+    elif page == "Joueurs ciblés":
+        st.header("Joueurs ciblés")
+
+        tab1, tab2 = st.tabs(["Ajout d'un joueur", "Liste des joueurs"])
+
+        with tab1:
+            DATA_FILE = "data/joueurs.csv"
+            os.makedirs("data", exist_ok=True)
+
+            if not os.path.exists(DATA_FILE):
+                colonnes = [
+                    "Prénom", "Nom", "Position", "Club", "Priorité N1", "Priorité N2",
+                    "Âge", "Taille (cm)", "Pied fort", "Nom de l'agent", "Type de contrat",
+                    "Durée du contrat (en année)", "Lien vers une vidéo (YouTube, etc.)",
+                    "Des données sont-elles disponibles ?", "Salaire actuel (€)",
+                    "Salaire proposé (€)", "Avantages actuels", "Avantages proposés"
+                ]
+                df_init = pd.DataFrame(columns=colonnes)
+                df_init.to_csv(DATA_FILE, index=False)
+
+            with st.form("formulaire_ajout"):
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    prenom = st.text_input("Prénom")
+                    position = st.selectbox("Position", ["Buteur", "Ailier", "Milieu offensif", "Milieu", "Latéral", "Défenseur central", "Gardien"])
+                    priorite_n1 = st.selectbox("Priorité N1", ["Haute", "Moyenne", "Basse", "Aucune"])
+                    age = st.number_input("Âge", min_value=10, max_value=50, step=1)
+                    pied = st.selectbox("Pied fort", ["Droit", "Gauche", "Ambidextre"])
+                    contrat = st.selectbox("Type de contrat", ["Pro", "Fédéral", "Formation", "Inconnu"])
+                    video = st.text_input("Lien vers une vidéo (YouTube, etc.)")
+                    salaire_actuel = st.number_input("Salaire actuel (€)", step=100)
+                    avantages = st.text_area("Avantages actuels")
+
+                with col2:
+                    nom = st.text_input("Nom")
+                    club = st.text_input("Club")
+                    priorite_n2 = st.selectbox("Priorité N2", ["Haute", "Moyenne", "Basse", "Aucune"])
+                    taille = st.number_input("Taille (cm)", min_value=150, max_value=250, step=1)
+                    agent = st.text_input("Nom de l'agent")
+                    duree_contrat = st.number_input("Durée du contrat (en année)", min_value=0, max_value=5, step=1)
+                    data = st.selectbox("Des données sont-elles disponibles ?", ["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"])
+                    salaire_proposition = st.number_input("Salaire proposé (€)", step=100)
+                    avantages_prosition = st.text_area("Avantages proposés")
+
+                submit = st.form_submit_button("Enregistrer le joueur")
+
+                if submit:
+                    new_data = pd.DataFrame([{
+                        "Prénom": prenom,
+                        "Nom": nom,
+                        "Position": position,
+                        "Club": club,
+                        "Priorité N1": priorite_n1,
+                        "Priorité N2": priorite_n2,
+                        "Âge": age,
+                        "Taille (cm)": taille,
+                        "Pied fort": pied,
+                        "Nom de l'agent": agent,
+                        "Type de contrat": contrat,
+                        "Durée du contrat (en année)": duree_contrat,
+                        "Lien vers une vidéo (YouTube, etc.)": video,
+                        "Des données sont-elles disponibles ?": data,
+                        "Salaire actuel (€)": salaire_actuel,
+                        "Salaire proposé (€)": salaire_proposition,
+                        "Avantages actuels": avantages,
+                        "Avantages proposés": avantages_prosition
+                    }])
+
+                    old_data = pd.read_csv(DATA_FILE)
+                    full_data = pd.concat([old_data, new_data], ignore_index=True)
+                    full_data.to_csv(DATA_FILE, index=False)
+
+                    # Upload vers Google Drive
+                    try:
+                        service = authenticate_google_drive()
+                        folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
+                        uploaded_id = upload_file_to_drive(service, folder_id, DATA_FILE)
+                        st.success("✅ Joueur enregistré et fichier mis à jour sur Google Drive !")
+                    except Exception as e:
+                        st.error(f"❌ Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
+
+        with tab2:
+            DATA_FILE = "data/joueurs.csv"
+            if os.path.exists(DATA_FILE):
+                df = pd.read_csv(DATA_FILE)
+                st.dataframe(df, use_container_width=True, hide_index=True)
+
+                if df.empty:
+                    st.info("Aucun joueur enregistré pour l'instant.")
+                else:
+                    agent_name = st.text_input("Nom de l'agent à rechercher")
+                    if agent_name:
+                        results = df[df["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
+                        if not results.empty:
+                            st.success(f"{len(results)} joueur(s) trouvés pour l'agent **{agent_name}**")
+                            st.dataframe(results)
+                        else:
+                            st.warning("Aucun joueur trouvé pour cet agent.")
+            else:
+                st.warning("⚠️ Le fichier joueurs.csv n'a pas été trouvé dans /data. Assure-toi qu'il a bien été téléchargé depuis Google Drive.")
 
 if __name__ == '__main__':
     st.set_page_config(
