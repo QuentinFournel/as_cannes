@@ -3126,8 +3126,8 @@ def streamlit_application(all_df):
                                 agent = st.text_input(f"Nom de l'agent_{index}", value=row["Nom de l'agent"])
                                 contrat = st.selectbox(f"Type de contrat_{index}", ["Pro", "Fédéral", "Formation", "Inconnu"], index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]))
                                 duree_contrat = st.text_input(f"Durée du contrat_{index}", value=str(row["Durée du contrat (en année)"]))
-                                supprimer = st.button(f"Supprimer")
-                                enregistrer = st.button(f"Enregistrer les modifications")
+                                supprimer = st.button("Supprimer", key=f"supprimer_{index}")
+                                enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
                             if supprimer:
                                 df.drop(index, inplace=True)
