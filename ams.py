@@ -3173,11 +3173,20 @@ def streamlit_application(all_df):
                         df.at[index, "Position"] = position
                         df.at[index, "Club"] = club
                         df.at[index, "Priorité N1"] = priorite_n1
+                        df.at[index, "Priorité N2"] = priorite_n2
                         df.at[index, "Âge"] = age
+                        df.at[index, "Taille (cm)"] = taille
                         df.at[index, "Pied fort"] = pied
                         df.at[index, "Nom de l'agent"] = agent
                         df.at[index, "Type de contrat"] = contrat
                         df.at[index, "Durée du contrat (en année)"] = duree_contrat
+                        df.at[index, "Lien vers une vidéo"] = video
+                        df.at[index, "Des données sont-elles disponibles ?"] = data_dispo
+                        df.at[index, "Salaire actuel (€)"] = salaire_actuel
+                        df.at[index, "Salaire proposé (€)"] = salaire_proposition
+                        df.at[index, "Avantages actuels"] = avantages
+                        df.at[index, "Avantages proposés"] = avantages_proposition
+
                         df.to_excel(DATA_FILE, index=False)
                         st.success(f"Modifications enregistrées pour {prenom} {nom}.")
                         st.rerun()
