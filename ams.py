@@ -3081,17 +3081,6 @@ def streamlit_application(all_df):
         with tab2:
             DATA_FILE = "data/joueurs.xlsx"
 
-            if not os.path.exists(DATA_FILE):
-                colonnes = [
-                    "Prénom", "Nom", "Position", "Club", "Priorité N1", "Priorité N2",
-                    "Âge", "Taille (cm)", "Pied fort", "Nom de l'agent", "Type de contrat",
-                    "Durée du contrat (en année)", "Lien vers une vidéo",
-                    "Des données sont-elles disponibles ?", "Salaire actuel (€)",
-                    "Salaire proposé (€)", "Avantages actuels", "Avantages proposés"
-                ]
-                df_init = pd.DataFrame(columns=colonnes)
-                df_init.to_excel(DATA_FILE, index=False)
-
             if os.path.exists(DATA_FILE):
                 df = pd.read_excel(DATA_FILE)
 
