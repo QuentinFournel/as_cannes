@@ -85,22 +85,34 @@ def load_all_files_from_drive():
     for file in files:
         download_file(service, file['id'], file['name'])
 
-# Sauvegarder un fichier vers Google Drive
-def upload_file_to_drive(service, folder_id, file_path, file_name=None):
-    if not file_name:
-        file_name = os.path.basename(file_path)
+def upload_or_update_file(service, folder_id, file_path, file_name):
+    # Rechercher s'il existe déjà un fichier avec ce nom dans le dossier
+    query = f"'{folder_id}' in parents and name = '{file_name}' and trashed = false"
+    results = service.files().list(q=query, fields="files(id, name)").execute()
+    items = results.get('files', [])
 
-    file_metadata = {
-        'name': file_name,
-        'parents': [folder_id]
-    }
+    media = MediaFileUpload(file_path, resumable=True, mimetype='text/csv')
 
-    media = MediaFileUpload(file_path, resumable=True)
-    uploaded_file = service.files().create(
-        body=file_metadata,
-        media_body=media,
-        fields='id'
-    ).execute()
+    if items:
+        # Si le fichier existe déjà, on le met à jour
+        file_id = items[0]['id']
+        updated_file = service.files().update(
+            fileId=file_id,
+            media_body=media
+        ).execute()
+        return updated_file['id']
+    else:
+        # Sinon, on le crée
+        file_metadata = {
+            'name': file_name,
+            'parents': [folder_id]
+        }
+        uploaded_file = service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields='id'
+        ).execute()
+        return uploaded_file['id']
 
 league_rating = {
     "Ligue 1": 1,
@@ -3025,7 +3037,7 @@ def streamlit_application(all_df):
                     age = st.number_input("Âge", min_value=10, max_value=50, step=1)
                     pied = st.selectbox("Pied fort", ["Droit", "Gauche", "Ambidextre"])
                     contrat = st.selectbox("Type de contrat", ["Pro", "Fédéral", "Formation", "Inconnu"])
-                    video = st.text_input("Lien vers une vidéo (YouTube, etc.)")
+                    video = st.text_input("Lien vers une vidéo")
                     salaire_actuel = st.text_input("Salaire actuel (€)")
                     avantages = st.text_area("Avantages actuels")
 
@@ -3035,7 +3047,7 @@ def streamlit_application(all_df):
                     priorite_n2 = st.selectbox("Priorité N2", ["Haute", "Moyenne", "Basse", "Aucune"])
                     taille = st.number_input("Taille (cm)", min_value=150, max_value=250, step=1)
                     agent = st.text_input("Nom de l'agent")
-                    duree_contrat = st.text_input("Durée du contrat (en année)")
+                    duree_contrat = st.text_input("Durée du contrat")
                     data = st.selectbox("Des données sont-elles disponibles ?", ["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"])
                     salaire_proposition = st.text_input("Salaire proposé (€)")
                     avantages_prosition = st.text_area("Avantages proposés")
@@ -3055,8 +3067,8 @@ def streamlit_application(all_df):
                         "Pied fort": pied,
                         "Nom de l'agent": agent,
                         "Type de contrat": contrat,
-                        "Durée du contrat (en année)": duree_contrat,
-                        "Lien vers une vidéo (YouTube, etc.)": video,
+                        "Durée du contrat": duree_contrat,
+                        "Lien vers une vidéo": video,
                         "Des données sont-elles disponibles ?": data,
                         "Salaire actuel (€)": salaire_actuel,
                         "Salaire proposé (€)": salaire_proposition,
@@ -3072,7 +3084,7 @@ def streamlit_application(all_df):
                     try:
                         service = authenticate_google_drive()
                         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
-                        upload_file_to_drive(service, folder_id, DATA_FILE)
+                        upload_or_update_file(service, folder_id, DATA_FILE, "joueurs.csv")
                         st.success("✅ Joueur enregistré et fichier mis à jour sur Google Drive !")
                     except Exception as e:
                         st.error(f"❌ Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
