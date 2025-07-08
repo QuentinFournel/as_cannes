@@ -3076,7 +3076,7 @@ def streamlit_application(all_df):
                         "Avantages proposés": avantages_prosition
                     }])
 
-                    old_data = pd.read_csv(DATA_FILE)
+                    old_data = pd.read_csv(DATA_FILE, encoding="utf-8", errors="replace")
                     full_data = pd.concat([old_data, new_data], ignore_index=True)
                     full_data.to_csv(DATA_FILE, index=False)
 
@@ -3092,7 +3092,7 @@ def streamlit_application(all_df):
         with tab2:
             DATA_FILE = "data/joueurs.csv"
             if os.path.exists(DATA_FILE):
-                df = pd.read_csv(DATA_FILE)
+                df = pd.read_csv(DATA_FILE, encoding="utf-8", errors="replace")
 
                 if df.empty:
                     st.info("Aucun joueur enregistré pour l'instant.")
