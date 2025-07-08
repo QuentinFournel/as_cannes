@@ -3010,7 +3010,7 @@ def streamlit_application(all_df):
     elif page == "Joueurs ciblés":
         st.header("Joueurs ciblés")
 
-        tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Liste des joueurs", "Modifier ou supprimer un joueur"])
+        tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Modifier ou supprimer un joueur", "Liste des joueurs"])
 
         with tab1:
             DATA_FILE = "data/joueurs.xlsx"
@@ -3079,35 +3079,25 @@ def streamlit_application(all_df):
                         st.error(f"Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
 
         with tab2:
-            DATA_FILE = "data/joueurs.xlsx"
+            agent_name = st.text_input("Nom de l'agent à rechercher")
+            if agent_name:
+                df_filtré = df[df["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
 
-            if os.path.exists(DATA_FILE):
-                df = pd.read_excel(DATA_FILE)
-
-                if df.empty:
-                    st.info("Aucun joueur enregistré pour l'instant.")
+                if not df_filtré.empty:
+                    st.success(f"{len(df_filtré)} joueur(s) trouvé(s) pour l'agent **{agent_name}**")
                 else:
-                    st.dataframe(df, use_container_width=True, hide_index=True)
-
-                    # Recherche par nom d'agent
-                    agent_name = st.text_input("Nom de l'agent à rechercher")
-                    if agent_name:
-                        results = df[df["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
-                        if not results.empty:
-                            st.success(f"{len(results)} joueur(s) trouvés pour l'agent **{agent_name}**")
-                            st.dataframe(results)
-                        else:
-                            st.warning("Aucun joueur trouvé pour cet agent.")
-
-        with tab3:
-            for index, row in df.iterrows():
+                    st.warning("Aucun joueur trouvé pour cet agent.")
+            else:
+                df_filtré = df.copy()
+                
+            for index, row in df_filtré.iterrows():
                 with st.expander(f"{row['Prénom']} {row['Nom']} - {row['Club']}"):
+
                     col1, col2 = st.columns(2)
+
                     with col1:
                         prenom = st.text_input("Prénom", value=row["Prénom"], key=f"prenom_{index}")
-                        nom = st.text_input("Nom", value=row["Nom"], key=f"nom_{index}")
                         position = st.text_input("Position", value=row["Position"], key=f"position_{index}")
-                        club = st.text_input("Club", value=row["Club"], key=f"club_{index}")
                         priorite_n1 = st.selectbox(
                             "Priorité N1",
                             ["Haute", "Moyenne", "Basse", "Aucune"],
@@ -3121,8 +3111,6 @@ def streamlit_application(all_df):
                             max_value=50,
                             key=f"age_{index}"
                         )
-
-                    with col2:
                         pied = st.selectbox(
                             "Pied fort",
                             ["Droit", "Gauche", "Ambidextre"],
@@ -3136,11 +3124,40 @@ def streamlit_application(all_df):
                             index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]),
                             key=f"contrat_{index}"
                         )
+                        video = st.text_input("Lien vers une vidéo", value=row["Lien vers une vidéo"], key=f"video_{index}")
+                        salaire_actuel = st.text_input("Salaire actuel (€)", value=row["Salaire actuel (€)"], key=f"salaire_actuel_{index}")
+                        avantages = st.text_area("Avantages actuels", value=row["Avantages actuels"], key=f"avantages_actuels_{index}")
+
+                    with col2:
+                        nom = st.text_input("Nom", value=row["Nom"], key=f"nom_{index}")
+                        club = st.text_input("Club", value=row["Club"], key=f"club_{index}")
+                        priorite_n2 = st.selectbox(
+                            "Priorité N2",
+                            ["Haute", "Moyenne", "Basse", "Aucune"],
+                            index=["Haute", "Moyenne", "Basse", "Aucune"].index(row["Priorité N2"]),
+                            key=f"priorite_n2_{index}"
+                        )
+                        taille = st.number_input(
+                            "Taille (cm)",
+                            value=int(row["Taille (cm)"]),
+                            min_value=150,
+                            max_value=250,
+                            key=f"taille_{index}"
+                        )
                         duree_contrat = st.text_input(
                             "Durée du contrat",
                             value=str(row["Durée du contrat (en année)"]),
                             key=f"duree_{index}"
                         )
+                        data_dispo = st.selectbox(
+                            "Des données sont-elles disponibles ?",
+                            ["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"],
+                            index=["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"].index(row["Des données sont-elles disponibles ?"]),
+                            key=f"data_{index}"
+                        )
+                        salaire_proposition = st.text_input("Salaire proposé (€)", value=row["Salaire proposé (€)"], key=f"salaire_propose_{index}")
+                        avantages_proposition = st.text_area("Avantages proposés", value=row["Avantages proposés"], key=f"avantages_proposes_{index}")
+
                         supprimer = st.button("Supprimer", key=f"supprimer_{index}")
                         enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
@@ -3164,6 +3181,27 @@ def streamlit_application(all_df):
                         df.to_excel(DATA_FILE, index=False)
                         st.success(f"Modifications enregistrées pour {prenom} {nom}.")
                         st.rerun()
+
+        with tab3:
+            DATA_FILE = "data/joueurs.xlsx"
+
+            if os.path.exists(DATA_FILE):
+                df = pd.read_excel(DATA_FILE)
+
+                if df.empty:
+                    st.info("Aucun joueur enregistré pour l'instant.")
+                else:
+                    st.dataframe(df, use_container_width=True, hide_index=True)
+
+                    # Recherche par nom d'agent
+                    agent_name = st.text_input("Nom de l'agent à rechercher")
+                    if agent_name:
+                        results = df[df["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
+                        if not results.empty:
+                            st.success(f"{len(results)} joueur(s) trouvés pour l'agent **{agent_name}**")
+                            st.dataframe(results)
+                        else:
+                            st.warning("Aucun joueur trouvé pour cet agent.")
 
 if __name__ == '__main__':
     st.set_page_config(
