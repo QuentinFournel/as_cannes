@@ -91,7 +91,7 @@ def upload_or_update_file(service, folder_id, file_path, file_name):
     results = service.files().list(q=query, fields="files(id, name)").execute()
     items = results.get('files', [])
 
-    media = MediaFileUpload(file_path, resumable=True, mimetype='text/csv')
+    media = MediaFileUpload(file_path, resumable=True, mimetype='text/excel')
 
     if items:
         # Si le fichier existe déjà, on le met à jour
@@ -3013,19 +3013,8 @@ def streamlit_application(all_df):
         tab1, tab2 = st.tabs(["Ajout d'un joueur", "Liste des joueurs"])
 
         with tab1:
-            DATA_FILE = "data/joueurs.csv"
+            DATA_FILE = "data/joueurs.xlsx"
             os.makedirs("data", exist_ok=True)
-
-            if not os.path.exists(DATA_FILE):
-                colonnes = [
-                    "Prénom", "Nom", "Position", "Club", "Priorité N1", "Priorité N2",
-                    "Âge", "Taille (cm)", "Pied fort", "Nom de l'agent", "Type de contrat",
-                    "Durée du contrat (en année)", "Lien vers une vidéo (YouTube, etc.)",
-                    "Des données sont-elles disponibles ?", "Salaire actuel (€)",
-                    "Salaire proposé (€)", "Avantages actuels", "Avantages proposés"
-                ]
-                df_init = pd.DataFrame(columns=colonnes)
-                df_init.to_csv(DATA_FILE, index=False)
 
             with st.form("formulaire_ajout"):
                 col1, col2 = st.columns(2)
@@ -3076,23 +3065,23 @@ def streamlit_application(all_df):
                         "Avantages proposés": avantages_prosition
                     }])
 
-                    old_data = pd.read_csv(DATA_FILE, encoding="ISO-8859-1", sep=";")
+                    old_data = pd.read_excel(DATA_FILE)
                     full_data = pd.concat([old_data, new_data], ignore_index=True)
-                    full_data.to_csv(DATA_FILE, index=False)
+                    full_data.to_excel(DATA_FILE, index=False)
 
                     # Upload vers Google Drive
                     try:
                         service = authenticate_google_drive()
                         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
-                        upload_or_update_file(service, folder_id, DATA_FILE, "joueurs.csv")
+                        upload_or_update_file(service, folder_id, DATA_FILE, "joueurs.xlsx")
                         st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
                     except Exception as e:
                         st.error(f"Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
 
         with tab2:
-            DATA_FILE = "data/joueurs.csv"
+            DATA_FILE = "data/joueurs.xlsx"
             if os.path.exists(DATA_FILE):
-                df = pd.read_csv(DATA_FILE, encoding="ISO-8859-1", sep=";")
+                df = pd.read_excel(DATA_FILE)
 
                 if df.empty:
                     st.info("Aucun joueur enregistré pour l'instant.")
@@ -3131,7 +3120,7 @@ def streamlit_application(all_df):
 
                             if supprimer:
                                 df.drop(index, inplace=True)
-                                df.to_csv(DATA_FILE, index=False)
+                                df.to_excel(DATA_FILE, index=False)
                                 st.success(f"Joueur {row['Prénom']} {row['Nom']} supprimé.")
                                 st.rerun()
 
@@ -3146,11 +3135,11 @@ def streamlit_application(all_df):
                                 df.at[index, "Nom de l'agent"] = agent
                                 df.at[index, "Type de contrat"] = contrat
                                 df.at[index, "Durée du contrat (en année)"] = duree_contrat
-                                df.to_csv(DATA_FILE, index=False)
+                                df.to_excel(DATA_FILE, index=False)
                                 st.success(f"Modifications enregistrées pour {prenom} {nom}.")
                                 st.rerun()
             else:
-                st.warning("⚠️ Le fichier joueurs.csv n'a pas été trouvé dans /data. Assure-toi qu'il a bien été téléchargé depuis Google Drive.")
+                st.warning("⚠️ Le fichier joueurs.xlsx n'a pas été trouvé dans /data. Assure-toi qu'il a bien été téléchargé depuis Google Drive.")
 
 if __name__ == '__main__':
     st.set_page_config(
