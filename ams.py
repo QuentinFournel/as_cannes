@@ -3161,8 +3161,8 @@ def streamlit_application(all_df):
                             salaire_proposition = st.text_input("Salaire proposé (€)", value=str(row.get("Salaire proposé (€)", "")), key=f"salaire_propose_{index}")
                             avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index}")
 
-                            supprimer = st.button("🗑 Supprimer", key=f"supprimer_{index}")
-                            enregistrer = st.button("💾 Enregistrer les modifications", key=f"enregistrer_{index}")
+                            supprimer = st.button("Supprimer", key=f"supprimer_{index}")
+                            enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
                         if supprimer:
                             df.drop(index, inplace=True)
