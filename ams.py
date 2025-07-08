@@ -3069,7 +3069,6 @@ def streamlit_application(all_df):
                     full_data = pd.concat([old_data, new_data], ignore_index=True)
                     full_data.to_excel(DATA_FILE, index=False)
 
-                    # Upload vers Google Drive
                     try:
                         service = authenticate_google_drive()
                         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
@@ -3106,26 +3105,28 @@ def streamlit_application(all_df):
                             prenom = st.text_input("Prénom", value=str(row.get("Prénom", "")), key=f"prenom_{index}")
                             position = st.text_input("Position", value=str(row.get("Position", "")), key=f"position_{index}")
 
-                            options_n1 = ["Haute", "Moyenne", "Basse", "Aucune"]
-                            val_n1 = str(row.get("Priorité N1", ""))
+                            options_n1 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
+                            val_n1 = str(row.get("Priorité N1", "")).strip()
                             idx_n1 = options_n1.index(val_n1) if val_n1 in options_n1 else 0
                             priorite_n1 = st.selectbox("Priorité N1", options_n1, index=idx_n1, key=f"priorite_n1_{index}")
 
                             try:
-                                age_val = int(row.get("Âge", 20))
+                                age_val = int(row["Âge"]) if not pd.isna(row["Âge"]) else 0
                             except:
-                                age_val = 20
-                            age = st.number_input("Âge", value=age_val, min_value=10, max_value=50, key=f"age_{index}")
+                                age_val = 0
+                            age = st.number_input("Âge", value=age_val, min_value=0, max_value=50, key=f"age_{index}")
+                            if age == 0:
+                                age = ""
 
-                            options_pied = ["Droit", "Gauche", "Ambidextre"]
-                            val_pied = str(row.get("Pied fort", ""))
+                            options_pied = ["", "Droit", "Gauche", "Ambidextre"]
+                            val_pied = str(row.get("Pied fort", "")).strip()
                             idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
                             pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index}")
 
                             agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index}")
 
-                            options_contrat = ["Pro", "Fédéral", "Formation", "Inconnu"]
-                            val_contrat = str(row.get("Type de contrat", ""))
+                            options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
+                            val_contrat = str(row.get("Type de contrat", "")).strip()
                             idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
                             contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
 
@@ -3137,21 +3138,23 @@ def streamlit_application(all_df):
                             nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index}")
                             club = st.text_input("Club", value=str(row.get("Club", "")), key=f"club_{index}")
 
-                            options_n2 = ["Haute", "Moyenne", "Basse", "Aucune"]
-                            val_n2 = str(row.get("Priorité N2", ""))
+                            options_n2 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
+                            val_n2 = str(row.get("Priorité N2", "")).strip()
                             idx_n2 = options_n2.index(val_n2) if val_n2 in options_n2 else 0
                             priorite_n2 = st.selectbox("Priorité N2", options_n2, index=idx_n2, key=f"priorite_n2_{index}")
 
                             try:
-                                taille_val = int(row.get("Taille (cm)", 180))
+                                taille_val = int(row["Taille (cm)"]) if not pd.isna(row["Taille (cm)"]) else 0
                             except:
-                                taille_val = 180
-                            taille = st.number_input("Taille (cm)", value=taille_val, min_value=150, max_value=250, key=f"taille_{index}")
+                                taille_val = 0
+                            taille = st.number_input("Taille (cm)", value=taille_val, min_value=0, max_value=250, key=f"taille_{index}")
+                            if taille == 0:
+                                taille = ""
 
                             duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index}")
 
-                            options_data = ["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
-                            val_data = str(row.get("Des données sont-elles disponibles ?", ""))
+                            options_data = ["", "Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
+                            val_data = str(row.get("Des données sont-elles disponibles ?", "")).strip()
                             idx_data = options_data.index(val_data) if val_data in options_data else 0
                             data_dispo = st.selectbox("Des données sont-elles disponibles ?", options_data, index=idx_data, key=f"data_{index}")
 
@@ -3203,16 +3206,6 @@ def streamlit_application(all_df):
                     st.info("Aucun joueur enregistré pour l'instant.")
                 else:
                     st.dataframe(df, use_container_width=True, hide_index=True)
-
-                    # Recherche par nom d'agent
-                    agent_name = st.text_input("Nom de l'agent à rechercher")
-                    if agent_name:
-                        results = df[df["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
-                        if not results.empty:
-                            st.success(f"{len(results)} joueur(s) trouvés pour l'agent **{agent_name}**")
-                            st.dataframe(results)
-                        else:
-                            st.warning("Aucun joueur trouvé pour cet agent.")
 
 if __name__ == '__main__':
     st.set_page_config(
