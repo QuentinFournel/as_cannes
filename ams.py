@@ -3092,7 +3092,7 @@ def streamlit_application(all_df):
                 df_init = pd.DataFrame(columns=colonnes)
                 df_init.to_excel(DATA_FILE, index=False)
 
-            else:
+            if os.path.exists(DATA_FILE):
                 df = pd.read_excel(DATA_FILE)
 
                 if df.empty:
