@@ -3085,9 +3085,9 @@ def streamlit_application(all_df):
                         service = authenticate_google_drive()
                         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
                         upload_or_update_file(service, folder_id, DATA_FILE, "joueurs.csv")
-                        st.success("✅ Joueur enregistré et fichier mis à jour sur Google Drive !")
+                        st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
                     except Exception as e:
-                        st.error(f"❌ Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
+                        st.error(f"Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
 
         with tab2:
             DATA_FILE = "data/joueurs.csv"
@@ -3126,8 +3126,8 @@ def streamlit_application(all_df):
                                 agent = st.text_input(f"Nom de l'agent_{index}", value=row["Nom de l'agent"])
                                 contrat = st.selectbox(f"Type de contrat_{index}", ["Pro", "Fédéral", "Formation", "Inconnu"], index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]))
                                 duree_contrat = st.text_input(f"Durée du contrat_{index}", value=str(row["Durée du contrat (en année)"]))
-                                supprimer = st.button(f"🗑 Supprimer_{index}")
-                                enregistrer = st.button(f"💾 Enregistrer les modifications_{index}")
+                                supprimer = st.button(f"Supprimer")
+                                enregistrer = st.button(f"Enregistrer les modifications")
 
                             if supprimer:
                                 df.drop(index, inplace=True)
