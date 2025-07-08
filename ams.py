@@ -3133,7 +3133,7 @@ def streamlit_application(all_df):
                                 df.drop(index, inplace=True)
                                 df.to_csv(DATA_FILE, index=False)
                                 st.success(f"Joueur {row['Prénom']} {row['Nom']} supprimé.")
-                                st.experimental_rerun()
+                                st.rerun()
 
                             if enregistrer:
                                 df.at[index, "Prénom"] = prenom
@@ -3148,7 +3148,7 @@ def streamlit_application(all_df):
                                 df.at[index, "Durée du contrat (en année)"] = duree_contrat
                                 df.to_csv(DATA_FILE, index=False)
                                 st.success(f"Modifications enregistrées pour {prenom} {nom}.")
-                                st.experimental_rerun()
+                                st.rerun()
             else:
                 st.warning("⚠️ Le fichier joueurs.csv n'a pas été trouvé dans /data. Assure-toi qu'il a bien été téléchargé depuis Google Drive.")
 
