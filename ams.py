@@ -3104,17 +3104,43 @@ def streamlit_application(all_df):
                 with st.expander(f"{row['Prénom']} {row['Nom']} - {row['Club']}"):
                     col1, col2 = st.columns(2)
                     with col1:
-                        prenom = st.text_input(f"Prénom_{index}", value=row["Prénom"])
-                        nom = st.text_input(f"Nom_{index}", value=row["Nom"])
-                        position = st.text_input(f"Position_{index}", value=row["Position"])
-                        club = st.text_input(f"Club_{index}", value=row["Club"])
-                        priorite_n1 = st.selectbox(f"Priorité N1_{index}", ["Haute", "Moyenne", "Basse", "Aucune"], index=["Haute", "Moyenne", "Basse", "Aucune"].index(row["Priorité N1"]))
-                        age = st.number_input(f"Âge_{index}", value=int(row["Âge"]), min_value=10, max_value=50)
+                        prenom = st.text_input("Prénom", value=row["Prénom"], key=f"prenom_{index}")
+                        nom = st.text_input("Nom", value=row["Nom"], key=f"nom_{index}")
+                        position = st.text_input("Position", value=row["Position"], key=f"position_{index}")
+                        club = st.text_input("Club", value=row["Club"], key=f"club_{index}")
+                        priorite_n1 = st.selectbox(
+                            "Priorité N1",
+                            ["Haute", "Moyenne", "Basse", "Aucune"],
+                            index=["Haute", "Moyenne", "Basse", "Aucune"].index(row["Priorité N1"]),
+                            key=f"priorite_n1_{index}"
+                        )
+                        age = st.number_input(
+                            "Âge",
+                            value=int(row["Âge"]),
+                            min_value=10,
+                            max_value=50,
+                            key=f"age_{index}"
+                        )
+
                     with col2:
-                        pied = st.selectbox(f"Pied fort_{index}", ["Droit", "Gauche", "Ambidextre"], index=["Droit", "Gauche", "Ambidextre"].index(row["Pied fort"]))
-                        agent = st.text_input(f"Nom de l'agent_{index}", value=row["Nom de l'agent"])
-                        contrat = st.selectbox(f"Type de contrat_{index}", ["Pro", "Fédéral", "Formation", "Inconnu"], index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]))
-                        duree_contrat = st.text_input(f"Durée du contrat_{index}", value=str(row["Durée du contrat (en année)"]))
+                        pied = st.selectbox(
+                            "Pied fort",
+                            ["Droit", "Gauche", "Ambidextre"],
+                            index=["Droit", "Gauche", "Ambidextre"].index(row["Pied fort"]),
+                            key=f"pied_{index}"
+                        )
+                        agent = st.text_input("Nom de l'agent", value=row["Nom de l'agent"], key=f"agent_{index}")
+                        contrat = st.selectbox(
+                            "Type de contrat",
+                            ["Pro", "Fédéral", "Formation", "Inconnu"],
+                            index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]),
+                            key=f"contrat_{index}"
+                        )
+                        duree_contrat = st.text_input(
+                            "Durée du contrat",
+                            value=str(row["Durée du contrat (en année)"]),
+                            key=f"duree_{index}"
+                        )
                         supprimer = st.button("Supprimer", key=f"supprimer_{index}")
                         enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
