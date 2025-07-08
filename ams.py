@@ -3010,7 +3010,7 @@ def streamlit_application(all_df):
     elif page == "Joueurs ciblés":
         st.header("Joueurs ciblés")
 
-        tab1, tab2 = st.tabs(["Ajout d'un joueur", "Liste des joueurs"])
+        tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Liste des joueurs", "Modifier ou supprimer un joueur"])
 
         with tab1:
             DATA_FILE = "data/joueurs.xlsx"
@@ -3099,48 +3099,45 @@ def streamlit_application(all_df):
                         else:
                             st.warning("Aucun joueur trouvé pour cet agent.")
 
-                    st.subheader("Modifier ou supprimer un joueur existant")
+        with tab3:
+            for index, row in df.iterrows():
+                with st.expander(f"{row['Prénom']} {row['Nom']} - {row['Club']}"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        prenom = st.text_input(f"Prénom_{index}", value=row["Prénom"])
+                        nom = st.text_input(f"Nom_{index}", value=row["Nom"])
+                        position = st.text_input(f"Position_{index}", value=row["Position"])
+                        club = st.text_input(f"Club_{index}", value=row["Club"])
+                        priorite_n1 = st.selectbox(f"Priorité N1_{index}", ["Haute", "Moyenne", "Basse", "Aucune"], index=["Haute", "Moyenne", "Basse", "Aucune"].index(row["Priorité N1"]))
+                        age = st.number_input(f"Âge_{index}", value=int(row["Âge"]), min_value=10, max_value=50)
+                    with col2:
+                        pied = st.selectbox(f"Pied fort_{index}", ["Droit", "Gauche", "Ambidextre"], index=["Droit", "Gauche", "Ambidextre"].index(row["Pied fort"]))
+                        agent = st.text_input(f"Nom de l'agent_{index}", value=row["Nom de l'agent"])
+                        contrat = st.selectbox(f"Type de contrat_{index}", ["Pro", "Fédéral", "Formation", "Inconnu"], index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]))
+                        duree_contrat = st.text_input(f"Durée du contrat_{index}", value=str(row["Durée du contrat (en année)"]))
+                        supprimer = st.button("Supprimer", key=f"supprimer_{index}")
+                        enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
-                    for index, row in df.iterrows():
-                        with st.expander(f"{row['Prénom']} {row['Nom']} - {row['Club']}"):
-                            col1, col2 = st.columns(2)
-                            with col1:
-                                prenom = st.text_input(f"Prénom_{index}", value=row["Prénom"])
-                                nom = st.text_input(f"Nom_{index}", value=row["Nom"])
-                                position = st.text_input(f"Position_{index}", value=row["Position"])
-                                club = st.text_input(f"Club_{index}", value=row["Club"])
-                                priorite_n1 = st.selectbox(f"Priorité N1_{index}", ["Haute", "Moyenne", "Basse", "Aucune"], index=["Haute", "Moyenne", "Basse", "Aucune"].index(row["Priorité N1"]))
-                                age = st.number_input(f"Âge_{index}", value=int(row["Âge"]), min_value=10, max_value=50)
-                            with col2:
-                                pied = st.selectbox(f"Pied fort_{index}", ["Droit", "Gauche", "Ambidextre"], index=["Droit", "Gauche", "Ambidextre"].index(row["Pied fort"]))
-                                agent = st.text_input(f"Nom de l'agent_{index}", value=row["Nom de l'agent"])
-                                contrat = st.selectbox(f"Type de contrat_{index}", ["Pro", "Fédéral", "Formation", "Inconnu"], index=["Pro", "Fédéral", "Formation", "Inconnu"].index(row["Type de contrat"]))
-                                duree_contrat = st.text_input(f"Durée du contrat_{index}", value=str(row["Durée du contrat (en année)"]))
-                                supprimer = st.button("Supprimer", key=f"supprimer_{index}")
-                                enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
+                    if supprimer:
+                        df.drop(index, inplace=True)
+                        df.to_excel(DATA_FILE, index=False)
+                        st.success(f"Joueur {row['Prénom']} {row['Nom']} supprimé.")
+                        st.rerun()
 
-                            if supprimer:
-                                df.drop(index, inplace=True)
-                                df.to_excel(DATA_FILE, index=False)
-                                st.success(f"Joueur {row['Prénom']} {row['Nom']} supprimé.")
-                                st.rerun()
-
-                            if enregistrer:
-                                df.at[index, "Prénom"] = prenom
-                                df.at[index, "Nom"] = nom
-                                df.at[index, "Position"] = position
-                                df.at[index, "Club"] = club
-                                df.at[index, "Priorité N1"] = priorite_n1
-                                df.at[index, "Âge"] = age
-                                df.at[index, "Pied fort"] = pied
-                                df.at[index, "Nom de l'agent"] = agent
-                                df.at[index, "Type de contrat"] = contrat
-                                df.at[index, "Durée du contrat (en année)"] = duree_contrat
-                                df.to_excel(DATA_FILE, index=False)
-                                st.success(f"Modifications enregistrées pour {prenom} {nom}.")
-                                st.rerun()
-            else:
-                st.warning("⚠️ Le fichier joueurs.xlsx n'a pas été trouvé dans /data. Assure-toi qu'il a bien été téléchargé depuis Google Drive.")
+                    if enregistrer:
+                        df.at[index, "Prénom"] = prenom
+                        df.at[index, "Nom"] = nom
+                        df.at[index, "Position"] = position
+                        df.at[index, "Club"] = club
+                        df.at[index, "Priorité N1"] = priorite_n1
+                        df.at[index, "Âge"] = age
+                        df.at[index, "Pied fort"] = pied
+                        df.at[index, "Nom de l'agent"] = agent
+                        df.at[index, "Type de contrat"] = contrat
+                        df.at[index, "Durée du contrat (en année)"] = duree_contrat
+                        df.to_excel(DATA_FILE, index=False)
+                        st.success(f"Modifications enregistrées pour {prenom} {nom}.")
+                        st.rerun()
 
 if __name__ == '__main__':
     st.set_page_config(
