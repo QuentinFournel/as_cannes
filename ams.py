@@ -3080,11 +3080,9 @@ def streamlit_application(all_df):
 
                     df_joueurs_ciblés = pd.concat([df_joueurs_ciblés, new_data], ignore_index=True)
 
-                    try:
-                        upload_or_update_file(service, folder_id, df_joueurs_ciblés)
-                        st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
-                    except Exception as e:
-                        st.error(f"Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
+                    upload_or_update_file(service, folder_id, df_joueurs_ciblés)
+                    st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
+                    st.rerun()
 
         with tab2:
             agent_name = st.text_input("Nom de l'agent à rechercher")
