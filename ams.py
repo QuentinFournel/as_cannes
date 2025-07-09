@@ -85,16 +85,27 @@ def load_all_files_from_drive():
     for file in files:
         download_file(service, file['id'], file['name'])
 
-def upload_or_update_file(service, folder_id, file_path, file_name):
-    # Rechercher s'il existe déjà un fichier avec ce nom dans le dossier
+from io import BytesIO
+from googleapiclient.http import MediaIoBaseUpload
+
+def upload_or_update_file(service, folder_id, df):
+    file_name = "joueurs.xlsx"
+
+    # 1. Convertir le DataFrame en Excel dans un buffer mémoire
+    excel_buffer = BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    # 2. Chercher si le fichier existe déjà dans le dossier
     query = f"'{folder_id}' in parents and name = '{file_name}' and trashed = false"
     results = service.files().list(q=query, fields="files(id, name)").execute()
     items = results.get('files', [])
 
-    media = MediaFileUpload(file_path, resumable=True, mimetype='text/excel')
+    # 3. Créer le MediaIoBaseUpload avec le buffer
+    media = MediaIoBaseUpload(excel_buffer, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     if items:
-        # Si le fichier existe déjà, on le met à jour
+        # Fichier déjà existant : mise à jour
         file_id = items[0]['id']
         updated_file = service.files().update(
             fileId=file_id,
@@ -102,7 +113,7 @@ def upload_or_update_file(service, folder_id, file_path, file_name):
         ).execute()
         return updated_file['id']
     else:
-        # Sinon, on le crée
+        # Nouveau fichier : création
         file_metadata = {
             'name': file_name,
             'parents': [folder_id]
@@ -3010,12 +3021,11 @@ def streamlit_application(all_df):
     elif page == "Joueurs ciblés":
         st.header("Joueurs ciblés")
 
+        df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
+
         tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Modifier ou supprimer un joueur", "Liste des joueurs"])
 
         with tab1:
-            DATA_FILE = "data/joueurs.xlsx"
-            os.makedirs("data", exist_ok=True)
-
             with st.form("formulaire_ajout"):
                 col1, col2 = st.columns(2)
 
@@ -3065,149 +3075,135 @@ def streamlit_application(all_df):
                         "Avantages proposés": avantages_prosition
                     }])
 
-                    old_data = pd.read_excel(DATA_FILE)
-                    full_data = pd.concat([old_data, new_data], ignore_index=True)
-                    full_data.to_excel(DATA_FILE, index=False)
+                    df_joueurs_ciblés = pd.concat([df_joueurs_ciblés, new_data], ignore_index=True)
 
                     try:
                         service = authenticate_google_drive()
                         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
-                        upload_or_update_file(service, folder_id, DATA_FILE, "joueurs.xlsx")
+                        upload_or_update_file(service, folder_id, df_joueurs_ciblés)
                         st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
                     except Exception as e:
                         st.error(f"Joueur enregistré localement, mais erreur lors de l'envoi sur Drive : {e}")
 
         with tab2:
-            DATA_FILE = "data/joueurs.xlsx"
+            agent_name = st.text_input("Nom de l'agent à rechercher")
 
-            if os.path.exists(DATA_FILE):
-                df = pd.read_excel(DATA_FILE)
-                df.columns = df.columns.str.strip()
-                df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+            if agent_name:
+                df_filtré = df_joueurs_ciblés[df_joueurs_ciblés["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
 
-                agent_name = st.text_input("🔍 Nom de l'agent à rechercher")
-
-                if agent_name:
-                    df_filtré = df[df["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
-
-                    if not df_filtré.empty:
-                        st.success(f"{len(df_filtré)} joueur(s) trouvé(s) pour l'agent **{agent_name}**")
-                    else:
-                        st.warning("Aucun joueur trouvé pour cet agent.")
+                if not df_filtré.empty:
+                    st.success(f"{len(df_filtré)} joueur(s) trouvé(s) pour l'agent **{agent_name}**")
                 else:
-                    df_filtré = df.copy()
-
-                for index, row in df_filtré.iterrows():
-                    with st.expander(f"{row.get('Prénom', '')} {row.get('Nom', '')} - {row.get('Club', '')}"):
-                        col1, col2 = st.columns(2)
-
-                        with col1:
-                            prenom = st.text_input("Prénom", value=str(row.get("Prénom", "")), key=f"prenom_{index}")
-                            position = st.text_input("Position", value=str(row.get("Position", "")), key=f"position_{index}")
-
-                            options_n1 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
-                            val_n1 = str(row.get("Priorité N1", "")).strip()
-                            idx_n1 = options_n1.index(val_n1) if val_n1 in options_n1 else 0
-                            priorite_n1 = st.selectbox("Priorité N1", options_n1, index=idx_n1, key=f"priorite_n1_{index}")
-
-                            try:
-                                age_val = int(row["Âge"]) if not pd.isna(row["Âge"]) else 0
-                            except:
-                                age_val = 0
-                            age = st.number_input("Âge", value=age_val, min_value=0, max_value=50, key=f"age_{index}")
-                            if age == 0:
-                                age = ""
-
-                            options_pied = ["", "Droit", "Gauche", "Ambidextre"]
-                            val_pied = str(row.get("Pied fort", "")).strip()
-                            idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
-                            pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index}")
-
-                            options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
-                            val_contrat = str(row.get("Type de contrat", "")).strip()
-                            idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
-                            contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
-
-                            video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index}")
-                            
-                            salaire_actuel = st.text_input("Salaire actuel (€)", value=str(row.get("Salaire actuel (€)", "")), key=f"salaire_actuel_{index}")
-                            avantages = st.text_area("Avantages actuels", value=str(row.get("Avantages actuels", "")), key=f"avantages_actuels_{index}")
-
-                            enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
-
-                        with col2:
-                            nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index}")
-                            club = st.text_input("Club", value=str(row.get("Club", "")), key=f"club_{index}")
-
-                            options_n2 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
-                            val_n2 = str(row.get("Priorité N2", "")).strip()
-                            idx_n2 = options_n2.index(val_n2) if val_n2 in options_n2 else 0
-                            priorite_n2 = st.selectbox("Priorité N2", options_n2, index=idx_n2, key=f"priorite_n2_{index}")
-
-                            try:
-                                taille_val = int(row["Taille (cm)"]) if not pd.isna(row["Taille (cm)"]) else 0
-                            except:
-                                taille_val = 0
-                            taille = st.number_input("Taille (cm)", value=taille_val, min_value=0, max_value=250, key=f"taille_{index}")
-                            if taille == 0:
-                                taille = ""
-
-                            agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index}")
-
-                            duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index}")
-
-                            options_data = ["", "Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
-                            val_data = str(row.get("Des données sont-elles disponibles ?", "")).strip()
-                            idx_data = options_data.index(val_data) if val_data in options_data else 0
-                            data_dispo = st.selectbox("Des données sont-elles disponibles ?", options_data, index=idx_data, key=f"data_{index}")
-
-                            salaire_proposition = st.text_input("Salaire proposé (€)", value=str(row.get("Salaire proposé (€)", "")), key=f"salaire_propose_{index}")
-                            avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index}")
-
-                            supprimer = st.button("Supprimer", key=f"supprimer_{index}")
-
-                        if supprimer:
-                            df.drop(index, inplace=True)
-                            df.to_excel(DATA_FILE, index=False)
-                            st.success(f"Joueur {prenom} {nom} supprimé.")
-                            st.rerun()
-
-                        if enregistrer:
-                            df.at[index, "Prénom"] = prenom
-                            df.at[index, "Nom"] = nom
-                            df.at[index, "Position"] = position
-                            df.at[index, "Club"] = club
-                            df.at[index, "Priorité N1"] = priorite_n1
-                            df.at[index, "Priorité N2"] = priorite_n2
-                            df.at[index, "Âge"] = age
-                            df.at[index, "Taille (cm)"] = taille
-                            df.at[index, "Pied fort"] = pied
-                            df.at[index, "Nom de l'agent"] = agent
-                            df.at[index, "Type de contrat"] = contrat
-                            df.at[index, "Durée du contrat (en année)"] = duree_contrat
-                            df.at[index, "Lien vers une vidéo"] = video
-                            df.at[index, "Des données sont-elles disponibles ?"] = data_dispo
-                            df.at[index, "Salaire actuel (€)"] = salaire_actuel
-                            df.at[index, "Salaire proposé (€)"] = salaire_proposition
-                            df.at[index, "Avantages actuels"] = avantages
-                            df.at[index, "Avantages proposés"] = avantages_proposition
-
-                            df.to_excel(DATA_FILE, index=False)
-                            st.success(f"Modifications enregistrées pour {prenom} {nom}.")
-                            st.rerun()
+                    st.warning("Aucun joueur trouvé pour cet agent.")
             else:
-                st.warning("⚠️ Le fichier joueurs.xlsx n'a pas été trouvé.")
+                df_filtré = df.copy()
+
+            for index, row in df_filtré.iterrows():
+                with st.expander(f"{row.get('Prénom', '')} {row.get('Nom', '')} - {row.get('Club', '')}"):
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        prenom = st.text_input("Prénom", value=str(row.get("Prénom", "")), key=f"prenom_{index}")
+                        position = st.text_input("Position", value=str(row.get("Position", "")), key=f"position_{index}")
+
+                        options_n1 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
+                        val_n1 = str(row.get("Priorité N1", "")).strip()
+                        idx_n1 = options_n1.index(val_n1) if val_n1 in options_n1 else 0
+                        priorite_n1 = st.selectbox("Priorité N1", options_n1, index=idx_n1, key=f"priorite_n1_{index}")
+
+                        try:
+                            age_val = int(row["Âge"]) if not pd.isna(row["Âge"]) else 0
+                        except:
+                            age_val = 0
+                        age = st.number_input("Âge", value=age_val, min_value=0, max_value=50, key=f"age_{index}")
+                        if age == 0:
+                            age = ""
+
+                        options_pied = ["", "Droit", "Gauche", "Ambidextre"]
+                        val_pied = str(row.get("Pied fort", "")).strip()
+                        idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
+                        pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index}")
+
+                        options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
+                        val_contrat = str(row.get("Type de contrat", "")).strip()
+                        idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
+                        contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
+
+                        video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index}")
+                        
+                        salaire_actuel = st.text_input("Salaire actuel (€)", value=str(row.get("Salaire actuel (€)", "")), key=f"salaire_actuel_{index}")
+                        avantages = st.text_area("Avantages actuels", value=str(row.get("Avantages actuels", "")), key=f"avantages_actuels_{index}")
+
+                        enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
+
+                    with col2:
+                        nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index}")
+                        club = st.text_input("Club", value=str(row.get("Club", "")), key=f"club_{index}")
+
+                        options_n2 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
+                        val_n2 = str(row.get("Priorité N2", "")).strip()
+                        idx_n2 = options_n2.index(val_n2) if val_n2 in options_n2 else 0
+                        priorite_n2 = st.selectbox("Priorité N2", options_n2, index=idx_n2, key=f"priorite_n2_{index}")
+
+                        try:
+                            taille_val = int(row["Taille (cm)"]) if not pd.isna(row["Taille (cm)"]) else 0
+                        except:
+                            taille_val = 0
+                        taille = st.number_input("Taille (cm)", value=taille_val, min_value=0, max_value=250, key=f"taille_{index}")
+                        if taille == 0:
+                            taille = ""
+
+                        agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index}")
+
+                        duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index}")
+
+                        options_data = ["", "Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
+                        val_data = str(row.get("Des données sont-elles disponibles ?", "")).strip()
+                        idx_data = options_data.index(val_data) if val_data in options_data else 0
+                        data_dispo = st.selectbox("Des données sont-elles disponibles ?", options_data, index=idx_data, key=f"data_{index}")
+
+                        salaire_proposition = st.text_input("Salaire proposé (€)", value=str(row.get("Salaire proposé (€)", "")), key=f"salaire_propose_{index}")
+                        avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index}")
+
+                        supprimer = st.button("Supprimer", key=f"supprimer_{index}")
+
+                    if supprimer:
+                        df_joueurs_ciblés.drop(index, inplace=True)
+                        df_joueurs_ciblés.to_excel("data/joueurs.xlsx", index=False)
+                        upload_or_update_file(service, folder_id, df_joueurs_ciblés)
+                        st.success(f"Joueur {prenom} {nom} supprimé.")
+                        st.rerun()
+
+                    if enregistrer:
+                        df_joueurs_ciblés.at[index, "Prénom"] = prenom
+                        df_joueurs_ciblés.at[index, "Nom"] = nom
+                        df_joueurs_ciblés.at[index, "Position"] = position
+                        df_joueurs_ciblés.at[index, "Club"] = club
+                        df_joueurs_ciblés.at[index, "Priorité N1"] = priorite_n1
+                        df_joueurs_ciblés.at[index, "Priorité N2"] = priorite_n2
+                        df_joueurs_ciblés.at[index, "Âge"] = age
+                        df_joueurs_ciblés.at[index, "Taille (cm)"] = taille
+                        df_joueurs_ciblés.at[index, "Pied fort"] = pied
+                        df_joueurs_ciblés.at[index, "Nom de l'agent"] = agent
+                        df_joueurs_ciblés.at[index, "Type de contrat"] = contrat
+                        df_joueurs_ciblés.at[index, "Durée du contrat (en année)"] = duree_contrat
+                        df_joueurs_ciblés.at[index, "Lien vers une vidéo"] = video
+                        df_joueurs_ciblés.at[index, "Des données sont-elles disponibles ?"] = data_dispo
+                        df_joueurs_ciblés.at[index, "Salaire actuel (€)"] = salaire_actuel
+                        df_joueurs_ciblés.at[index, "Salaire proposé (€)"] = salaire_proposition
+                        df_joueurs_ciblés.at[index, "Avantages actuels"] = avantages
+                        df_joueurs_ciblés.at[index, "Avantages proposés"] = avantages_proposition
+
+                        df_joueurs_ciblés.to_excel("data/joueurs.xlsx", index=False)
+                        upload_or_update_file(service, folder_id, df_joueurs_ciblés)
+                        st.success(f"Modifications enregistrées pour {prenom} {nom}.")
+                        st.rerun()
 
         with tab3:
-            DATA_FILE = "data/joueurs.xlsx"
-
-            if os.path.exists(DATA_FILE):
-                df = pd.read_excel(DATA_FILE)
-
-                if df.empty:
-                    st.info("Aucun joueur enregistré pour l'instant.")
-                else:
-                    st.dataframe(df, use_container_width=True, hide_index=True)
+            if df_joueurs_ciblés.empty:
+                st.info("Aucun joueur enregistré pour l'instant.")
+            else:
+                st.dataframe(df_joueurs_ciblés, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
