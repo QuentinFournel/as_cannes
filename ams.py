@@ -3099,101 +3099,105 @@ def streamlit_application(all_df):
             else:
                 df_filtré = df_joueurs_ciblés.copy()
 
-            for index, row in df_filtré.iterrows():
+            # Ajout d'une colonne pour garder l'index réel
+            df_filtré = df_filtré.copy()
+            df_filtré["index_reel"] = df_filtré.index
+
+            for i, row in df_filtré.iterrows():
+                index_reel = row["index_reel"]
+
                 with st.expander(f"{row.get('Prénom', '')} {row.get('Nom', '')} - {row.get('Club', '')}"):
                     col1, col2 = st.columns(2)
 
                     with col1:
-                        prenom = st.text_input("Prénom", value=str(row.get("Prénom", "")), key=f"prenom_{index}")
-                        position = st.text_input("Position", value=str(row.get("Position", "")), key=f"position_{index}")
+                        prenom = st.text_input("Prénom", value=str(row.get("Prénom", "")), key=f"prenom_{index_reel}")
+                        position = st.text_input("Position", value=str(row.get("Position", "")), key=f"position_{index_reel}")
 
                         options_n1 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
                         val_n1 = str(row.get("Priorité N1", "")).strip()
                         idx_n1 = options_n1.index(val_n1) if val_n1 in options_n1 else 0
-                        priorite_n1 = st.selectbox("Priorité N1", options_n1, index=idx_n1, key=f"priorite_n1_{index}")
+                        priorite_n1 = st.selectbox("Priorité N1", options_n1, index=idx_n1, key=f"priorite_n1_{index_reel}")
 
                         try:
                             age_val = int(row["Âge"]) if not pd.isna(row["Âge"]) else 0
                         except:
                             age_val = 0
-                        age = st.number_input("Âge", value=age_val, min_value=0, max_value=50, key=f"age_{index}")
+                        age = st.number_input("Âge", value=age_val, min_value=0, max_value=50, key=f"age_{index_reel}")
                         if age == 0:
                             age = ""
 
                         options_pied = ["", "Droit", "Gauche", "Ambidextre"]
                         val_pied = str(row.get("Pied fort", "")).strip()
                         idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
-                        pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index}")
+                        pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index_reel}")
 
                         options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
                         val_contrat = str(row.get("Type de contrat", "")).strip()
                         idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
-                        contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
+                        contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index_reel}")
 
-                        video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index}")
-                        
-                        salaire_actuel = st.text_input("Salaire actuel (€)", value=str(row.get("Salaire actuel (€)", "")), key=f"salaire_actuel_{index}")
-                        avantages = st.text_area("Avantages actuels", value=str(row.get("Avantages actuels", "")), key=f"avantages_actuels_{index}")
+                        video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index_reel}")
+                        salaire_actuel = st.text_input("Salaire actuel (€)", value=str(row.get("Salaire actuel (€)", "")), key=f"salaire_actuel_{index_reel}")
+                        avantages = st.text_area("Avantages actuels", value=str(row.get("Avantages actuels", "")), key=f"avantages_actuels_{index_reel}")
 
-                        enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
+                        enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index_reel}")
 
                     with col2:
-                        nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index}")
-                        club = st.text_input("Club", value=str(row.get("Club", "")), key=f"club_{index}")
+                        nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index_reel}")
+                        club = st.text_input("Club", value=str(row.get("Club", "")), key=f"club_{index_reel}")
 
                         options_n2 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
                         val_n2 = str(row.get("Priorité N2", "")).strip()
                         idx_n2 = options_n2.index(val_n2) if val_n2 in options_n2 else 0
-                        priorite_n2 = st.selectbox("Priorité N2", options_n2, index=idx_n2, key=f"priorite_n2_{index}")
+                        priorite_n2 = st.selectbox("Priorité N2", options_n2, index=idx_n2, key=f"priorite_n2_{index_reel}")
 
                         try:
                             taille_val = int(row["Taille (cm)"]) if not pd.isna(row["Taille (cm)"]) else 0
                         except:
                             taille_val = 0
-                        taille = st.number_input("Taille (cm)", value=taille_val, min_value=0, max_value=250, key=f"taille_{index}")
+                        taille = st.number_input("Taille (cm)", value=taille_val, min_value=0, max_value=250, key=f"taille_{index_reel}")
                         if taille == 0:
                             taille = ""
 
-                        agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index}")
-
-                        duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index}")
+                        agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index_reel}")
+                        duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index_reel}")
 
                         options_data = ["", "Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
                         val_data = str(row.get("Des données sont-elles disponibles ?", "")).strip()
                         idx_data = options_data.index(val_data) if val_data in options_data else 0
-                        data_dispo = st.selectbox("Des données sont-elles disponibles ?", options_data, index=idx_data, key=f"data_{index}")
+                        data_dispo = st.selectbox("Des données sont-elles disponibles ?", options_data, index=idx_data, key=f"data_{index_reel}")
 
-                        salaire_proposition = st.text_input("Salaire proposé (€)", value=str(row.get("Salaire proposé (€)", "")), key=f"salaire_propose_{index}")
-                        avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index}")
+                        salaire_proposition = st.text_input("Salaire proposé (€)", value=str(row.get("Salaire proposé (€)", "")), key=f"salaire_propose_{index_reel}")
+                        avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index_reel}")
 
-                        supprimer = st.button("Supprimer", key=f"supprimer_{index}")
+                        supprimer = st.button("Supprimer", key=f"supprimer_{index_reel}")
 
                     if supprimer:
-                        df_joueurs_ciblés.drop(index, inplace=True)
+                        df_joueurs_ciblés.drop(index_reel, inplace=True)
                         df_joueurs_ciblés.to_excel("data/joueurs.xlsx", index=False)
                         upload_or_update_file(service, folder_id, df_joueurs_ciblés)
                         st.success(f"Joueur {prenom} {nom} supprimé.")
                         st.rerun()
 
                     if enregistrer:
-                        df_joueurs_ciblés.at[index, "Prénom"] = prenom
-                        df_joueurs_ciblés.at[index, "Nom"] = nom
-                        df_joueurs_ciblés.at[index, "Position"] = position
-                        df_joueurs_ciblés.at[index, "Club"] = club
-                        df_joueurs_ciblés.at[index, "Priorité N1"] = priorite_n1
-                        df_joueurs_ciblés.at[index, "Priorité N2"] = priorite_n2
-                        df_joueurs_ciblés.at[index, "Âge"] = age
-                        df_joueurs_ciblés.at[index, "Taille (cm)"] = taille
-                        df_joueurs_ciblés.at[index, "Pied fort"] = pied
-                        df_joueurs_ciblés.at[index, "Nom de l'agent"] = agent
-                        df_joueurs_ciblés.at[index, "Type de contrat"] = contrat
-                        df_joueurs_ciblés.at[index, "Durée du contrat (en année)"] = duree_contrat
-                        df_joueurs_ciblés.at[index, "Lien vers une vidéo"] = video
-                        df_joueurs_ciblés.at[index, "Des données sont-elles disponibles ?"] = data_dispo
-                        df_joueurs_ciblés.at[index, "Salaire actuel (€)"] = salaire_actuel
-                        df_joueurs_ciblés.at[index, "Salaire proposé (€)"] = salaire_proposition
-                        df_joueurs_ciblés.at[index, "Avantages actuels"] = avantages
-                        df_joueurs_ciblés.at[index, "Avantages proposés"] = avantages_proposition
+                        df_joueurs_ciblés.at[index_reel, "Prénom"] = prenom
+                        df_joueurs_ciblés.at[index_reel, "Nom"] = nom
+                        df_joueurs_ciblés.at[index_reel, "Position"] = position
+                        df_joueurs_ciblés.at[index_reel, "Club"] = club
+                        df_joueurs_ciblés.at[index_reel, "Priorité N1"] = priorite_n1
+                        df_joueurs_ciblés.at[index_reel, "Priorité N2"] = priorite_n2
+                        df_joueurs_ciblés.at[index_reel, "Âge"] = age
+                        df_joueurs_ciblés.at[index_reel, "Taille (cm)"] = taille
+                        df_joueurs_ciblés.at[index_reel, "Pied fort"] = pied
+                        df_joueurs_ciblés.at[index_reel, "Nom de l'agent"] = agent
+                        df_joueurs_ciblés.at[index_reel, "Type de contrat"] = contrat
+                        df_joueurs_ciblés.at[index_reel, "Durée du contrat (en année)"] = duree_contrat
+                        df_joueurs_ciblés.at[index_reel, "Lien vers une vidéo"] = video
+                        df_joueurs_ciblés.at[index_reel, "Des données sont-elles disponibles ?"] = data_dispo
+                        df_joueurs_ciblés.at[index_reel, "Salaire actuel (€)"] = salaire_actuel
+                        df_joueurs_ciblés.at[index_reel, "Salaire proposé (€)"] = salaire_proposition
+                        df_joueurs_ciblés.at[index_reel, "Avantages actuels"] = avantages
+                        df_joueurs_ciblés.at[index_reel, "Avantages proposés"] = avantages_proposition
 
                         df_joueurs_ciblés.to_excel("data/joueurs.xlsx", index=False)
                         upload_or_update_file(service, folder_id, df_joueurs_ciblés)
