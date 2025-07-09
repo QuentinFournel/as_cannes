@@ -3123,16 +3123,17 @@ def streamlit_application(all_df):
                             idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
                             pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index}")
 
-                            agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index}")
-
+                            contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
                             options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
                             val_contrat = str(row.get("Type de contrat", "")).strip()
                             idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
-                            contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
 
                             video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index}")
+                            
                             salaire_actuel = st.text_input("Salaire actuel (€)", value=str(row.get("Salaire actuel (€)", "")), key=f"salaire_actuel_{index}")
                             avantages = st.text_area("Avantages actuels", value=str(row.get("Avantages actuels", "")), key=f"avantages_actuels_{index}")
+
+                            enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
                         with col2:
                             nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index}")
@@ -3151,6 +3152,8 @@ def streamlit_application(all_df):
                             if taille == 0:
                                 taille = ""
 
+                            agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index}")
+
                             duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index}")
 
                             options_data = ["", "Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
@@ -3162,7 +3165,6 @@ def streamlit_application(all_df):
                             avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index}")
 
                             supprimer = st.button("Supprimer", key=f"supprimer_{index}")
-                            enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index}")
 
                         if supprimer:
                             df.drop(index, inplace=True)
