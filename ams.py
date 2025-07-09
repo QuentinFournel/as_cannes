@@ -3123,10 +3123,10 @@ def streamlit_application(all_df):
                             idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
                             pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index}")
 
-                            contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
                             options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
                             val_contrat = str(row.get("Type de contrat", "")).strip()
                             idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
+                            contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index}")
 
                             video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index}")
                             
