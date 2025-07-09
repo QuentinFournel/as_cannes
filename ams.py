@@ -3027,6 +3027,11 @@ def streamlit_application(all_df):
         tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Modifier ou supprimer un joueur", "Liste des joueurs"])
 
         with tab1:
+            files = list_files_in_folder(service, folder_id)
+            file_info = next((f for f in files if f["name"] == "joueurs.xlsx"), None)
+
+            download_file(service, file_info["id"], "joueurs.xlsx", output_folder="data")
+            
             df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
 
             with st.form("formulaire_ajout"):
@@ -3085,6 +3090,11 @@ def streamlit_application(all_df):
                     st.rerun()
 
         with tab2:
+            files = list_files_in_folder(service, folder_id)
+            file_info = next((f for f in files if f["name"] == "joueurs.xlsx"), None)
+
+            download_file(service, file_info["id"], "joueurs.xlsx", output_folder="data")
+
             df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
 
             agent_name = st.text_input("Nom de l'agent à rechercher")
@@ -3205,8 +3215,13 @@ def streamlit_application(all_df):
                         st.rerun()
 
         with tab3:
+            files = list_files_in_folder(service, folder_id)
+            file_info = next((f for f in files if f["name"] == "joueurs.xlsx"), None)
+
+            download_file(service, file_info["id"], "joueurs.xlsx", output_folder="data")
+
             df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
-            
+
             if df_joueurs_ciblés.empty:
                 st.info("Aucun joueur enregistré pour l'instant.")
             else:
