@@ -3023,6 +3023,9 @@ def streamlit_application(all_df):
 
         df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
 
+        service = authenticate_google_drive()
+        folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
+
         tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Modifier ou supprimer un joueur", "Liste des joueurs"])
 
         with tab1:
@@ -3078,8 +3081,6 @@ def streamlit_application(all_df):
                     df_joueurs_ciblés = pd.concat([df_joueurs_ciblés, new_data], ignore_index=True)
 
                     try:
-                        service = authenticate_google_drive()
-                        folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
                         upload_or_update_file(service, folder_id, df_joueurs_ciblés)
                         st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
                     except Exception as e:
