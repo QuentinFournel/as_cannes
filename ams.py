@@ -3021,14 +3021,14 @@ def streamlit_application(all_df):
     elif page == "Joueurs ciblés":
         st.header("Joueurs ciblés")
 
-        df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
-
         service = authenticate_google_drive()
         folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
 
         tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Modifier ou supprimer un joueur", "Liste des joueurs"])
 
         with tab1:
+            df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
+
             with st.form("formulaire_ajout"):
                 col1, col2 = st.columns(2)
 
@@ -3085,6 +3085,8 @@ def streamlit_application(all_df):
                     st.rerun()
 
         with tab2:
+            df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
+
             agent_name = st.text_input("Nom de l'agent à rechercher")
 
             if agent_name:
@@ -3203,6 +3205,8 @@ def streamlit_application(all_df):
                         st.rerun()
 
         with tab3:
+            df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
+            
             if df_joueurs_ciblés.empty:
                 st.info("Aucun joueur enregistré pour l'instant.")
             else:
