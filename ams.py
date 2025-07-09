@@ -3096,7 +3096,7 @@ def streamlit_application(all_df):
                 else:
                     st.warning("Aucun joueur trouvé pour cet agent.")
             else:
-                df_filtré = df.copy()
+                df_filtré = df_joueurs_ciblés.copy()
 
             for index, row in df_filtré.iterrows():
                 with st.expander(f"{row.get('Prénom', '')} {row.get('Nom', '')} - {row.get('Club', '')}"):
