@@ -2190,12 +2190,17 @@ def compute_similarity(df, joueur, poste):
     # Création du DataFrame final
     df_filtré['Score de similarité'] = ((similarities + 1) / 2 * 100).round(1)
     df_sorted = df_filtré.sort_values(by='Score de similarité', ascending=False)
-    
+
     df_sorted = df_sorted[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration', 'Score de similarité']]
 
-    # Supprimer les lignes correspondantes au joueur
+    # Sécuriser la suppression des lignes correspondantes au joueur
     nom_joueur = joueur.strip().split(' - ')[0]
-    df_sorted = df_sorted[~df_sorted['Joueur + Information'].str.startswith(nom_joueur)]
+    df_sorted = df_sorted[
+        ~df_sorted['Joueur + Information']
+        .fillna('')
+        .astype(str)
+        .str.startswith(nom_joueur)
+    ]
 
     return df_sorted
 
