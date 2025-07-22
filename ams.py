@@ -248,9 +248,9 @@ metrics_by_position = [
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\noffensifs": "Duels offensifs par 90",
-            "Duels\noffensifs gagnés": "Duels de marquage, %",
+            "Duels\noffensifs gagnés (%)": "Duels de marquage, %",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %"
+            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %"
         }
     },
     {
@@ -268,11 +268,11 @@ metrics_by_position = [
             "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
             "Passes progressives\n/ Passes": "Passes progressives / Passes",
             "Centres": "Centres par 90",
-            "Centres\nréussis": "Сentres précises, %",
+            "Centres\nréussis (%)": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
-            "Dribbles\nréussis": "Dribbles réussis, %"
+            "Dribbles\nréussis (%)": "Dribbles réussis, %"
         }
     },
     {
@@ -291,9 +291,9 @@ metrics_by_position = [
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
-            "Dribbles\nréussis": "Dribbles réussis, %",
+            "Dribbles\nréussis (%)": "Dribbles réussis, %",
             "Duels": "Duels par 90",
-            "Duels\ngagnés": "Duels gagnés, %",
+            "Duels\ngagnés (%)": "Duels gagnés, %",
             "Actions déf.\nréussies": "Actions défensives réussies par 90"
         }
     },
@@ -310,9 +310,9 @@ metrics_by_position = [
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\ndéfensifs": "Duels défensifs par 90",
-            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
+            "Duels\ndéfensifs gagnés (%)": "Duels défensifs gagnés, %",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %",
+            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %",
             "Tacles\nglissés": "Tacles glissés PAdj",
             "Interceptions": "Interceptions PAdj",
             "Tirs\ncontrés": "Tirs contrés par 90",
@@ -328,13 +328,13 @@ metrics_by_position = [
             "xA\n/ Passes": "xA / Passes",
             "Passes avant\n/ Passes": "Passes avant / Passes",
             "Centres": "Centres par 90",
-            "Centres\nréussis": "Сentres précises, %",
+            "Centres\nréussis (%)": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\ndéfensifs": "Duels défensifs par 90",
-            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
+            "Duels\ndéfensifs gagnés (%)": "Duels défensifs gagnés, %",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %",
+            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %",
             "Tacles\nglissés": "Tacles glissés PAdj",
             "Interceptions": "Interceptions PAdj",
             "Tirs\ncontrés": "Tirs contrés par 90",
@@ -347,16 +347,16 @@ metrics_by_position = [
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "Passes avant\n/ Passes": "Passes avant / Passes",
-            "Passes\navant réussies": "Passes en avant précises, %",
+            "Passes\navant réussies (%)": "Passes en avant précises, %",
             "Passes longues\n/ Passes": "Passes longues / Passes",
-            "Passes\nlongues réussies": "Longues passes précises, %",
+            "Passes\nlongues réussies (%)": "Longues passes précises, %",
             "Passes progressives\n/ Passes": "Passes progressives / Passes",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\ndéfensifs": "Duels défensifs par 90",
-            "Duels\ndéfensifs gagnés": "Duels défensifs gagnés, %",
+            "Duels\ndéfensifs gagnés (%)": "Duels défensifs gagnés, %",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %",
+            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %",
             "Tacles\nglissés": "Tacles glissés PAdj",
             "Interceptions": "Interceptions PAdj",
             "Tirs\ncontrés": "Tirs contrés par 90",
@@ -369,9 +369,9 @@ metrics_by_position = [
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "Passes courtes\n/ Passes": "Passes courtes / Passes",
-            "Passes\courtes réussies": "Passes courtes / moyennes précises, %",
+            "Passes\ncourtes réussies (%)": "Passes courtes / moyennes précises, %",
             "Passes longues\n/ Passes": "Passes longues / Passes",
-            "Passes\nlongues réussies": "Longues passes précises, %",
+            "Passes\nlongues réussies (%)": "Longues passes précises, %",
             "Buts\nconcédés": "Buts concédés par 90",
             "xG\nconcédés": "xG contre par 90",
             "Buts\névités": "Buts évités par 90",
@@ -379,7 +379,7 @@ metrics_by_position = [
             "Arrêts": "Enregistrer, %",
             "Sorties": "Sorties par 90",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés": "Duels aériens gagnés, %"
+            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %"
         }
     }
 ]
