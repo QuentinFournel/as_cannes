@@ -1493,7 +1493,10 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
         hover_data={
             "Catégorie": False,
             x_metric: False,
-            y_metric: False
+            y_metric: False,
+            "Âge": True,
+            "Minutes jouées": True,
+            "Contrat expiration": True
         },
         opacity=0.7
     )
