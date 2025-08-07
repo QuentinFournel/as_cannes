@@ -2918,25 +2918,25 @@ def streamlit_application(all_df):
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                fig = plot_rating_distribution(scores_df[kpis_poste[0]], joueur_scores[kpis_poste[0]], kpis_poste[0])
-                st.plotly_chart(fig, use_container_width=True)
+                fig1 = plot_rating_distribution(scores_df[kpis_poste[0]], joueur_scores[kpis_poste[0]], kpis_poste[0])
+                st.plotly_chart(fig1, use_container_width=True)
 
-                fig = plot_rating_distribution(scores_df[kpis_poste[3]], joueur_scores[kpis_poste[3]], kpis_poste[3], show_legend=False)
-                st.plotly_chart(fig, use_container_width=True)
+                fig4 = plot_rating_distribution(scores_df[kpis_poste[3]], joueur_scores[kpis_poste[3]], kpis_poste[3])
+                st.plotly_chart(fig4, use_container_width=True)
 
             with col2:
-                fig = plot_rating_distribution(scores_df[kpis_poste[1]], joueur_scores[kpis_poste[1]], kpis_poste[1])
-                st.plotly_chart(fig, use_container_width=True)
+                fig2 = plot_rating_distribution(scores_df[kpis_poste[1]], joueur_scores[kpis_poste[1]], kpis_poste[1])
+                st.plotly_chart(fig2, use_container_width=True)
 
-                fig = plot_rating_distribution(scores_df[kpis_poste[4]], joueur_scores[kpis_poste[4]], kpis_poste[4], show_legend=False)
-                st.plotly_chart(fig, use_container_width=True)
+                fig5 = plot_rating_distribution(scores_df[kpis_poste[4]], joueur_scores[kpis_poste[4]], kpis_poste[4])
+                st.plotly_chart(fig5, use_container_width=True)
 
             with col3:
-                fig = plot_rating_distribution(scores_df[kpis_poste[2]], joueur_scores[kpis_poste[2]], kpis_poste[2])
-                st.plotly_chart(fig, use_container_width=True)
+                fig3 = plot_rating_distribution(scores_df[kpis_poste[2]], joueur_scores[kpis_poste[2]], kpis_poste[2])
+                st.plotly_chart(fig3, use_container_width=True)
 
-                fig = plot_rating_distribution(scores_df[kpis_poste[5]], joueur_scores[kpis_poste[5]], kpis_poste[5], show_legend=False)
-                st.plotly_chart(fig, use_container_width=True)
+                fig6 = plot_rating_distribution(scores_df[kpis_poste[5]], joueur_scores[kpis_poste[5]], kpis_poste[5])
+                st.plotly_chart(fig6, use_container_width=True)
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
