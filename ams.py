@@ -1134,9 +1134,9 @@ def collect_individual_data():
     df_français.columns = df_français.columns.str.strip()
     df_top5européen.columns = df_top5européen.columns.str.strip()
 
-    df_championnat_de_france['Contrat expiration'] = pd.to_datetime(df_championnat_de_france['Contrat expiration'], errors='coerce')
-    df_français['Contrat expiration'] = pd.to_datetime(df_français['Contrat expiration'], errors='coerce')
-    df_top5européen['Contrat expiration'] = pd.to_datetime(df_top5européen['Contrat expiration'], errors='coerce')
+    df_championnat_de_france['Contrat expiration'] = pd.to_datetime(df_championnat_de_france['Contrat expiration'], errors='coerce').dt.date
+    df_français['Contrat expiration'] = pd.to_datetime(df_français['Contrat expiration'], errors='coerce').dt.date
+    df_top5européen['Contrat expiration'] = pd.to_datetime(df_top5européen['Contrat expiration'], errors='coerce').dt.date
 
     all_df = {
         'Joueur du championnat de France': df_championnat_de_france,
