@@ -1134,6 +1134,10 @@ def collect_individual_data():
     df_français.columns = df_français.columns.str.strip()
     df_top5européen.columns = df_top5européen.columns.str.strip()
 
+    df_championnat_de_france['Contrat expiration'] = pd.to_datetime(df_championnat_de_france['Contrat expiration'], errors='coerce')
+    df_français['Contrat expiration'] = pd.to_datetime(df_français['Contrat expiration'], errors='coerce')
+    df_top5européen['Contrat expiration'] = pd.to_datetime(df_top5européen['Contrat expiration'], errors='coerce')
+
     all_df = {
         'Joueur du championnat de France': df_championnat_de_france,
         'Joueur français': df_français,
@@ -1641,7 +1645,7 @@ def search_top_players(df, poste):
 
     df_ranked = rank_columns(df_filtré)
 
-    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Minutes jouées', 'Contrat expiration']].copy()
+    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Taille', 'Minutes jouées', 'Contrat expiration']].copy()
 
     kpi_metrics = kpi_by_position[poste]
     kpi_coefficients = kpi_coefficients_by_position[poste]
@@ -3006,10 +3010,6 @@ def streamlit_application(all_df):
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
         col1, col2, col3 = st.columns(3)
-
-        # Conversion de la colonne 'Contrat expiration' en datetime, en ignorant les erreurs de format
-        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
-
 
         with col1:
             min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
