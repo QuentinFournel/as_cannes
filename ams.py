@@ -1224,9 +1224,9 @@ def compute_weighted_stats_by_minutes(df_joueur):
 def rank_columns(df):
     df_copy = df.copy()
 
-    # Colonnes numériques sauf 'Minutes jouées' et 'Âge'
+    # Colonnes numériques sauf 'Minutes jouées', 'Âge' et 'Taille'
     numeric_cols = df_copy.select_dtypes(include=['number']).columns
-    numeric_cols = numeric_cols.drop(['Minutes jouées', 'Âge'], errors='ignore')
+    numeric_cols = numeric_cols.drop(['Minutes jouées', 'Âge', 'Taille'], errors='ignore')
 
     # Colonnes où un score plus faible est meilleur
     lower_is_better = [
