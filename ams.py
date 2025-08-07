@@ -2937,8 +2937,12 @@ def streamlit_application(all_df):
                 fig6 = plot_rating_distribution(scores_df[kpis_poste[5]], joueur_scores[kpis_poste[5]], kpis_poste[5])
                 st.pyplot(fig6)
 
-            fig7 = plot_rating_distribution(scores_df['Note globale'], joueur_scores['Note globale'], 'Note globale')
-            st.pyplot(fig7)
+            # Créer 3 colonnes pour centrer la fig 7
+            _, col_center, _ = st.columns([1, 2, 1])
+
+            with col_center:
+                fig7 = plot_rating_distribution(scores_df['Note globale'], joueur_scores['Note globale'], 'Note globale')
+                st.pyplot(fig7)
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
