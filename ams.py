@@ -2915,28 +2915,30 @@ def streamlit_application(all_df):
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
 
             with col1:
                 fig1 = plot_rating_distribution(scores_df[kpis_poste[0]], joueur_scores[kpis_poste[0]], kpis_poste[0])
                 st.pyplot(fig1)
 
-                fig4 = plot_rating_distribution(scores_df[kpis_poste[3]], joueur_scores[kpis_poste[3]], kpis_poste[3])
-                st.pyplot(fig4)
+                fig3 = plot_rating_distribution(scores_df[kpis_poste[2]], joueur_scores[kpis_poste[2]], kpis_poste[2])
+                st.pyplot(fig3)
+
+                fig5 = plot_rating_distribution(scores_df[kpis_poste[4]], joueur_scores[kpis_poste[4]], kpis_poste[4])
+                st.pyplot(fig5)
 
             with col2:
                 fig2 = plot_rating_distribution(scores_df[kpis_poste[1]], joueur_scores[kpis_poste[1]], kpis_poste[1])
                 st.pyplot(fig2)
 
-                fig5 = plot_rating_distribution(scores_df[kpis_poste[4]], joueur_scores[kpis_poste[4]], kpis_poste[4])
-                st.pyplot(fig5)
-
-            with col3:
-                fig3 = plot_rating_distribution(scores_df[kpis_poste[2]], joueur_scores[kpis_poste[2]], kpis_poste[2])
-                st.pyplot(fig3)
+                fig4 = plot_rating_distribution(scores_df[kpis_poste[3]], joueur_scores[kpis_poste[3]], kpis_poste[3])
+                st.pyplot(fig4)
 
                 fig6 = plot_rating_distribution(scores_df[kpis_poste[5]], joueur_scores[kpis_poste[5]], kpis_poste[5])
                 st.pyplot(fig6)
+
+            fig7 = plot_rating_distribution(scores_df['Note globale'], joueur_scores['Note globale'], 'Note globale')
+            st.pyplot(fig7)
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
