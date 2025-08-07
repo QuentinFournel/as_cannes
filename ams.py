@@ -2785,7 +2785,7 @@ def streamlit_application(all_df):
                 bordered_metric(col2, "Taille", '?' if pd.isna(taille_value) or taille_value == 0 or taille_value == '' else int(taille_value), 165)
 
             with col3:
-                bordered_metric(col3, "Pied fort", '?' if pd.isna(pied_value) or pied_value == 0 or pied_value == '' else pied_value.capitalize(), 165)
+                bordered_metric(col3, "Pied fort", '?' if pd.isna(pied_value) or pied_value == 'Unknown' or pied_value == '' else pied_value.capitalize(), 165)
 
             with col4:
                 bordered_metric(col4, "Contrat expiration", '?' if pd.isna(contrat_value) or contrat_value == 0 or contrat_value == '' else contrat_value, 165)
