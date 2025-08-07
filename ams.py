@@ -3009,7 +3009,7 @@ def streamlit_application(all_df):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1:
             min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
