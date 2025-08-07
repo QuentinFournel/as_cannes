@@ -3005,7 +3005,16 @@ def streamlit_application(all_df):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
-        min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df['Âge'].min()), max_value=int(df['Âge'].max()), value=(int(df['Âge'].min()), int(df['Âge'].max())), step=1)
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df['Âge'].min()), max_value=int(df['Âge'].max()), value=(int(df['Âge'].min()), int(df['Âge'].max())), step=1)
+
+        with col2:
+            min_taille, max_taille = st.slider("Sélectionnez une tranche de taille (cm)", min_value=int(df['Taille'].min()), max_value=int(df['Taille'].max()), value=(int(df['Taille'].min()), int(df['Taille'].max())), step=1)
+        
+        with col3:
+            min_contrat, max_contrat = st.slider("Sélectionnez une plage de dates de contrat", min_value=df['contrat expiration'].min().date(), max_value=df['contrat expiration'].max().date(), value=(df['contrat expiration'].min().date(), df['contrat expiration'].max().date()), format="YYYY-MM-DD")
 
         tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
@@ -3013,7 +3022,9 @@ def streamlit_application(all_df):
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             top_players = search_top_players(df, poste)
-            top_players = top_players[(top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)]
+            top_players = top_players[((top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)) & 
+                                      ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille)) & 
+                                      ((top_players['contrat expiration'] >= pd.to_datetime(min_contrat)) & (top_players['contrat expiration'] <= pd.to_datetime(max_contrat)))]
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
             top_players.insert(0, "Classement", range(1, len(top_players) + 1))
@@ -3042,7 +3053,9 @@ def streamlit_application(all_df):
                 thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
             recommended_players = search_recommended_players(df, poste, thresholds)
-            recommended_players = recommended_players[(recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)]
+            recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                                                      ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille)) &
+                                                      ((recommended_players['contrat expiration'] >= pd.to_datetime(min_contrat)) & (recommended_players['contrat expiration'] <= pd.to_datetime(max_contrat)))]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
