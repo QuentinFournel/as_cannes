@@ -3007,6 +3007,10 @@ def streamlit_application(all_df):
 
         col1, col2, col3 = st.columns(3)
 
+        # Conversion de la colonne 'Contrat expiration' en datetime, en ignorant les erreurs de format
+        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
+
+
         with col1:
             min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
                                         min_value=int(df['Âge'].min(skipna=True)), 
@@ -3015,7 +3019,7 @@ def streamlit_application(all_df):
                                         step=1)
 
         with col2:
-            min_taille, max_taille = st.slider("Sélectionnez une tranche de taille (cm)", 
+            min_taille, max_taille = st.slider("Sélectionnez une tranche de taille", 
                                             min_value=int(df['Taille'].min(skipna=True)), 
                                             max_value=int(df['Taille'].max(skipna=True)), 
                                             value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
