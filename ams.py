@@ -3032,7 +3032,7 @@ def streamlit_application(all_df):
 
             top_players = search_top_players(df, poste)
             top_players = top_players[((top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)) & 
-                                      ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille))]
+                                    ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille) | (top_players['Taille'] == 0))]
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
             top_players.insert(0, "Classement", range(1, len(top_players) + 1))
@@ -3062,7 +3062,7 @@ def streamlit_application(all_df):
 
             recommended_players = search_recommended_players(df, poste, thresholds)
             recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                      ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille))]
+                                                      ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
