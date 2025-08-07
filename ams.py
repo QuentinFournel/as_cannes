@@ -2769,6 +2769,24 @@ def streamlit_application(all_df):
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Joueur similaire"])
 
         with tab1:
+            st.subheader('Informations')
+
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                bordered_metric(col3, "Âge", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Âge'].values[0], 165)
+
+            with col2:
+                bordered_metric(col2, "Taille", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Taille'].values[0], 165)
+
+            with col3:
+                bordered_metric(col1, "Pied fort", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Pied'].values[0], 165)
+
+            with col4:
+                bordered_metric(col4, "Contrat expiration", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Contrat expiration'].values[0], 165)
+
+            st.markdown("---")
+
             st.subheader('Statistiques générales')
 
             col1, col2, col3, col4 = st.columns(4)
