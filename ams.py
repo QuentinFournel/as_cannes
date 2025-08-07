@@ -3025,14 +3025,6 @@ def streamlit_application(all_df):
                                             value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                             step=1)
 
-        with col3:
-            min_contrat, max_contrat = st.slider("Sélectionnez une plage de dates de contrat", 
-                                                min_value=df['Contrat expiration'].min(skipna=True).date(), 
-                                                max_value=df['Contrat expiration'].max(skipna=True).date(), 
-                                                value=(df['Contrat expiration'].min(skipna=True).date(), 
-                                                        df['Contrat expiration'].max(skipna=True).date()), 
-                                                format="YYYY-MM-DD")
-
         tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
         with tab1:
@@ -3040,8 +3032,7 @@ def streamlit_application(all_df):
 
             top_players = search_top_players(df, poste)
             top_players = top_players[((top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)) & 
-                                      ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille)) & 
-                                      ((top_players['Contrat expiration'] >= pd.to_datetime(min_contrat)) & (top_players['Contrat expiration'] <= pd.to_datetime(max_contrat)))]
+                                      ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille))]
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
 
             top_players.insert(0, "Classement", range(1, len(top_players) + 1))
@@ -3071,8 +3062,7 @@ def streamlit_application(all_df):
 
             recommended_players = search_recommended_players(df, poste, thresholds)
             recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                      ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille)) &
-                                                      ((recommended_players['Contrat expiration'] >= pd.to_datetime(min_contrat)) & (recommended_players['Contrat expiration'] <= pd.to_datetime(max_contrat)))]
+                                                      ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille))]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
