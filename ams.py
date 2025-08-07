@@ -2779,16 +2779,16 @@ def streamlit_application(all_df):
             contrat_value = compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Contrat expiration'].values[0]
 
             with col1:
-                bordered_metric(col1, "Âge", '?' if pd.isna(age_value) or age_value == 0 or age_value == '' else int(age_value), 165)
+                bordered_metric(col1, "Âge", 'Unknown' if pd.isna(age_value) or age_value == 0 or age_value == '' else int(age_value), 165)
 
             with col2:
-                bordered_metric(col2, "Taille", '?' if pd.isna(taille_value) or taille_value == 0 or taille_value == '' else int(taille_value), 165)
+                bordered_metric(col2, "Taille", 'Unknown' if pd.isna(taille_value) or taille_value == 0 or taille_value == '' else int(taille_value), 165)
 
             with col3:
-                bordered_metric(col3, "Pied fort", '?' if pd.isna(pied_value) or pied_value == 'Unknown' or pied_value == '' else pied_value.capitalize(), 165)
+                bordered_metric(col3, "Pied fort", 'Unknown' if pd.isna(pied_value) or pied_value == 0 or pied_value == '' else pied_value.capitalize(), 165)
 
             with col4:
-                bordered_metric(col4, "Contrat expiration", '?' if pd.isna(contrat_value) or contrat_value == 0 or contrat_value == '' else contrat_value, 165)
+                bordered_metric(col4, "Contrat expiration", 'Unknown' if pd.isna(contrat_value) or contrat_value == 0 or contrat_value == '' else contrat_value, 165)
 
             st.markdown("---")
 
