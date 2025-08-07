@@ -15,7 +15,8 @@ import math
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics.pairwise import cosine_distances
-import base64
+import seaborn as sns
+from scipy import stats
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -2303,6 +2304,50 @@ def create_player_data(nom_joueur, sélection_dataframe):
 
     return df_player
 
+def plot_rating_distribution(values, player_rating, kpi):
+    # Créer la figure et les axes
+    fig, ax = plt.subplots(figsize=(5, 3))
+
+    # Courbe KDE (estimation de densité)
+    sns.kdeplot(values, fill=False, color="black", linewidth=1.5, ax=ax)
+
+    # Créer des points pour la zone ombrée
+    x = np.linspace(0, 100, 1000)
+    kde = stats.gaussian_kde(values)
+    y = kde(x)
+
+    # Remplir la zone jusqu’à la note du joueur
+    ax.fill_between(x, 0, y, where=(x <= player_rating), color='#ac141a', alpha=0.8)
+
+    # Calcul du percentile
+    percentile = stats.percentileofscore(values, player_rating)
+
+    # Titre de l'axe
+    ax.set_title(f"{kpi}", fontsize=15, fontweight='bold', loc='center')
+
+    # Texte centré dans la figure (et pas dans l'axe) – dans la marge blanche
+    fig.text(0.5, 0.8, f"Rating : {player_rating} | Percentile : {int(percentile)}",
+             fontsize=11, ha='center', va='bottom')
+
+    # Supprimer les bordures noires autour
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    # Nettoyage des axes
+    ax.set_xticks(np.arange(0, 101, 20))
+    ax.set_yticks([])
+    ax.set_xlabel("")
+    ax.set_ylabel("")
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, max(y) * 1.25)
+
+    fig.tight_layout()
+
+    fig.set_facecolor('#f4f3ed')
+    ax.set_facecolor('#f4f3ed')
+
+    return fig
+
 def streamlit_application(all_df):
     with st.sidebar:
         page = option_menu(
@@ -2869,14 +2914,29 @@ def streamlit_application(all_df):
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
-            colonnes = st.columns(len(kpis_poste) + 1)
 
-            for i, kpi in enumerate(kpis_poste):
-                with colonnes[i]:
-                    bordered_metric(colonnes[i], kpi, round(joueur_scores[kpi], 1), 90)
+            col1, col2, col3 = st.columns(3)
 
-            with colonnes[-1]:
-                bordered_metric(colonnes[-1], "Note globale", round(joueur_scores["Note globale"], 1), 90, color= "#ac141a")
+            with col1:
+                fig = plot_rating_distribution(scores_df[kpis_poste[0]], joueur_scores[kpis_poste[0]], kpis_poste[0])
+                st.plotly_chart(fig, use_container_width=True)
+
+                fig = plot_rating_distribution(scores_df[kpis_poste[3]], joueur_scores[kpis_poste[3]], kpis_poste[3], show_legend=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col2:
+                fig = plot_rating_distribution(scores_df[kpis_poste[1]], joueur_scores[kpis_poste[1]], kpis_poste[1])
+                st.plotly_chart(fig, use_container_width=True)
+
+                fig = plot_rating_distribution(scores_df[kpis_poste[4]], joueur_scores[kpis_poste[4]], kpis_poste[4], show_legend=False)
+                st.plotly_chart(fig, use_container_width=True)
+
+            with col3:
+                fig = plot_rating_distribution(scores_df[kpis_poste[2]], joueur_scores[kpis_poste[2]], kpis_poste[2])
+                st.plotly_chart(fig, use_container_width=True)
+
+                fig = plot_rating_distribution(scores_df[kpis_poste[5]], joueur_scores[kpis_poste[5]], kpis_poste[5], show_legend=False)
+                st.plotly_chart(fig, use_container_width=True)
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
