@@ -2317,7 +2317,7 @@ def plot_rating_distribution(values, player_rating, kpi):
     y = kde(x)
 
     # Remplir la zone jusqu’à la note du joueur
-    ax.fill_between(x, 0, y, where=(x <= player_rating), color='#ac141a', alpha=0.8)
+    ax.fill_between(x, 0, y, where=(x <= player_rating), color='#ac141a')
 
     # Calcul du percentile
     percentile = stats.percentileofscore(values, player_rating)
