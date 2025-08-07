@@ -2774,13 +2774,13 @@ def streamlit_application(all_df):
             col1, col2, col3, col4 = st.columns(4)
 
             with col1:
-                bordered_metric(col3, "Âge", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Âge'].values[0], 165)
+                bordered_metric(col1, "Âge", int(compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Âge'].values[0]), 165)
 
             with col2:
-                bordered_metric(col2, "Taille", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Taille'].values[0], 165)
+                bordered_metric(col2, "Taille", int(compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Taille'].values[0]), 165)
 
             with col3:
-                bordered_metric(col1, "Pied fort", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Pied'].values[0], 165)
+                bordered_metric(col3, "Pied fort", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Pied'].values[0].capitalize(), 165)
 
             with col4:
                 bordered_metric(col4, "Contrat expiration", compute_weighted_stats_by_minutes(df[df['Joueur + Information'] == joueur])['Contrat expiration'].values[0], 165)
