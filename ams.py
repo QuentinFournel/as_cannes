@@ -3008,13 +3008,26 @@ def streamlit_application(all_df):
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            min_age, max_age = st.slider("Sélectionnez une tranche d'âge", min_value=int(df['Âge'].min()), max_value=int(df['Âge'].max()), value=(int(df['Âge'].min()), int(df['Âge'].max())), step=1)
+            min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
+                                        min_value=int(df['Âge'].min(skipna=True)), 
+                                        max_value=int(df['Âge'].max(skipna=True)), 
+                                        value=(int(df['Âge'].min(skipna=True)), int(df['Âge'].max(skipna=True))), 
+                                        step=1)
 
         with col2:
-            min_taille, max_taille = st.slider("Sélectionnez une tranche de taille (cm)", min_value=int(df['Taille'].min()), max_value=int(df['Taille'].max()), value=(int(df['Taille'].min()), int(df['Taille'].max())), step=1)
-        
+            min_taille, max_taille = st.slider("Sélectionnez une tranche de taille (cm)", 
+                                            min_value=int(df['Taille'].min(skipna=True)), 
+                                            max_value=int(df['Taille'].max(skipna=True)), 
+                                            value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
+                                            step=1)
+
         with col3:
-            min_contrat, max_contrat = st.slider("Sélectionnez une plage de dates de contrat", min_value=df['Contrat expiration'].min().date(), max_value=df['Contrat expiration'].max().date(), value=(df['Contrat expiration'].min().date(), df['Contrat expiration'].max().date()), format="YYYY-MM-DD")
+            min_contrat, max_contrat = st.slider("Sélectionnez une plage de dates de contrat", 
+                                                min_value=df['Contrat expiration'].min(skipna=True).date(), 
+                                                max_value=df['Contrat expiration'].max(skipna=True).date(), 
+                                                value=(df['Contrat expiration'].min(skipna=True).date(), 
+                                                        df['Contrat expiration'].max(skipna=True).date()), 
+                                                format="YYYY-MM-DD")
 
         tab1, tab2 = st.tabs(["Classement", "Recommandation"])
 
