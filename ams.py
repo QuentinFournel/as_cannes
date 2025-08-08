@@ -3161,7 +3161,7 @@ def streamlit_application(all_df):
                 for kpi in kpis_sélectionnées:
                     thresholds[kpi] = st.slider(f"Sélectionnez le top % pour le KPI : {kpi}", min_value=0, max_value=100, value=50, step=5, key=kpi)
 
-                recommended_players = search_recommended_players(df, poste, thresholds)
+                recommended_players = search_recommended_players(scores_df, poste, thresholds)
                 recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
                                                         ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
                 recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
