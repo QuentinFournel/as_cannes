@@ -3113,9 +3113,9 @@ def streamlit_application(all_df):
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab2:
-            metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métriques", "KPI"])
+            metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
 
-            if metric_or_kpi == "Métriques":
+            if metric_or_kpi == "Métrique":
                 colonnes_à_exclure = [
                     'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
                     'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
@@ -3144,6 +3144,7 @@ def streamlit_application(all_df):
                 st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
             elif metric_or_kpi == "KPI":
+                scores_df = calcul_scores_par_kpi(df, "", poste)
                 kpis_sélectionnées = st.multiselect("Sélectionnez des métriques", scores_df.columns)
 
                 thresholds = {}
