@@ -3147,7 +3147,7 @@ def streamlit_application(all_df):
                 scores_df = calcul_scores_par_kpi(df, "", poste)
 
                 colonnes_à_exclure = [
-                    'Minutes jouées', 'Âge'
+                    'Minutes jouées', 'Âge', 'Taille'
                 ]
 
                 colonnes_filtrées = [
