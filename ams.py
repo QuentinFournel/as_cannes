@@ -1040,20 +1040,25 @@ def collect_collective_data(équipe):
 
 def add_new_columns(all_df):
     for name, df in all_df.items():
-        df['Buts - xG'] = df['Buts par 90'] - df['xG par 90']
-        df['xG / Tirs'] = df['xG par 90'] / df['Tirs par 90']
-        df['xA / Passes'] = df['xA par 90'] / df['Passes par 90']
-        df['Passes courtes / Passes'] = df['Passes courtes / moyennes par 90'] / df['Passes par 90']
-        df['Passes avant / Passes'] = df['Passes avant par 90'] / df['Passes par 90']
-        df['Passes longues / Passes'] = df['Passes longues par 90'] / df['Passes par 90']
-        df['Passes clés / Passes'] = df['Passes quasi décisives par 90'] / df['Passes par 90']
-        df['Passes judicieuses / Passes'] = df['Passes judicieuses par 90'] / df['Passes par 90']
-        df['Passes vers la surface / Passes'] = df['Passes vers la surface de réparation par 90'] / df['Passes par 90']
-        df['Passes en profondeur / Passes'] = df['Passes pénétrantes par 90'] / df['Passes par 90']
-        df['Passes dans le tiers adverse / Passes'] = df['Passes dans tiers adverse par 90'] / df['Passes par 90']
-        df['Passes avant tir / Passes'] = df['Passes décisives avec tir par 90'] / df['Passes par 90']
-        df['Passes progressives / Passes'] = df['Passes progressives par 90'] / df['Passes par 90']
-        df['Passes dans la zone dangereuse / Passes'] = df['Réalisations en profondeur par 90'] / df['Passes par 90']
+        new_columns = {
+            'Buts - xG': df['Buts par 90'] - df['xG par 90'],
+            'xG / Tirs': df['xG par 90'] / df['Tirs par 90'],
+            'xA / Passes': df['xA par 90'] / df['Passes par 90'],
+            'Passes courtes / Passes': df['Passes courtes / moyennes par 90'] / df['Passes par 90'],
+            'Passes avant / Passes': df['Passes avant par 90'] / df['Passes par 90'],
+            'Passes longues / Passes': df['Passes longues par 90'] / df['Passes par 90'],
+            'Passes clés / Passes': df['Passes quasi décisives par 90'] / df['Passes par 90'],
+            'Passes judicieuses / Passes': df['Passes judicieuses par 90'] / df['Passes par 90'],
+            'Passes vers la surface / Passes': df['Passes vers la surface de réparation par 90'] / df['Passes par 90'],
+            'Passes en profondeur / Passes': df['Passes pénétrantes par 90'] / df['Passes par 90'],
+            'Passes dans le tiers adverse / Passes': df['Passes dans tiers adverse par 90'] / df['Passes par 90'],
+            'Passes avant tir / Passes': df['Passes décisives avec tir par 90'] / df['Passes par 90'],
+            'Passes progressives / Passes': df['Passes progressives par 90'] / df['Passes par 90'],
+            'Passes dans la zone dangereuse / Passes': df['Réalisations en profondeur par 90'] / df['Passes par 90'],
+        }
+
+        df = pd.concat([df, pd.DataFrame(new_columns)], axis=1)
+
         all_df[name] = df
     return all_df
 
@@ -2353,7 +2358,7 @@ def streamlit_application(all_df):
         page = option_menu(
             menu_title="",
             options=st.secrets['roles'].get(st.session_state.username, []),
-            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search", "file-earmark-plus"],
+            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search"],
             menu_icon="cast",
             default_index=0,
             orientation="vertical",
@@ -3108,241 +3113,51 @@ def streamlit_application(all_df):
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab2:
-            colonnes_à_exclure = [
-                'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
-                'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
-                'Cartons jaunes', 'Cartons rouges', 'Buts hors penaltyButs hors penalty',
-                'Tir', 'Buts de la tête'
-            ]
+            metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métriques", "KPI"])
 
-            colonnes_filtrées = [
-                col for col in df.select_dtypes(include='number').columns
-                if col not in colonnes_à_exclure
-            ]
-            
-            métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
+            if metric_or_kpi == "Métriques":
+                colonnes_à_exclure = [
+                    'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
+                    'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
+                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penaltyButs hors penalty',
+                    'Tir', 'Buts de la tête'
+                ]
 
-            thresholds = {}
-            for métrique in métriques_selectionnées:
-                thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
+                colonnes_filtrées = [
+                    col for col in df.select_dtypes(include='number').columns
+                    if col not in colonnes_à_exclure
+                ]
+                
+                métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
-            recommended_players = search_recommended_players(df, poste, thresholds)
-            recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                      ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
-            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
+                thresholds = {}
+                for métrique in métriques_selectionnées:
+                    thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
-            recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
+                recommended_players = search_recommended_players(df, poste, thresholds)
+                recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                                                        ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
+                recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
-            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+                recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
-    elif page == "Joueurs ciblés":
-        st.header("Joueurs ciblés")
+                st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
-        service = authenticate_google_drive()
-        folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
+            elif metric_or_kpi == "KPI":
+                kpis_sélectionnées = st.multiselect("Sélectionnez des métriques", scores_df.columns)
 
-        tab1, tab2, tab3 = st.tabs(["Ajout d'un joueur", "Modifier ou supprimer un joueur", "Liste des joueurs"])
+                thresholds = {}
+                for kpi in kpis_sélectionnées:
+                    thresholds[kpi] = st.slider(f"Sélectionnez le top % pour le KPI : {kpi}", min_value=0, max_value=100, value=50, step=5, key=kpi)
 
-        with tab1:
-            files = list_files_in_folder(service, folder_id)
-            file_info = next((f for f in files if f["name"] == "joueurs.xlsx"), None)
+                recommended_players = search_recommended_players(df, poste, thresholds)
+                recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                                                        ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
+                recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
-            download_file(service, file_info["id"], "joueurs.xlsx", output_folder="data")
-            
-            df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
+                recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
-            with st.form("formulaire_ajout"):
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    prenom = st.text_input("Prénom")
-                    position = st.text_input("Position")
-                    priorite_n1 = st.selectbox("Priorité N1", ["Haute", "Moyenne", "Basse", "Aucune"])
-                    age = st.number_input("Âge", min_value=10, max_value=50, step=1)
-                    pied = st.selectbox("Pied fort", ["Droit", "Gauche", "Ambidextre"])
-                    contrat = st.selectbox("Type de contrat", ["Pro", "Fédéral", "Formation", "Inconnu"])
-                    video = st.text_input("Lien vers une vidéo")
-                    salaire_actuel = st.text_input("Salaire actuel (€)")
-                    avantages = st.text_area("Avantages actuels")
-
-                with col2:
-                    nom = st.text_input("Nom")
-                    club = st.text_input("Club")
-                    priorite_n2 = st.selectbox("Priorité N2", ["Haute", "Moyenne", "Basse", "Aucune"])
-                    taille = st.number_input("Taille (cm)", min_value=150, max_value=250, step=1)
-                    agent = st.text_input("Nom de l'agent")
-                    duree_contrat = st.text_input("Durée du contrat")
-                    data = st.selectbox("Des données sont-elles disponibles ?", ["Non", "Oui - très peu", "Oui - de base", "Oui - complètes"])
-                    salaire_proposition = st.text_input("Salaire proposé (€)")
-                    avantages_prosition = st.text_area("Avantages proposés")
-
-                submit = st.form_submit_button("Enregistrer le joueur")
-
-                if submit:
-                    new_data = pd.DataFrame([{
-                        "Prénom": prenom,
-                        "Nom": nom,
-                        "Position": position,
-                        "Club": club,
-                        "Priorité N1": priorite_n1,
-                        "Priorité N2": priorite_n2,
-                        "Âge": age,
-                        "Taille (cm)": taille,
-                        "Pied fort": pied,
-                        "Nom de l'agent": agent,
-                        "Type de contrat": contrat,
-                        "Durée du contrat": duree_contrat,
-                        "Lien vers une vidéo": video,
-                        "Des données sont-elles disponibles ?": data,
-                        "Salaire actuel (€)": salaire_actuel,
-                        "Salaire proposé (€)": salaire_proposition,
-                        "Avantages actuels": avantages,
-                        "Avantages proposés": avantages_prosition
-                    }])
-
-                    df_joueurs_ciblés = pd.concat([df_joueurs_ciblés, new_data], ignore_index=True)
-
-                    upload_or_update_file(service, folder_id, df_joueurs_ciblés)
-                    st.success("Joueur enregistré et fichier mis à jour sur Google Drive !")
-                    st.rerun()
-
-        with tab2:
-            files = list_files_in_folder(service, folder_id)
-            file_info = next((f for f in files if f["name"] == "joueurs.xlsx"), None)
-
-            download_file(service, file_info["id"], "joueurs.xlsx", output_folder="data")
-
-            df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
-
-            agent_name = st.text_input("Nom de l'agent à rechercher")
-
-            if agent_name:
-                df_filtré = df_joueurs_ciblés[df_joueurs_ciblés["Nom de l'agent"].fillna('').str.lower().str.contains(agent_name.lower())]
-
-                if not df_filtré.empty:
-                    st.success(f"{len(df_filtré)} joueur(s) trouvé(s) pour l'agent **{agent_name}**")
-                else:
-                    st.warning("Aucun joueur trouvé pour cet agent.")
-            else:
-                df_filtré = df_joueurs_ciblés.copy()
-
-            # Ajout d'une colonne pour garder l'index réel
-            df_filtré = df_filtré.copy()
-            df_filtré["index_reel"] = df_filtré.index
-
-            for i, row in df_filtré.iterrows():
-                index_reel = row["index_reel"]
-
-                with st.expander(f"{row.get('Prénom', '')} {row.get('Nom', '')} - {row.get('Club', '')}"):
-                    col1, col2 = st.columns(2)
-
-                    with col1:
-                        prenom = st.text_input("Prénom", value=str(row.get("Prénom", "")), key=f"prenom_{index_reel}")
-                        position = st.text_input("Position", value=str(row.get("Position", "")), key=f"position_{index_reel}")
-
-                        options_n1 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
-                        val_n1 = str(row.get("Priorité N1", "")).strip()
-                        idx_n1 = options_n1.index(val_n1) if val_n1 in options_n1 else 0
-                        priorite_n1 = st.selectbox("Priorité N1", options_n1, index=idx_n1, key=f"priorite_n1_{index_reel}")
-
-                        try:
-                            age_val = int(row["Âge"]) if not pd.isna(row["Âge"]) else 0
-                        except:
-                            age_val = 0
-                        age = st.number_input("Âge", value=age_val, min_value=0, max_value=50, key=f"age_{index_reel}")
-                        if age == 0:
-                            age = ""
-
-                        options_pied = ["", "Droit", "Gauche", "Ambidextre"]
-                        val_pied = str(row.get("Pied fort", "")).strip()
-                        idx_pied = options_pied.index(val_pied) if val_pied in options_pied else 0
-                        pied = st.selectbox("Pied fort", options_pied, index=idx_pied, key=f"pied_{index_reel}")
-
-                        options_contrat = ["", "Pro", "Fédéral", "Formation", "Inconnu"]
-                        val_contrat = str(row.get("Type de contrat", "")).strip()
-                        idx_contrat = options_contrat.index(val_contrat) if val_contrat in options_contrat else 0
-                        contrat = st.selectbox("Type de contrat", options_contrat, index=idx_contrat, key=f"contrat_{index_reel}")
-
-                        video = st.text_input("Lien vers une vidéo", value=str(row.get("Lien vers une vidéo", "")), key=f"video_{index_reel}")
-                        salaire_actuel = st.text_input("Salaire actuel (€)", value=str(row.get("Salaire actuel (€)", "")), key=f"salaire_actuel_{index_reel}")
-                        avantages = st.text_area("Avantages actuels", value=str(row.get("Avantages actuels", "")), key=f"avantages_actuels_{index_reel}")
-
-                        enregistrer = st.button("Enregistrer les modifications", key=f"enregistrer_{index_reel}")
-
-                    with col2:
-                        nom = st.text_input("Nom", value=str(row.get("Nom", "")), key=f"nom_{index_reel}")
-                        club = st.text_input("Club", value=str(row.get("Club", "")), key=f"club_{index_reel}")
-
-                        options_n2 = ["", "Haute", "Moyenne", "Basse", "Aucune"]
-                        val_n2 = str(row.get("Priorité N2", "")).strip()
-                        idx_n2 = options_n2.index(val_n2) if val_n2 in options_n2 else 0
-                        priorite_n2 = st.selectbox("Priorité N2", options_n2, index=idx_n2, key=f"priorite_n2_{index_reel}")
-
-                        try:
-                            taille_val = int(row["Taille (cm)"]) if not pd.isna(row["Taille (cm)"]) else 0
-                        except:
-                            taille_val = 0
-                        taille = st.number_input("Taille (cm)", value=taille_val, min_value=0, max_value=250, key=f"taille_{index_reel}")
-                        if taille == 0:
-                            taille = ""
-
-                        agent = st.text_input("Nom de l'agent", value=str(row.get("Nom de l'agent", "")), key=f"agent_{index_reel}")
-                        duree_contrat = st.text_input("Durée du contrat", value=str(row.get("Durée du contrat (en année)", "")), key=f"duree_{index_reel}")
-
-                        options_data = ["", "Non", "Oui - très peu", "Oui - de base", "Oui - complètes"]
-                        val_data = str(row.get("Des données sont-elles disponibles ?", "")).strip()
-                        idx_data = options_data.index(val_data) if val_data in options_data else 0
-                        data_dispo = st.selectbox("Des données sont-elles disponibles ?", options_data, index=idx_data, key=f"data_{index_reel}")
-
-                        salaire_proposition = st.text_input("Salaire proposé (€)", value=str(row.get("Salaire proposé (€)", "")), key=f"salaire_propose_{index_reel}")
-                        avantages_proposition = st.text_area("Avantages proposés", value=str(row.get("Avantages proposés", "")), key=f"avantages_proposes_{index_reel}")
-
-                        supprimer = st.button("Supprimer", key=f"supprimer_{index_reel}")
-
-                    if supprimer:
-                        df_joueurs_ciblés.drop(index_reel, inplace=True)
-                        df_joueurs_ciblés.to_excel("data/joueurs.xlsx", index=False)
-                        upload_or_update_file(service, folder_id, df_joueurs_ciblés)
-                        st.success(f"Joueur {prenom} {nom} supprimé.")
-                        st.rerun()
-
-                    if enregistrer:
-                        df_joueurs_ciblés.at[index_reel, "Prénom"] = prenom
-                        df_joueurs_ciblés.at[index_reel, "Nom"] = nom
-                        df_joueurs_ciblés.at[index_reel, "Position"] = position
-                        df_joueurs_ciblés.at[index_reel, "Club"] = club
-                        df_joueurs_ciblés.at[index_reel, "Priorité N1"] = priorite_n1
-                        df_joueurs_ciblés.at[index_reel, "Priorité N2"] = priorite_n2
-                        df_joueurs_ciblés.at[index_reel, "Âge"] = age
-                        df_joueurs_ciblés.at[index_reel, "Taille (cm)"] = taille
-                        df_joueurs_ciblés.at[index_reel, "Pied fort"] = pied
-                        df_joueurs_ciblés.at[index_reel, "Nom de l'agent"] = agent
-                        df_joueurs_ciblés.at[index_reel, "Type de contrat"] = contrat
-                        df_joueurs_ciblés.at[index_reel, "Durée du contrat (en année)"] = duree_contrat
-                        df_joueurs_ciblés.at[index_reel, "Lien vers une vidéo"] = video
-                        df_joueurs_ciblés.at[index_reel, "Des données sont-elles disponibles ?"] = data_dispo
-                        df_joueurs_ciblés.at[index_reel, "Salaire actuel (€)"] = salaire_actuel
-                        df_joueurs_ciblés.at[index_reel, "Salaire proposé (€)"] = salaire_proposition
-                        df_joueurs_ciblés.at[index_reel, "Avantages actuels"] = avantages
-                        df_joueurs_ciblés.at[index_reel, "Avantages proposés"] = avantages_proposition
-
-                        df_joueurs_ciblés.to_excel("data/joueurs.xlsx", index=False)
-                        upload_or_update_file(service, folder_id, df_joueurs_ciblés)
-                        st.success(f"Modifications enregistrées pour {prenom} {nom}.")
-                        st.rerun()
-
-        with tab3:
-            files = list_files_in_folder(service, folder_id)
-            file_info = next((f for f in files if f["name"] == "joueurs.xlsx"), None)
-
-            download_file(service, file_info["id"], "joueurs.xlsx", output_folder="data")
-
-            df_joueurs_ciblés = pd.read_excel("data/joueurs.xlsx")
-
-            if df_joueurs_ciblés.empty:
-                st.info("Aucun joueur enregistré pour l'instant.")
-            else:
-                st.dataframe(df_joueurs_ciblés, use_container_width=True, hide_index=True)
+                st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
