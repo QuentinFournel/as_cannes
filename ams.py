@@ -3145,7 +3145,17 @@ def streamlit_application(all_df):
 
             elif metric_or_kpi == "KPI":
                 scores_df = calcul_scores_par_kpi(df, "", poste)
-                kpis_sélectionnées = st.multiselect("Sélectionnez des métriques", scores_df.columns)
+
+                colonnes_à_exclure = [
+                    'Minutes jouées', 'Âge'
+                ]
+
+                colonnes_filtrées = [
+                    col for col in scores_df.select_dtypes(include='number').columns
+                    if col not in colonnes_à_exclure
+                ]
+
+                kpis_sélectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
                 thresholds = {}
                 for kpi in kpis_sélectionnées:
