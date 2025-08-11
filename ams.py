@@ -2324,6 +2324,7 @@ def plot_rating_distribution(values, player_rating, kpi):
 def streamlit_application(all_df):
     with st.sidebar:
         st.selectbox(
+            "Saison",
             ["24-25", "25-26"],
             index=["24-25", "25-26"].index(st.session_state.get("saison", "25-26"))
         )
