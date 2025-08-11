@@ -77,8 +77,8 @@ def download_file(service, file_id, file_name, output_folder="data"):
 def load_all_files_from_drive():
     # Mapping des folder_id vers les dossiers de destination
     folder_targets = {
-        '1MS5J8AdY785pxf7LEZdG38bkciijlZm_': 'Data 24-25',
-        '1PQgcChI1Lb9rAGgpHCsGnaBQtuFo6FJ8': 'Data 25-26',
+        '1MS5J8AdY785pxf7LEZdG38bkciijlZm_': 'data/Data 24-25',
+        '1PQgcChI1Lb9rAGgpHCsGnaBQtuFo6FJ8': 'data/Data 25-26',
     }
 
     service = authenticate_google_drive()
