@@ -2326,7 +2326,8 @@ def streamlit_application(all_df):
         st.selectbox(
             "Saison",
             ["24-25", "25-26"],
-            index=["24-25", "25-26"].index(st.session_state.get("saison", "25-26"))
+            index=["24-25", "25-26"].index(st.session_state.get("saison", "25-26")),
+            label_visibility="collapsed"
         )
     
         page = option_menu(
