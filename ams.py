@@ -2393,8 +2393,11 @@ def streamlit_application(all_df):
             st.warning("⚠️ La journée de fin doit être supérieure ou égale à la journée de début.")
 
         else:
-            url = f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-
+            if st.session_state['saison'] == "24-25":
+                url = f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
+            elif st.session_state['saison'] == "25-26":
+                url = f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
+            
             response = requests.get(url)
             response.encoding = "ISO-8859-1"
 
