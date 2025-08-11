@@ -90,13 +90,9 @@ def load_all_files_from_drive():
             st.warning(f"⚠️ Aucun fichier trouvé dans le dossier Drive ({folder_id}).")
             continue
 
-        st.info(f"📂 Téléchargement de {len(files)} fichier(s) depuis {folder_id} vers '{local_dir}'...")
-
         # Téléchargement fichier par fichier dans le dossier correspondant
         for file in files:
             download_file(service, file['id'], file['name'], output_folder=local_dir)
-
-        st.success(f"✅ Terminé pour '{local_dir}'.")
 
 league_rating = {
     "Ligue 1": 1,
