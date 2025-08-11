@@ -75,7 +75,7 @@ def download_file(service, file_id, file_name, output_folder="data"):
 
 # Fonction principale : télécharge tous les fichiers du dossier Google Drive spécifié
 def load_all_files_from_drive():
-    folder_id = '1s_XoaozPoIQtVzY_xRnhNfCnQ3xXkTm9'
+    folder_id = '1MS5J8AdY785pxf7LEZdG38bkciijlZm_'
     service = authenticate_google_drive()
     files = list_files_in_folder(service, folder_id)
 
@@ -85,46 +85,6 @@ def load_all_files_from_drive():
 
     for file in files:
         download_file(service, file['id'], file['name'])
-
-from io import BytesIO
-from googleapiclient.http import MediaIoBaseUpload
-
-def upload_or_update_file(service, folder_id, df):
-    file_name = "joueurs.xlsx"
-
-    # 1. Convertir le DataFrame en Excel dans un buffer mémoire
-    excel_buffer = BytesIO()
-    df.to_excel(excel_buffer, index=False)
-    excel_buffer.seek(0)
-
-    # 2. Chercher si le fichier existe déjà dans le dossier
-    query = f"'{folder_id}' in parents and name = '{file_name}' and trashed = false"
-    results = service.files().list(q=query, fields="files(id, name)").execute()
-    items = results.get('files', [])
-
-    # 3. Créer le MediaIoBaseUpload avec le buffer
-    media = MediaIoBaseUpload(excel_buffer, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-    if items:
-        # Fichier déjà existant : mise à jour
-        file_id = items[0]['id']
-        updated_file = service.files().update(
-            fileId=file_id,
-            media_body=media
-        ).execute()
-        return updated_file['id']
-    else:
-        # Nouveau fichier : création
-        file_metadata = {
-            'name': file_name,
-            'parents': [folder_id]
-        }
-        uploaded_file = service.files().create(
-            body=file_metadata,
-            media_body=media,
-            fields='id'
-        ).execute()
-        return uploaded_file['id']
 
 league_rating = {
     "Ligue 1": 1,
