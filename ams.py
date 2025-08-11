@@ -87,7 +87,6 @@ def load_all_files_from_drive():
         files = list_files_in_folder(service, folder_id)
 
         if not files:
-            st.warning(f"⚠️ Aucun fichier trouvé dans le dossier Drive ({folder_id}).")
             continue
 
         # Téléchargement fichier par fichier dans le dossier correspondant
