@@ -2326,7 +2326,7 @@ def streamlit_application(all_df):
         st.selectbox(
             "Saison",
             ["24-25", "25-26"],
-            index=["24-25", "25-26"].index(st.session_state.get("saison", "24-25")),
+            index=["24-25", "25-26"].index(st.session_state.get("saison", "25-26")),
             key="saison"
         )
     
@@ -3200,7 +3200,7 @@ if __name__ == '__main__':
 
     if st.session_state.authenticated:
         if "saison" not in st.session_state:
-            st.session_state["saison"] = "24-25"
+            st.session_state["saison"] = "25-26"
 
         all_df = collect_individual_data()
         streamlit_application(all_df)
