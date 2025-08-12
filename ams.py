@@ -17,6 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics.pairwise import cosine_distances
 import seaborn as sns
 from scipy import stats
+from pathlib import Path
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -1007,29 +1008,29 @@ def collect_collective_data(équipe):
 
 def add_new_columns(all_df):
     for name, df in all_df.items():
+        if df is None or df.empty:
+            continue
+
         new_columns = {
             'Buts - xG': df['Buts par 90'] - df['xG par 90'],
-            'xG / Tirs': df['xG par 90'] / df['Tirs par 90'],
-            'xA / Passes': df['xA par 90'] / df['Passes par 90'],
-            'Passes courtes / Passes': df['Passes courtes / moyennes par 90'] / df['Passes par 90'],
-            'Passes avant / Passes': df['Passes avant par 90'] / df['Passes par 90'],
-            'Passes longues / Passes': df['Passes longues par 90'] / df['Passes par 90'],
-            'Passes clés / Passes': df['Passes quasi décisives par 90'] / df['Passes par 90'],
-            'Passes judicieuses / Passes': df['Passes judicieuses par 90'] / df['Passes par 90'],
-            'Passes vers la surface / Passes': df['Passes vers la surface de réparation par 90'] / df['Passes par 90'],
-            'Passes en profondeur / Passes': df['Passes pénétrantes par 90'] / df['Passes par 90'],
-            'Passes dans le tiers adverse / Passes': df['Passes dans tiers adverse par 90'] / df['Passes par 90'],
-            'Passes avant tir / Passes': df['Passes décisives avec tir par 90'] / df['Passes par 90'],
-            'Passes progressives / Passes': df['Passes progressives par 90'] / df['Passes par 90'],
-            'Passes dans la zone dangereuse / Passes': df['Réalisations en profondeur par 90'] / df['Passes par 90'],
+            'xG / Tirs': np.where(df['Tirs par 90'] != 0, df['xG par 90'] / df['Tirs par 90'], 0),
+            'xA / Passes': np.where(df['Passes par 90'] != 0, df['xA par 90'] / df['Passes par 90'], 0),
+            'Passes courtes / Passes': np.where(df['Passes par 90'] != 0, df['Passes courtes / moyennes par 90'] / df['Passes par 90'], 0),
+            'Passes avant / Passes': np.where(df['Passes par 90'] != 0, df['Passes avant par 90'] / df['Passes par 90'], 0),
+            'Passes longues / Passes': np.where(df['Passes par 90'] != 0, df['Passes longues par 90'] / df['Passes par 90'], 0),
+            'Passes clés / Passes': np.where(df['Passes par 90'] != 0, df['Passes quasi décisives par 90'] / df['Passes par 90'], 0),
+            'Passes judicieuses / Passes': np.where(df['Passes par 90'] != 0, df['Passes judicieuses par 90'] / df['Passes par 90'], 0),
+            'Passes vers la surface / Passes': np.where(df['Passes par 90'] != 0, df['Passes vers la surface de réparation par 90'] / df['Passes par 90'], 0),
+            'Passes en profondeur / Passes': np.where(df['Passes par 90'] != 0, df['Passes pénétrantes par 90'] / df['Passes par 90'], 0),
+            'Passes dans le tiers adverse / Passes': np.where(df['Passes par 90'] != 0, df['Passes dans tiers adverse par 90'] / df['Passes par 90'], 0),
+            'Passes avant tir / Passes': np.where(df['Passes par 90'] != 0, df['Passes décisives avec tir par 90'] / df['Passes par 90'], 0),
+            'Passes progressives / Passes': np.where(df['Passes par 90'] != 0, df['Passes progressives par 90'] / df['Passes par 90'], 0),
+            'Passes dans la zone dangereuse / Passes': np.where(df['Passes par 90'] != 0, df['Réalisations en profondeur par 90'] / df['Passes par 90'], 0),
         }
 
-        df = pd.concat([df, pd.DataFrame(new_columns)], axis=1)
+        all_df[name] = pd.concat([df, pd.DataFrame(new_columns, index=df.index)], axis=1)
 
-        all_df[name] = df
     return all_df
-
-from pathlib import Path
 
 @st.cache_data
 def collect_individual_data():
