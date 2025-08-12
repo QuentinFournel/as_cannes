@@ -1029,41 +1029,57 @@ def add_new_columns(all_df):
         all_df[name] = df
     return all_df
 
+from pathlib import Path
+
 @st.cache_data
 def collect_individual_data():
     load_all_files_from_drive()
 
     saisons = ["24-25", "25-26"]
-    all_df_dict = {}  # pour stocker les all_df par saison
+    competitions = ["Ligue 1", "Ligue 2", "National 1", "National 2", "Français", "Top 5 Européen"]
+    positions = ["Ailier", "Buteur", "Défenseur central", "Latéral", "Milieu", "Milieu offensif", "Gardien"]
+
+    all_df_dict = {}
+
+    def safe_read(path_str):
+        path = Path(path_str)
+        if not path.exists():
+            return None
+        try:
+            return read_with_competition(str(path))
+        except:
+            return None
+
+    def safe_concat(list_df):
+        valid_df = [df for df in list_df if df is not None and not df.empty]
+        return pd.concat(valid_df, ignore_index=True) if valid_df else pd.DataFrame()
 
     for saison in saisons:
-        # Lecture des fichiers
-        positions = [
-            "Ailier", "Buteur", "Défenseur central", "Latéral", "Milieu", "Milieu offensif", "Gardien"
-        ]
-        competitions = [
-            "Ligue 1", "Ligue 2", "National 1", "National 2", "Français", "Top 5 Européen"
-        ]
-
+        base_dir = Path(f"data") / f"Data {saison}"
         dfs = {comp: {} for comp in competitions}
 
+        # Lecture sécurisée
         for comp in competitions:
             for pos in positions:
-                fichier = f"data/Data {saison}/{comp} - {pos}.xlsx"
-                dfs[comp][pos] = read_with_competition(fichier)
+                fichier = base_dir / f"{comp} - {pos}.xlsx"
+                dfs[comp][pos] = safe_read(fichier)
 
-        # Concaténations
-        df_championnat_de_france = pd.concat(
-            sum([list(dfs[comp].values()) for comp in ["Ligue 1", "Ligue 2", "National 1", "National 2"]], []),
-            ignore_index=True
+        # Concat selon tes regroupements
+        df_championnat_de_france = safe_concat(
+            [*dfs["Ligue 1"].values(),
+             *dfs["Ligue 2"].values(),
+             *dfs["National 1"].values(),
+             *dfs["National 2"].values()]
         )
-        df_français = pd.concat(list(dfs["Français"].values()), ignore_index=True)
-        df_top5européen = pd.concat(list(dfs["Top 5 Européen"].values()), ignore_index=True)
+        df_français = safe_concat(dfs["Français"].values())
+        df_top5européen = safe_concat(dfs["Top 5 Européen"].values())
 
-        # Nettoyage des colonnes
-        for df in [df_championnat_de_france, df_français, df_top5européen]:
-            df.columns = df.columns.str.strip()
-            df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce').dt.date
+        # Nettoyage
+        for df in (df_championnat_de_france, df_français, df_top5européen):
+            if not df.empty:
+                df.columns = df.columns.str.strip()
+                if "Contrat expiration" in df.columns:
+                    df["Contrat expiration"] = pd.to_datetime(df["Contrat expiration"], errors="coerce").dt.date
 
         all_df = {
             'Joueur du championnat de France': df_championnat_de_france,
@@ -1072,11 +1088,8 @@ def collect_individual_data():
         }
 
         all_df = add_new_columns(all_df)
-
-        # Stockage du dictionnaire final dans un dict global
         all_df_dict[f"all_df_{saison.replace('-', '_')}"] = all_df
 
-    # On retourne un tuple ou un dict selon ton besoin
     return all_df_dict
 
 def bordered_metric(container, label, value, size, color="#3d3a2a"):
