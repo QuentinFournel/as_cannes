@@ -1033,93 +1033,51 @@ def add_new_columns(all_df):
 def collect_individual_data():
     load_all_files_from_drive()
 
-    # Ligue 1
-    ligue1_ailier = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Ailier.xlsx")
-    ligue1_buteur = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Buteur.xlsx")
-    ligue1_defenseur_central = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Défenseur central.xlsx")
-    ligue1_lateral = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Latéral.xlsx")
-    ligue1_milieu = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Milieu.xlsx")
-    ligue1_milieu_offensif = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Milieu offensif.xlsx")
-    ligue1_gardien = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 1 - Gardien.xlsx")
+    saisons = ["24-25", "25-26"]
+    all_df_dict = {}  # pour stocker les all_df par saison
 
-    # Ligue 2
-    ligue2_ailier = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Ailier.xlsx")
-    ligue2_buteur = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Buteur.xlsx")
-    ligue2_defenseur_central = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Défenseur central.xlsx")
-    ligue2_lateral = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Latéral.xlsx")
-    ligue2_milieu = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Milieu.xlsx")
-    ligue2_milieu_offensif = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Milieu offensif.xlsx")
-    ligue2_gardien = read_with_competition(f"data/Data {st.session_state['saison']}/Ligue 2 - Gardien.xlsx")
+    for saison in saisons:
+        # Lecture des fichiers
+        positions = [
+            "Ailier", "Buteur", "Défenseur central", "Latéral", "Milieu", "Milieu offensif", "Gardien"
+        ]
+        competitions = [
+            "Ligue 1", "Ligue 2", "National 1", "National 2", "Français", "Top 5 Européen"
+        ]
 
-    # National 1
-    nat1_ailier = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Ailier.xlsx")
-    nat1_buteur = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Buteur.xlsx")
-    nat1_defenseur_central = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Défenseur central.xlsx")
-    nat1_lateral = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Latéral.xlsx")
-    nat1_milieu = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Milieu.xlsx")
-    nat1_milieu_offensif = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Milieu offensif.xlsx")
-    nat1_gardien = read_with_competition(f"data/Data {st.session_state['saison']}/National 1 - Gardien.xlsx")
+        dfs = {comp: {} for comp in competitions}
 
-    # National 2
-    nat2_ailier = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Ailier.xlsx")
-    nat2_buteur = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Buteur.xlsx")
-    nat2_defenseur_central = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Défenseur central.xlsx")
-    nat2_lateral = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Latéral.xlsx")
-    nat2_milieu = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Milieu.xlsx")
-    nat2_milieu_offensif = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Milieu offensif.xlsx")
-    nat2_gardien = read_with_competition(f"data/Data {st.session_state['saison']}/National 2 - Gardien.xlsx")
+        for comp in competitions:
+            for pos in positions:
+                fichier = f"data/Data {saison}/{comp} - {pos}.xlsx"
+                dfs[comp][pos] = read_with_competition(fichier)
 
-    # Français
-    français_ailier = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Ailier.xlsx")
-    français_buteur = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Buteur.xlsx")
-    français_defenseur_central = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Défenseur central.xlsx")
-    français_lateral = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Latéral.xlsx")
-    français_milieu = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Milieu.xlsx")
-    français_milieu_offensif = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Milieu offensif.xlsx")
-    français_gardien = read_with_competition(f"data/Data {st.session_state['saison']}/Français - Gardien.xlsx")
+        # Concaténations
+        df_championnat_de_france = pd.concat(
+            sum([list(dfs[comp].values()) for comp in ["Ligue 1", "Ligue 2", "National 1", "National 2"]], []),
+            ignore_index=True
+        )
+        df_français = pd.concat(list(dfs["Français"].values()), ignore_index=True)
+        df_top5européen = pd.concat(list(dfs["Top 5 Européen"].values()), ignore_index=True)
 
-    # Top 5 Européen
-    top5europe_ailier = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Ailier.xlsx")
-    top5europe_buteur = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Buteur.xlsx")
-    top5europe_defenseur_central = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Défenseur central.xlsx")
-    top5europe_lateral = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Latéral.xlsx")
-    top5europe_milieu = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Milieu.xlsx")
-    top5europe_milieu_offensif = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Milieu offensif.xlsx")
-    top5europe_gardien = read_with_competition(f"data/Data {st.session_state['saison']}/Top 5 Européen - Gardien.xlsx")
+        # Nettoyage des colonnes
+        for df in [df_championnat_de_france, df_français, df_top5européen]:
+            df.columns = df.columns.str.strip()
+            df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce').dt.date
 
-    # Concaténation de tous les DataFrames dans un giga DataFrame
-    df_championnat_de_france = pd.concat([
-        ligue1_ailier, ligue1_buteur, ligue1_defenseur_central, ligue1_lateral, ligue1_milieu, ligue1_milieu_offensif, ligue1_gardien,
-        ligue2_ailier, ligue2_buteur, ligue2_defenseur_central, ligue2_lateral, ligue2_milieu, ligue2_milieu_offensif, ligue2_gardien,
-        nat1_ailier, nat1_buteur, nat1_defenseur_central, nat1_lateral, nat1_milieu, nat1_milieu_offensif, nat1_gardien,
-        nat2_ailier, nat2_buteur, nat2_defenseur_central, nat2_lateral, nat2_milieu, nat2_milieu_offensif, nat2_gardien
-    ], ignore_index=True)
+        all_df = {
+            'Joueur du championnat de France': df_championnat_de_france,
+            'Joueur français': df_français,
+            'Joueur du top 5 européen': df_top5européen
+        }
 
-    df_français = pd.concat([
-        français_ailier, français_buteur, français_defenseur_central, français_lateral, français_milieu, français_milieu_offensif, français_gardien
-    ])
+        all_df = add_new_columns(all_df)
 
-    df_top5européen = pd.concat([
-        top5europe_ailier, top5europe_buteur, top5europe_defenseur_central, top5europe_lateral, top5europe_milieu, top5europe_milieu_offensif, top5europe_gardien
-    ])
+        # Stockage du dictionnaire final dans un dict global
+        all_df_dict[f"all_df_{saison.replace('-', '_')}"] = all_df
 
-    df_championnat_de_france.columns = df_championnat_de_france.columns.str.strip()
-    df_français.columns = df_français.columns.str.strip()
-    df_top5européen.columns = df_top5européen.columns.str.strip()
-
-    df_championnat_de_france['Contrat expiration'] = pd.to_datetime(df_championnat_de_france['Contrat expiration'], errors='coerce').dt.date
-    df_français['Contrat expiration'] = pd.to_datetime(df_français['Contrat expiration'], errors='coerce').dt.date
-    df_top5européen['Contrat expiration'] = pd.to_datetime(df_top5européen['Contrat expiration'], errors='coerce').dt.date
-
-    all_df = {
-        'Joueur du championnat de France': df_championnat_de_france,
-        'Joueur français': df_français,
-        'Joueur du top 5 européen': df_top5européen
-    }
-
-    all_df = add_new_columns(all_df)
-
-    return all_df
+    # On retourne un tuple ou un dict selon ton besoin
+    return all_df_dict
 
 def bordered_metric(container, label, value, size, color="#3d3a2a"):
     style = f"""
@@ -2320,7 +2278,7 @@ def plot_rating_distribution(values, player_rating, kpi):
 
     return fig
 
-def streamlit_application(all_df):
+def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
             "Saison",
@@ -2362,6 +2320,8 @@ def streamlit_application(all_df):
             """,
             unsafe_allow_html=True
         )
+
+    all_df = all_df_dict[f"all_df_{st.session_state['saison'].replace('-', '_')}"]
 
     if page == "Accueil":
         st.header("Accueil")
@@ -3202,5 +3162,5 @@ if __name__ == '__main__':
         if "saison" not in st.session_state:
             st.session_state["saison"] = "24-25"
 
-        all_df = collect_individual_data()
-        streamlit_application(all_df)
+        all_df_dict = collect_individual_data()
+        streamlit_application(all_df_dict)
