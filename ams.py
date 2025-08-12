@@ -1521,7 +1521,13 @@ def plot_team_metrics(df, x_metric, y_metric):
         "Marignane Gignac CB": "https://upload.wikimedia.org/wikipedia/fr/thumb/b/bb/Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg/langfr-800px-Logo_Marignane_Gignac_C%C3%B4te_Bleue_FC_-_2022.svg.png",
         "Rumilly Vallières": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/40/Logo_Groupement_Football_Albanais_74_-_2021.svg/langfr-800px-Logo_Groupement_Football_Albanais_74_-_2021.svg.png",
         "Saint-Priest": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/46/Logo_AS_St_Priest.svg/langfr-800px-Logo_AS_St_Priest.svg.png",
-        "Toulon": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d6/Logo_SC_Toulon.svg/langfr-800px-Logo_SC_Toulon.svg.png"
+        "Toulon": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d6/Logo_SC_Toulon.svg/langfr-800px-Logo_SC_Toulon.svg.png",
+        "Créteil": "https://upload.wikimedia.org/wikipedia/fr/thumb/9/99/Logo_US_Cr%C3%A9teil_Lusitanos_2015.svg/langfr-800px-Logo_US_Cr%C3%A9teil_Lusitanos_2015.svg.png",
+        "St Maur Lusitanos": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/89/Logo_US_Lusitanos_Saint-Maur_2018.svg/langfr-1024px-Logo_US_Lusitanos_Saint-Maur_2018.svg.png",
+        "Nîmes": "https://upload.wikimedia.org/wikipedia/fr/thumb/f/f0/N%C3%AEmes_Olympique_logo_2018.svg/langfr-800px-N%C3%AEmes_Olympique_logo_2018.svg.png",
+        "FC 93 Bobigny BG": "https://upload.wikimedia.org/wikipedia/fr/d/d7/Logo_Football_Club_93-2024.png",
+        "Rousset-Ste Victoire": "https://fcroussetsvo.fr/img/rousset.png",
+        "Limonest": "https://upload.wikimedia.org/wikipedia/fr/thumb/7/7c/Logo_FC_Limonest_Dardilly_Saint_Didier_-_2021.svg/langfr-1024px-Logo_FC_Limonest_Dardilly_Saint_Didier_-_2021.svg.png"
     }
 
     fig = go.Figure()
@@ -2492,7 +2498,13 @@ def streamlit_application(all_df_dict):
             "Marignane Gignac CB",
             "Rumilly Vallières",
             "Saint-Priest",
-            "Toulon"
+            "Toulon",
+            "Créteil",
+            "St Maur Lusitanos",
+            "Nîmes",
+            "FC 93 Bobigny BG",
+            "Rousset-Ste Victoire",
+            "Limonest"
         ]
 
         df_stats_moyennes = pd.DataFrame()
