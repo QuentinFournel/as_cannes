@@ -3078,7 +3078,7 @@ def streamlit_application(all_df_dict):
                         phrase = points_forts.get(k)
                         if phrase:
                             st.markdown(
-                                f"- {phrase}\n"
+                                f"- {phrase}  \n"
                                 f"<span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
                                 unsafe_allow_html=True
                             )
@@ -3090,8 +3090,8 @@ def streamlit_application(all_df_dict):
                         phrase = points_faibles.get(k)
                         if phrase:
                             st.markdown(
-                                f"- {phrase} \n"
-                                f"<span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
+                                f"- {phrase}\n"
+                                f"  <span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
                                 unsafe_allow_html=True
                             )
 
