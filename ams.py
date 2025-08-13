@@ -3077,7 +3077,7 @@ def streamlit_application(all_df_dict):
                     for k in points_forts_clé:
                         phrase = points_forts.get(k)
                         if phrase:
-                            st.markdown(f"- {phrase}")
+                            st.markdown(f"- {phrase} (Score : {points_forts_clé[k]})")
                 else:
                     st.caption("Aucun point fort détecté.")
 
@@ -3087,7 +3087,7 @@ def streamlit_application(all_df_dict):
                     for k in points_faibles_clé:
                         phrase = points_faibles.get(k)
                         if phrase:
-                            st.markdown(f"- {phrase}")
+                            st.markdown(f"- {phrase} (Score : {points_faibles_clé[k]})")
                 else:
                     st.caption("Aucun point faible détecté.")
 
