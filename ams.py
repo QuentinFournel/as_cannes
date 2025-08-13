@@ -915,6 +915,178 @@ indicateurs_pressing = [
     'Pertes bas'
 ]
 
+points_forts = {
+    "Duels par 90": "Participe à beaucoup de duels",
+    "Duels gagnés, %": "Gagne un fort pourcentage de ses duels",
+    "Actions défensives réussies par 90": "Réalise beaucoup d'actions défensives réussies",
+    "Duels défensifs par 90": "Participe à beaucoup de duels défensifs",
+    "Duels défensifs gagnés, %": "Gagne un fort pourcentage de ses duels défensifs",
+    "Duels aériens par 90": "Participe à beaucoup de duels aériens",
+    "Duels aériens gagnés, %": "Gagne un fort pourcentage de ses duels aériens",
+    "Tacles glissés PAdj": "Réalise beaucoup de tacles glissés",
+    "Tirs contrés par 90": "Contre beaucoup de tirs",
+    "Interceptions PAdj": "Intercepte beaucoup le ballon",
+    "Fautes par 90": "Commets peu de fautes",
+    "Cartons jaunes par 90": "Reçoit peu de cartons jaunes",
+    "Cartons rouges par 90": "Reçoit peu de cartons rouges",
+    "Attaques réussies par 90": "Réalise beaucoup d'attaques réussies",
+    "Buts par 90": "Marque beaucoup",
+    "Buts hors penalty par 90": "Marque beaucoup hors penalty",
+    "xG par 90": "Se crée beaucoup d'occasions",
+    "Buts de la tête par 90": "Marque beaucoup de la tête",
+    "Tirs par 90": "Tire beaucoup",
+    "Tirs à la cible, %": "Cadre un fort pourcentage de ses tirs",
+    "Taux de conversion but/tir": "Convertit bien ses tirs en buts",
+    "Passes décisives par 90": "Effectue beaucoup de passes décisives",
+    "Centres par 90": "Centre beaucoup",
+    "Сentres précises, %": "Précis dans ses centres",
+    "Centres du flanc gauche par 90": "Centre beaucoup depuis le flanc gauche",
+    "Centres du flanc gauche précises, %": "Précis dans ses centres depuis le flanc gauche",
+    "Centres du flanc droit par 90": "Centre beaucoup depuis le flanc droit",
+    "Centres du flanc droit précises, %": "Précis dans ses centres depuis le flanc droit",
+    "Centres dans la surface de but par 90": "Centre beaucoup dans la surface",
+    "Dribbles par 90": "Dribble beaucoup",
+    "Dribbles réussis, %": "Réussit un fort pourcentage de dribbles",
+    "Duels offensifs par 90": "Participe à beaucoup de duels offensifs",
+    "Duels de marquage, %": "Gagne un fort pourcentage de ses duels offensifs",
+    "Touches de balle dans la surface de réparation sur 90": "Touche beaucoup de ballons dans la surface",
+    "Courses progressives par 90": "Effectue beaucoup des courses progressives",
+    "Accélérations par 90": "Accélère beaucoup",
+    "Passes réceptionnées par 90": "Reçoit beaucoup des passes",
+    "Longues passes réceptionnées par 90": "Reçoit beaucoup des longues passes",
+    "Fautes subies par 90": "Obtient beaucoup des fautes",
+    "Passes par 90": "Effectue beaucoup de passes",
+    "Passes précises, %": "Passe avec précision",
+    "Passes avant par 90": "Effectue beaucoup de passes vers l'avant",
+    "Passes en avant précises, %": "Précis dans ses passes vers l'avant",
+    "Passes arrière par 90": "Effectue beaucoup de passes vers l'arrière",
+    "Passes arrière précises, %": "Précis dans ses passes vers l'arrière",
+    "Passes latérales par 90": "Effectue beaucoup de passes latérales",
+    "Passes latérales précises, %": "Précis dans ses passes latérales",
+    "Passes courtes / moyennes par 90": "Effectue beaucoup de passes courtes/moyennes",
+    "Passes courtes / moyennes précises, %": "Précis dans ses passes courtes/moyennes",
+    "Passes longues par 90": "Effectue beaucoup de passes longues",
+    "Longues passes précises, %": "Précis dans ses passes longues",
+    "xA par 90": "Crée beaucoup d'occasions",
+    "Passes décisives avec tir par 90": "Effectue beaucoup la dernière passe avant un tir",
+    "Secondes passes décisives par 90": "Participe beaucoup à l'avant-dernière passe",
+    "Troisièmes passes décisives par 90": "Contribue beaucoup à la phase de préparation",
+    "Passes judicieuses par 90": "Effectue beaucoup de passes intelligentes",
+    "Passes intelligentes précises, %": "Précis dans ses passes intelligentes",
+    "Passes quasi décisives par 90": "Effectue beaucoup de passes dangereuses",
+    "Passes dans tiers adverse par 90": "Effectue beaucoup de passes dans le dernier tiers adverse",
+    "Passes dans tiers adverse précises, %": "Précis dans ses passes dans le dernier tiers",
+    "Passes vers la surface de réparation par 90": "Effectue beaucoup de passes vers la surface",
+    "Passes vers la surface de réparation précises, %": "Précis dans ses passes vers la surface",
+    "Passes pénétrantes par 90": "Effectue beaucoup de passes pénétrantes",
+    "Passes en profondeur précises, %": "Précis dans ses passes en profondeur",
+    "Réalisations en profondeur par 90": "Effectue beaucoup de passes en profondeur",
+    "Centres en profondeur, par 90": "Centre beaucoup en profondeur",
+    "Passes progressives par 90": "Effectue beaucoup de passes progressives",
+    "Passes progressives précises, %": "Précis dans ses passes progressives",
+    "Transformation des penalties, %": "Transforme un fort pourcentage de penalties",
+    "Buts - xG": "Marque plus que prévu par ses xG",
+    "xG / Tirs": "Tire avec une forte qualité moyenne",
+    "xA / Passes": "Génère beaucoup d'occasions par passe",
+    "Passes courtes / Passes": "Effectue beaucoup de passes courtes par passe",
+    "Passes avant / Passes": "Effectue beaucoup de passes vers l'avant par passe",
+    "Passes longues / Passes": "Effectue beaucoup de passes longues par passe",
+    "Passes clés / Passes": "Effectue beaucoup de passes clés par passe",
+    "Passes judicieuses / Passes": "Effectue beaucoup de passes intelligentes par passe",
+    "Passes vers la surface / Passes": "Effectue beaucoup de passes vers la surface par passe",
+    "Passes en profondeur / Passes": "Effectue beaucoup de passes en profondeur par passe",
+    "Passes dans le tiers adverse / Passes": "Effectue beaucoup de passes dans le dernier tiers par passe",
+    "Passes avant tir / Passes": "Effectue beaucoup de passes avant un tir par passe",
+    "Passes progressives / Passes": "Effectue beaucoup de passes progressives par passe",
+    "Passes dans la zone dangereuse / Passes": "Effectue beaucoup de passes dans les zones dangereuses par passe"
+}
+
+points_faibles = {
+    "Duels par 90": "Participe à peu de duels",
+    "Duels gagnés, %": "Gagne un faible pourcentage de ses duels",
+    "Actions défensives réussies par 90": "Réalise peu d'actions défensives réussies",
+    "Duels défensifs par 90": "Participe à peu de duels défensifs",
+    "Duels défensifs gagnés, %": "Gagne un faible pourcentage de ses duels défensifs",
+    "Duels aériens par 90": "Participe à peu de duels aériens",
+    "Duels aériens gagnés, %": "Gagne un faible pourcentage de ses duels aériens",
+    "Tacles glissés PAdj": "Réalise peu de tacles glissés",
+    "Tirs contrés par 90": "Contre peu de tirs",
+    "Interceptions PAdj": "Intercepte peu le ballon",
+    "Fautes par 90": "Commets beaucoup de fautes",
+    "Cartons jaunes par 90": "Reçoit beaucoup de cartons jaunes",
+    "Cartons rouges par 90": "Reçoit beaucoup de cartons rouges",
+    "Attaques réussies par 90": "Réalise peu d'attaques réussies",
+    "Buts par 90": "Marque peu",
+    "Buts hors penalty par 90": "Marque peu hors penalty",
+    "xG par 90": "Se crée peu d'occasions",
+    "Buts de la tête par 90": "Marque peu de la tête",
+    "Tirs par 90": "Tire peu",
+    "Tirs à la cible, %": "Cadre un faible pourcentage de ses tirs",
+    "Taux de conversion but/tir": "Convertit mal ses tirs en buts",
+    "Passes décisives par 90": "Effectue peu de passes décisives",
+    "Centres par 90": "Centre peu",
+    "Сentres précises, %": "Imprécis dans ses centres",
+    "Centres du flanc gauche par 90": "Centre peu depuis le flanc gauche",
+    "Centres du flanc gauche précises, %": "Imprécis dans ses centres depuis le flanc gauche",
+    "Centres du flanc droit par 90": "Centre peu depuis le flanc droit",
+    "Centres du flanc droit précises, %": "Imprécis dans ses centres depuis le flanc droit",
+    "Centres dans la surface de but par 90": "Centre peu dans la surface",
+    "Dribbles par 90": "Dribble peu",
+    "Dribbles réussis, %": "Réussit un faible pourcentage de dribbles",
+    "Duels offensifs par 90": "Participe à peu de duels offensifs",
+    "Duels de marquage, %": "Gagne un faible pourcentage de ses duels offensifs",
+    "Touches de balle dans la surface de réparation sur 90": "Touche peu de ballons dans la surface",
+    "Courses progressives par 90": "Effectue peu de courses progressives",
+    "Accélérations par 90": "Accélère peu",
+    "Passes réceptionnées par 90": "Reçoit peu de passes",
+    "Longues passes réceptionnées par 90": "Reçoit peu de longues passes",
+    "Fautes subies par 90": "Obtient peu de fautes",
+    "Passes par 90": "Effectue peu de passes",
+    "Passes précises, %": "Passe avec imprécision",
+    "Passes avant par 90": "Effectue peu de passes vers l'avant",
+    "Passes en avant précises, %": "Imprécis dans ses passes vers l'avant",
+    "Passes arrière par 90": "Effectue peu de passes vers l'arrière",
+    "Passes arrière précises, %": "Imprécis dans ses passes vers l'arrière",
+    "Passes latérales par 90": "Effectue peu de passes latérales",
+    "Passes latérales précises, %": "Imprécis dans ses passes latérales",
+    "Passes courtes / moyennes par 90": "Effectue peu de passes courtes/moyennes",
+    "Passes courtes / moyennes précises, %": "Imprécis dans ses passes courtes/moyennes",
+    "Passes longues par 90": "Effectue peu de passes longues",
+    "Longues passes précises, %": "Imprécis dans ses passes longues",
+    "xA par 90": "Crée peu d'occasions",
+    "Passes décisives avec tir par 90": "Effectue rarement la dernière passe avant un tir",
+    "Secondes passes décisives par 90": "Participe peu à l'avant-dernière passe",
+    "Troisièmes passes décisives par 90": "Contribue peu à la phase de préparation",
+    "Passes judicieuses par 90": "Effectue peu de passes intelligentes",
+    "Passes intelligentes précises, %": "Imprécis dans ses passes intelligentes",
+    "Passes quasi décisives par 90": "Effectue peu de passes dangereuses",
+    "Passes dans tiers adverse par 90": "Effectue peu de passes dans le dernier tiers adverse",
+    "Passes dans tiers adverse précises, %": "Imprécis dans ses passes dans le dernier tiers",
+    "Passes vers la surface de réparation par 90": "Effectue peu de passes vers la surface",
+    "Passes vers la surface de réparation précises, %": "Imprécis dans ses passes vers la surface",
+    "Passes pénétrantes par 90": "Effectue peu de passes pénétrantes",
+    "Passes en profondeur précises, %": "Imprécis dans ses passes en profondeur",
+    "Réalisations en profondeur par 90": "Effectue peu de passes en profondeur",
+    "Centres en profondeur, par 90": "Centre peu en profondeur",
+    "Passes progressives par 90": "Effectue peu de passes progressives",
+    "Passes progressives précises, %": "Imprécis dans ses passes progressives",
+    "Transformation des penalties, %": "Transforme un faible pourcentage de penalties",
+    "Buts - xG": "Marque moins que prévu par ses xG",
+    "xG / Tirs": "Tire avec une faible qualité moyenne",
+    "xA / Passes": "Génère peu d'occasions par passe",
+    "Passes courtes / Passes": "Effectue peu de passes courtes par passe",
+    "Passes avant / Passes": "Effectue peu de passes vers l'avant par passe",
+    "Passes longues / Passes": "Effectue peu de passes longues par passe",
+    "Passes clés / Passes": "Effectue peu de passes clés par passe",
+    "Passes judicieuses / Passes": "Effectue peu de passes intelligentes par passe",
+    "Passes vers la surface / Passes": "Effectue peu de passes vers la surface par passe",
+    "Passes en profondeur / Passes": "Effectue peu de passes en profondeur par passe",
+    "Passes dans le tiers adverse / Passes": "Effectue peu de passes dans le dernier tiers par passe",
+    "Passes avant tir / Passes": "Effectue peu de passes avant un tir par passe",
+    "Passes progressives / Passes": "Effectue peu de passes progressives par passe",
+    "Passes dans la zone dangereuse / Passes": "Effectue peu de passes dans les zones dangereuses par passe"
+}
+
 def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
@@ -2298,6 +2470,32 @@ def plot_rating_distribution(values, player_rating, kpi):
 
     return fig
 
+def points_forts_faibles(df, joueur, poste):
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+
+    if len(joueur_infos) > 1:
+        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    df_ranked = rank_columns(df_filtré)
+
+    joueur_data = df_ranked[df_ranked['Joueur + Information'] == joueur].iloc[0]
+    points_forts = {}
+    points_faibles = {}
+
+    for col in joueur_data.index:
+        if pd.api.types.is_numeric_dtype(type(joueur_data[col])):
+            value = joueur_data[col]
+            if value > 85:
+                points_forts[col] = value
+            elif value < 15:
+                points_faibles[col] = value
+
+    return points_forts, points_faibles
+
 def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
@@ -2784,9 +2982,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Joueur similaire", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Statistique", "Radar", "Points forts/Points faibles", "Nuage de points", "KPI", "Joueur similaire", "Match"])
         else:
-            tab1, tab2, tab3, tab4, tab5 = st.tabs(["Statistique", "Radar", "Nuage de points", "KPI", "Joueur similaire"])
+            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Statistique", "Radar", "Points forts/Points faibles", "Nuage de points", "KPI", "Joueur similaire"])
 
         with tab1:
             st.subheader('Informations')
@@ -2869,6 +3067,47 @@ def streamlit_application(all_df_dict):
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
+            points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
+
+            st.subheader("Résumé du joueur")
+            st.caption(f"{joueur} · Poste : {poste}")
+
+            col1, col2 = st.columns(2, gap="large")
+
+            # --------- Colonne POINTS FORTS ---------
+            with col1:
+                st.markdown("### ✅ Points forts")
+                if points_forts_clé:
+                    manquants_forts = []
+                    for k in points_forts_clé:
+                        phrase = points_forts.get(k)
+                        if phrase:
+                            # Affiche la phrase, et en plus la clé en petit grisé pour traçabilité
+                            st.markdown(f"- **{phrase}**  \n  <span style='opacity:.6'>({k})</span>", unsafe_allow_html=True)
+                        else:
+                            manquants_forts.append(k)
+                    if manquants_forts:
+                        st.warning("Clés manquantes dans `points_forts` : " + ", ".join(manquants_forts))
+                else:
+                    st.caption("Aucun point fort détecté.")
+
+            # --------- Colonne POINTS FAIBLES ---------
+            with col2:
+                st.markdown("### 🧩 Points faibles")
+                if points_faibles_clé:
+                    manquants_faibles = []
+                    for k in points_faibles_clé:
+                        phrase = points_faibles.get(k)
+                        if phrase:
+                            st.markdown(f"- **{phrase}**  \n  <span style='opacity:.6'>({k})</span>", unsafe_allow_html=True)
+                        else:
+                            manquants_faibles.append(k)
+                    if manquants_faibles:
+                        st.warning("Clés manquantes dans `points_faibles` : " + ", ".join(manquants_faibles))
+                else:
+                    st.caption("Aucun point faible détecté.")
+
+        with tab4:
             if poste != 'Gardien': 
                 metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
             else:
@@ -2881,7 +3120,7 @@ def streamlit_application(all_df_dict):
             fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
-        with tab4:
+        with tab5:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
@@ -2919,7 +3158,7 @@ def streamlit_application(all_df_dict):
 
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
-        with tab5:
+        with tab6:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             similar_players = compute_similarity(df, joueur, poste)
@@ -2929,7 +3168,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(similar_players.head(nombre_joueur), use_container_width=True, hide_index=True)
 
         if team == "Cannes":
-            with tab6:
+            with tab7:
                 nom_joueur = joueur.split(" - ")[0]
 
                 df_player = create_player_data(nom_joueur, sélection_dataframe)
