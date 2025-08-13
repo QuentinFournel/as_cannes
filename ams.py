@@ -3069,41 +3069,25 @@ def streamlit_application(all_df_dict):
         with tab3:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
 
-            st.subheader("Résumé du joueur")
-            st.caption(f"{joueur} · Poste : {poste}")
+            col1, col2 = st.columns(2)
 
-            col1, col2 = st.columns(2, gap="large")
-
-            # --------- Colonne POINTS FORTS ---------
             with col1:
-                st.markdown("### ✅ Points forts")
+                st.markdown("Points forts")
                 if points_forts_clé:
-                    manquants_forts = []
                     for k in points_forts_clé:
                         phrase = points_forts.get(k)
                         if phrase:
-                            # Affiche la phrase, et en plus la clé en petit grisé pour traçabilité
-                            st.markdown(f"- **{phrase}**  \n  <span style='opacity:.6'>({k})</span>", unsafe_allow_html=True)
-                        else:
-                            manquants_forts.append(k)
-                    if manquants_forts:
-                        st.warning("Clés manquantes dans `points_forts` : " + ", ".join(manquants_forts))
+                            st.markdown(f"{phrase}")
                 else:
                     st.caption("Aucun point fort détecté.")
 
-            # --------- Colonne POINTS FAIBLES ---------
             with col2:
-                st.markdown("### 🧩 Points faibles")
+                st.markdown("Points faibles")
                 if points_faibles_clé:
-                    manquants_faibles = []
                     for k in points_faibles_clé:
                         phrase = points_faibles.get(k)
                         if phrase:
-                            st.markdown(f"- **{phrase}**  \n  <span style='opacity:.6'>({k})</span>", unsafe_allow_html=True)
-                        else:
-                            manquants_faibles.append(k)
-                    if manquants_faibles:
-                        st.warning("Clés manquantes dans `points_faibles` : " + ", ".join(manquants_faibles))
+                            st.markdown(f"{phrase}")
                 else:
                     st.caption("Aucun point faible détecté.")
 
