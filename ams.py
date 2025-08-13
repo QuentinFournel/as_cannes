@@ -2489,9 +2489,9 @@ def points_forts_faibles(df, joueur, poste):
     for col in joueur_data.index:
         if pd.api.types.is_numeric_dtype(type(joueur_data[col])):
             value = joueur_data[col]
-            if value > 75:
+            if value > 85:
                 points_forts[col] = value
-            elif value < 25:
+            elif value < 15:
                 points_faibles[col] = value
 
     return points_forts, points_faibles
