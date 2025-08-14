@@ -3226,13 +3226,7 @@ def streamlit_application(all_df_dict):
         with tab4:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
 
-            # Trouver l'index de la colonne "Note globale"
-            idx = scores_df.columns.get_loc("Note globale")
-
-            # Garder toutes les colonnes après (exclut "Note globale" elle-même)
-            temp_df = scores_df.iloc[:, idx+1:]
-
-            st.dataframe(temp_df, use_container_width=True)
+            st.dataframe(scores_df.iloc[:, scores_df.columns.get_loc("Note globale")+1:], use_container_width=True, hide_index=True)
 
         with tab5:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
