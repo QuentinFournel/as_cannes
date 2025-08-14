@@ -1938,6 +1938,11 @@ def search_top_players(df, poste):
 
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
 
+    # Calcul de la note des rôles
+    for role, coeffs in kpi_coefficients_by_role[poste].items():
+        total_coeff = sum(coeffs.values())
+        df_scores[role] = df_scores.apply(lambda row: sum(row[kpi] * coeffs[kpi] for kpi in coeffs) / total_coeff, axis=1).round(1)
+
     return df_scores
 
 def search_recommended_players(df, poste, thresholds):
