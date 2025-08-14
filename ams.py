@@ -3226,7 +3226,9 @@ def streamlit_application(all_df_dict):
         with tab4:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
 
-            st.dataframe(scores_df.iloc[:, scores_df.columns.get_loc("Note globale")+1:], use_container_width=True, hide_index=True)
+            joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
+
+            st.dataframe(joueur_scores.iloc[:, joueur_scores.columns.get_loc("Note globale")+1:], use_container_width=True, hide_index=True)
 
         with tab5:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
