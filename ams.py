@@ -723,6 +723,149 @@ kpi_coefficients_by_position = {
     }
 }
 
+kpi_coefficients_by_role = {
+    "Buteur": {
+        "Attaquant de profondeur": {
+            "Finition": 5,
+            "Apport offensif": 4,
+            "Qualité de passe": 1,
+            "Vision du jeu": 1,
+            "Percussion": 5,
+            "Jeu aérien": 1
+        },
+        "Faux neuf": {
+            "Finition": 3,
+            "Apport offensif": 2,
+            "Qualité de passe": 4,
+            "Vision du jeu": 5,
+            "Percussion": 2,
+            "Jeu aérien": 1
+        },
+        "Renard des surfaces": {
+            "Finition": 6,
+            "Apport offensif": 3,
+            "Qualité de passe": 1,
+            "Vision du jeu": 1,
+            "Percussion": 1,
+            "Jeu aérien": 3
+        },
+        "Attaquant pivot": {
+            "Finition": 4,
+            "Apport offensif": 3,
+            "Qualité de passe": 2,
+            "Vision du jeu": 1,
+            "Percussion": 1,
+            "Jeu aérien": 6
+        }
+    },
+    "Ailier": {
+        "Ailier percutant": {
+            "Finition": 2,
+            "Apport offensif": 4,
+            "Qualité de passe": 2,
+            "Vision du jeu": 3,
+            "Percussion": 5,
+            "Jeu défensif": 1
+        },
+        "Ailier créateur": {
+            "Finition": 3,
+            "Apport offensif": 4,
+            "Qualité de passe": 4,
+            "Vision du jeu": 5,
+            "Percussion": 2,
+            "Jeu défensif": 1
+        }
+    },
+    "Milieu": {
+        "Milieu défensif": {
+            "Apport offensif": 1,
+            "Qualité de passe": 2,
+            "Vision du jeu": 1,
+            "Percussion": 1,
+            "Jeu défensif": 5,
+            "Jeu aérien": 5
+        },
+        "Milieu relayeur": {
+            "Apport offensif": 2,
+            "Qualité de passe": 3,
+            "Vision du jeu": 2,
+            "Percussion": 2,
+            "Jeu défensif": 4,
+            "Jeu aérien": 3
+        },
+        "Milieu créateur": {
+            "Apport offensif": 2,
+            "Qualité de passe": 5,
+            "Vision du jeu": 5,
+            "Percussion": 1,
+            "Jeu défensif": 1,
+            "Jeu aérien": 1
+        },
+        "Box-to-box": {
+            "Apport offensif": 4,
+            "Qualité de passe": 2,
+            "Vision du jeu": 2,
+            "Percussion": 5,
+            "Jeu défensif": 4,
+            "Jeu aérien": 1
+        }
+    },
+    "Latéral": {
+        "Latéral offensif": {
+            "Apport offensif": 6,
+            "Qualité de passe": 4,
+            "Vision du jeu": 2,
+            "Percussion": 4,
+            "Jeu défensif": 3,
+            "Jeu aérien": 1
+        },
+        "Latéral défensif": {
+            "Apport offensif": 2,
+            "Qualité de passe": 2,
+            "Vision du jeu": 1,
+            "Percussion": 1,
+            "Jeu défensif": 5,
+            "Jeu aérien": 2
+        }
+    },
+    "Défenseur central": {
+        "Défenseur stoppeur": {
+            "Discipline": 1,
+            "Qualité de passe": 1,
+            "Vision du jeu": 1,
+            "Percussion": 1,
+            "Jeu défensif": 6,
+            "Jeu aérien": 6
+        },
+        "Défenseur relanceur": {
+            "Discipline": 1,
+            "Qualité de passe": 5,
+            "Vision du jeu": 5,
+            "Percussion": 1,
+            "Jeu défensif": 3,
+            "Jeu aérien": 3
+        }
+    },
+    "Gardien": {
+        "Gardien de ligne": {
+            "Participe au jeu": 1,
+            "Jeu court": 2,
+            "Jeu long": 2,
+            "Sortie": 1,
+            "Présence aérienne": 2,
+            "Efficacité sur sa ligne": 5
+        },
+        "Gardien libéro": {
+            "Participe au jeu": 5,
+            "Jeu court": 2,
+            "Jeu long": 2,
+            "Sortie": 3,
+            "Présence aérienne": 3,
+            "Efficacité sur sa ligne": 5
+        }
+  }
+}
+
 metrics_x_y = {
     "Apport offensif": {
         "metrics": ["xG par 90", "xA par 90"],
@@ -1459,6 +1602,11 @@ def calcul_scores_par_kpi(df, joueur, poste):
     ) / total_coeff
 
     df_scores["Note globale"] = df_scores["Note globale"].round(1)
+
+    # Calcul de la note des rôles
+    for role, coeffs in kpi_coefficients_by_role[poste].items():
+        total_coeff = sum(coeffs.values())
+        df_scores[role] = df_scores.apply(lambda row: sum(row[kpi] * coeffs[kpi] for kpi in coeffs) / total_coeff, axis=1).round(1)
 
     return df_scores
 
