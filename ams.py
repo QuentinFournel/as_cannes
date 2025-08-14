@@ -1911,40 +1911,6 @@ def plot_team_metrics(df, x_metric, y_metric):
 
     return fig
 
-def search_top_players(df, poste):
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
-
-    df_ranked = rank_columns(df_filtré)
-
-    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Taille', 'Minutes jouées', 'Contrat expiration']].copy()
-
-    kpi_metrics = kpi_by_position[poste]
-    kpi_coefficients = kpi_coefficients_by_position[poste]
-    total_coeff = sum(kpi_coefficients.values())
-
-    for kpi, metrics in kpi_metrics.items():
-        # Extraire la ligue et remplacer les valeurs absentes par 1
-        coeffs = df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].apply(lambda x: league_rating.get(x, 1))
-
-        # Appliquer le calcul du score avec la pondération
-        df_scores[kpi] = (
-            df_ranked[list(metrics.keys())].mul(list(metrics.values()), axis=1).sum(axis=1)
-            * (1 - 0.5 + 0.5 * coeffs)
-        ).round(1)
-
-    df_scores["Note globale"] = sum(
-        df_scores[kpi] * coef for kpi, coef in kpi_coefficients.items()
-    ) / total_coeff
-
-    df_scores["Note globale"] = df_scores["Note globale"].round(1)
-
-    # Calcul de la note des rôles
-    for role, coeffs in kpi_coefficients_by_role[poste].items():
-        total_coeff = sum(coeffs.values())
-        df_scores[role] = df_scores.apply(lambda row: sum(row[kpi] * coeffs[kpi] for kpi in coeffs) / total_coeff, axis=1).round(1)
-
-    return df_scores
-
 def search_recommended_players(df, poste, thresholds):
     df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
 
@@ -3135,9 +3101,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Statistique", "Radar", "Points forts/Points faibles", "Nuage de points", "KPI", "Joueur similaire", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Statistique", "Radar", "KPI", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Statistique", "Radar", "Points forts/Points faibles", "Nuage de points", "KPI", "Joueur similaire"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Statistique", "Radar", "KPI", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
 
         with tab1:
             st.subheader('Informations')
@@ -3220,48 +3186,6 @@ def streamlit_application(all_df_dict):
             st.pyplot(fig, use_container_width=True)
 
         with tab3:
-            points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.subheader('Points forts')
-                if points_forts_clé:
-                    for k, score in sorted(points_forts_clé.items(), key=lambda x: x[1], reverse=True):
-                        phrase = points_forts.get(k)
-                        if phrase:
-                            st.markdown(
-                                f"- {phrase}  \n"
-                                f"<span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
-                                unsafe_allow_html=True
-                            )
-
-            with col2:
-                st.subheader('Points faibles')
-                if points_faibles_clé:
-                    for k, score in sorted(points_faibles_clé.items(), key=lambda x: x[1]):
-                        phrase = points_faibles.get(k)
-                        if phrase:
-                            st.markdown(
-                                f"- {phrase}  \n"
-                                f"<span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
-                                unsafe_allow_html=True
-                            )
-
-        with tab4:
-            if poste != 'Gardien': 
-                metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
-            else:
-                metrics_label = "Buts évités"
-
-            x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
-            nom_x_metric, nom_y_metric = metrics_x_y[metrics_label]["names"]
-            description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
-
-            fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
-            st.plotly_chart(fig, use_container_width=True)
-
-        with tab5:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
@@ -3299,7 +3223,52 @@ def streamlit_application(all_df_dict):
 
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
+        with tab4:
+            scores_df = calcul_scores_par_kpi(df, joueur, poste)
+
+        with tab5:
+            points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.subheader('Points forts')
+                if points_forts_clé:
+                    for k, score in sorted(points_forts_clé.items(), key=lambda x: x[1], reverse=True):
+                        phrase = points_forts.get(k)
+                        if phrase:
+                            st.markdown(
+                                f"- {phrase}  \n"
+                                f"<span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
+                                unsafe_allow_html=True
+                            )
+
+            with col2:
+                st.subheader('Points faibles')
+                if points_faibles_clé:
+                    for k, score in sorted(points_faibles_clé.items(), key=lambda x: x[1]):
+                        phrase = points_faibles.get(k)
+                        if phrase:
+                            st.markdown(
+                                f"- {phrase}  \n"
+                                f"<span style='color:#6b7280; font-size:0.9em;'>Score : {score}</span>",
+                                unsafe_allow_html=True
+                            )
+
         with tab6:
+            if poste != 'Gardien': 
+                metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
+            else:
+                metrics_label = "Buts évités"
+
+            x_metric, y_metric = metrics_x_y[metrics_label]["metrics"]
+            nom_x_metric, nom_y_metric = metrics_x_y[metrics_label]["names"]
+            description_1, description_2, description_3, description_4 = metrics_x_y[metrics_label]["descriptions"]
+
+            fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
+            st.plotly_chart(fig, use_container_width=True)
+
+        with tab7:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             similar_players = compute_similarity(df, joueur, poste)
@@ -3309,7 +3278,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(similar_players.head(nombre_joueur), use_container_width=True, hide_index=True)
 
         if team == "Cannes":
-            with tab7:
+            with tab8:
                 nom_joueur = joueur.split(" - ")[0]
 
                 df_player = create_player_data(nom_joueur, sélection_dataframe)
@@ -3447,7 +3416,7 @@ def streamlit_application(all_df_dict):
         with tab1:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
-            top_players = search_top_players(df, poste)
+            top_players = calcul_scores_par_kpi(df, "", poste)
             top_players = top_players[((top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)) & 
                                     ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille) | (top_players['Taille'] == 0))]
             top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
