@@ -2619,7 +2619,7 @@ def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
             "Saison",
-            ["24-25"],
+            ["24-25", "25-26"],
             index=["24-25", "25-26"].index(st.session_state.get("saison", "24-25")),
             key="saison",
             label_visibility="collapsed"
@@ -2719,74 +2719,88 @@ def streamlit_application(all_df_dict):
         st.header("Vidéo des buts")
 
         journées = {
-            "J24": [
-                'Anglet Genets Foot VS Le Puy Foot 43',
-                'Angoulême Charente FC VS Andrézieux-Bouthéon FC',
-                'AS Saint-Priest VS Jura Sud Foot',
-                'EFC Fréjus Saint-Raphaël VS AS Cannes',
-                'FC Istres VS Bergerac Périgord FC',
-                'Goal FC VS SC Toulon',
-                'Hyeres FC VS GFA Rumilly Vallieres',
-                'RCP Grasse VS Marignane Gignac FC'
-            ],
-            "J25": [
-                'Andrézieux-Bouthéon FC VS EFC Fréjus Saint-Raphaël',
-                'AS Cannes VS Goal FC',
-                'Bergerac Périgord FC VS RCP Grasse',
-                'GFA Rumilly Vallieres VS Angoulême Charente FC',
-                'Jura Sud Foot VS Anglet Genets Foot',
-                'Le Puy Foot 43 VS Hyeres FC',
-                'Marignane Gignac FC VS AS Saint-Priest',
-                'SC Toulon VS FC Istres'
-            ],
-            "J26": [
-                'Anglet Genets Foot VS Marignane Gignac FC',
-                'Angoulême Charente FC VS Le Puy Foot 43',
-                'Bergerac Périgord FC VS SC Toulon',
-                'EFC Fréjus Saint-Raphaël VS GFA Rumilly Vallieres',
-                'FC Istres VS AS Cannes',
-                'Goal FC VS Andrézieux-Bouthéon FC',
-                'Hyeres FC VS Jura Sud Foot',
-                'RCP Grasse VS AS Saint-Priest'
-            ],
-            "J27": [
-                "Andrézieux-Bouthéon FC VS FC Istres",
-                "AS Cannes VS Bergerac Périgord FC",
-                "AS Saint-Priest VS Anglet Genets Foot",
-                "GFA Rumilly Vallieres VS Goal FC",
-                "Jura Sud Foot VS Angoulême Charente FC",
-                "Le Puy Foot 43 VS EFC Fréjus Saint-Raphaël",
-                "Marignane Gignac FC VS Hyeres FC",
-                "SC Toulon VS RCP Grasse"
-            ],
-            "J28": [
-                "Angoulême Charente FC VS Marignane Gignac FC",
-                "Bergerac Périgord FC VS Andrézieux-Bouthéon FC",
-                "EFC Fréjus Saint-Raphaël VS Jura Sud Foot",
-                "FC Istres VS GFA Rumilly Vallieres",
-                "Goal FC VS Le Puy Foot 43",
-                "Hyeres FC VS AS Saint-Priest",
-                "RCP Grasse VS Anglet Genets Foot",
-                "SC Toulon VS AS Cannes"
-            ],
-            "J29": [
-                "Andrézieux-Bouthéon FC VS SC Toulon",
-                "Anglet Genets Foot VS Hyeres FC",
-                "AS Saint-Priest VS Angoulême Charente FC",
-                "GFA Rumilly Vallieres VS Bergerac Périgord FC",
-                "Jura Sud Foot VS Goal FC",
-                "Le Puy Foot 43 VS FC Istres",
-                "Marignane Gignac FC VS EFC Fréjus Saint-Raphaël",
-                "RCP Grasse VS AS Cannes"
-            ]
+            "24-25": {
+                "J24": [
+                    'Anglet Genets Foot VS Le Puy Foot 43',
+                    'Angoulême Charente FC VS Andrézieux-Bouthéon FC',
+                    'AS Saint-Priest VS Jura Sud Foot',
+                    'EFC Fréjus Saint-Raphaël VS AS Cannes',
+                    'FC Istres VS Bergerac Périgord FC',
+                    'Goal FC VS SC Toulon',
+                    'Hyeres FC VS GFA Rumilly Vallieres',
+                    'RCP Grasse VS Marignane Gignac FC'
+                ],
+                "J25": [
+                    'Andrézieux-Bouthéon FC VS EFC Fréjus Saint-Raphaël',
+                    'AS Cannes VS Goal FC',
+                    'Bergerac Périgord FC VS RCP Grasse',
+                    'GFA Rumilly Vallieres VS Angoulême Charente FC',
+                    'Jura Sud Foot VS Anglet Genets Foot',
+                    'Le Puy Foot 43 VS Hyeres FC',
+                    'Marignane Gignac FC VS AS Saint-Priest',
+                    'SC Toulon VS FC Istres'
+                ],
+                "J26": [
+                    'Anglet Genets Foot VS Marignane Gignac FC',
+                    'Angoulême Charente FC VS Le Puy Foot 43',
+                    'Bergerac Périgord FC VS SC Toulon',
+                    'EFC Fréjus Saint-Raphaël VS GFA Rumilly Vallieres',
+                    'FC Istres VS AS Cannes',
+                    'Goal FC VS Andrézieux-Bouthéon FC',
+                    'Hyeres FC VS Jura Sud Foot',
+                    'RCP Grasse VS AS Saint-Priest'
+                ],
+                "J27": [
+                    "Andrézieux-Bouthéon FC VS FC Istres",
+                    "AS Cannes VS Bergerac Périgord FC",
+                    "AS Saint-Priest VS Anglet Genets Foot",
+                    "GFA Rumilly Vallieres VS Goal FC",
+                    "Jura Sud Foot VS Angoulême Charente FC",
+                    "Le Puy Foot 43 VS EFC Fréjus Saint-Raphaël",
+                    "Marignane Gignac FC VS Hyeres FC",
+                    "SC Toulon VS RCP Grasse"
+                ],
+                "J28": [
+                    "Angoulême Charente FC VS Marignane Gignac FC",
+                    "Bergerac Périgord FC VS Andrézieux-Bouthéon FC",
+                    "EFC Fréjus Saint-Raphaël VS Jura Sud Foot",
+                    "FC Istres VS GFA Rumilly Vallieres",
+                    "Goal FC VS Le Puy Foot 43",
+                    "Hyeres FC VS AS Saint-Priest",
+                    "RCP Grasse VS Anglet Genets Foot",
+                    "SC Toulon VS AS Cannes"
+                ],
+                "J29": [
+                    "Andrézieux-Bouthéon FC VS SC Toulon",
+                    "Anglet Genets Foot VS Hyeres FC",
+                    "AS Saint-Priest VS Angoulême Charente FC",
+                    "GFA Rumilly Vallieres VS Bergerac Périgord FC",
+                    "Jura Sud Foot VS Goal FC",
+                    "Le Puy Foot 43 VS FC Istres",
+                    "Marignane Gignac FC VS EFC Fréjus Saint-Raphaël",
+                    "RCP Grasse VS AS Cannes"
+                ]
+            },
+            "25-26": {
+                "J1": [
+                    'AS Saint-Priest VS Hyères FC',
+                    'FC 93 VS SC Toulon',
+                    'FC Rousset Sainte-Victoire VS Andrézieux-Bouthéon FC',
+                    'GOAL FC VS FC Istres',
+                    'Nîmes Olympique VS FC Limonest DSD',
+                    'RC Grasse VS EFC Fréjus Saint-Raphaël',
+                    'US Créteil Lusitanos VS GFA Rumilly Vallières',
+                    'US Lusitanos Saint-Maur VS AS Cannes'
+                ]
+            }
         }
 
         col1, col2 = st.columns([1, 3])
 
         with col1:
-            journée = st.selectbox("Sélectionnez une journée", list(journées.keys()))
+            journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
         with col2:
-            match = st.selectbox("Sélectionnez un match", journées[journée])
+            match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
         # Affichage si la vidéo existe
         if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
