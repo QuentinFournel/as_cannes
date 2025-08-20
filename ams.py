@@ -2813,34 +2813,48 @@ def streamlit_application(all_df_dict):
 
         tab1, tab2 = st.tabs(['Statistiques globales', 'Statistiques par équipe'])
 
-        équipes = [
-            "Andrézieux",
-            "Anglet Genets",
-            "Angoulême",
-            "Bergerac",
-            "Cannes",
-            "Fréjus St-Raphaël",
-            "GOAL FC",
-            "Grasse",
-            "Hyères FC",
-            "Istres",
-            "Jura Sud Foot",
-            "Le Puy F.43 Auvergne",
-            "Marignane Gignac CB",
-            "Rumilly Vallières",
-            "Saint-Priest",
-            "Toulon",
-            "Créteil",
-            "St Maur Lusitanos",
-            "Nîmes",
-            "FC 93 Bobigny BG",
-            "Rousset-Ste Victoire",
-            "Limonest"
-        ]
+        équipes = {
+            "24-25": [
+                "Andrézieux",
+                "Anglet Genets",
+                "Angoulême",
+                "Bergerac",
+                "Cannes",
+                "Fréjus St-Raphaël",
+                "GOAL FC",
+                "Grasse",
+                "Hyères FC",
+                "Istres",
+                "Jura Sud Foot",
+                "Le Puy F.43 Auvergne",
+                "Marignane Gignac CB",
+                "Rumilly Vallières",
+                "Saint-Priest",
+                "Toulon"
+            ],
+            "25-26": [
+                "Andrézieux",
+                "Cannes",
+                "Fréjus St-Raphaël",
+                "GOAL FC",
+                "Grasse",
+                "Hyères FC",
+                "Istres",
+                "Rumilly Vallières",
+                "Saint-Priest",
+                "Toulon",
+                "Créteil",
+                "St Maur Lusitanos",
+                "Nîmes",
+                "FC 93 Bobigny BG",
+                "Rousset-Ste Victoire",
+                "Limonest"
+            ]
+        }
 
         df_stats_moyennes = pd.DataFrame()
 
-        for équipe in équipes:
+        for équipe in équipes[st.session_state['saison']]:
             if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx"):
                 continue
             df_filtré = collect_collective_data(équipe)
@@ -2868,7 +2882,7 @@ def streamlit_application(all_df_dict):
             with tab3:
                 df = all_df['Joueur du championnat de France']
 
-                df_filtré = df[df['Équipe dans la période sélectionnée'].isin(équipes)]
+                df_filtré = df[df['Équipe dans la période sélectionnée'].isin(équipes[st.session_state['saison']])]
 
                 colonnes_à_exclure = [
                     'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
@@ -2962,7 +2976,7 @@ def streamlit_application(all_df_dict):
                     st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
-            team = st.selectbox("Sélectionnez une équipe", équipes, index=équipes.index("Cannes"))
+            team = st.selectbox("Sélectionnez une équipe", équipes[st.session_state['saison']], index=équipes[st.session_state['saison']].index("Cannes"))
 
             df_collective = collect_collective_data(team)
 
