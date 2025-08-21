@@ -103,100 +103,202 @@ league_rating = {
 }
 
 smart_goal = {
-    "J. Aymes": [
-        ["Tirs contre", "Arrêts", "Arrêts réflexes"],
-        ["Passes", "Passes précises", "% de passes précises"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-    ],
-    "F. Vanni": [
-        ["Tirs contre", "Arrêts", "Arrêts réflexes"],
-        ["Passes", "Passes précises", "% de passes précises"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-    ],
-    "M. Fischer": [
-        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-        ["Centres", "Centres précis", "% de centres précis"]
-    ],
-    "L. Vinci": [
-        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-        ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"]
-    ],
-    "G. Pineau": [
-        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-        ["Passes longues", "Passes longues précises", "% de passes longues précises"]
-    ],
-    "H. Abderrahmane": [
-        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-        ["Passes longues", "Passes longues précises", "% de passes longues précises"]
-    ],
-    "J. Smith": [
-        ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
-        ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
-        ["Passes longues", "Passes longues précises", "% de passes longues précises"]
-    ],
-    "C. N'Doye": [
-        ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
-        ["Récupérations"]
-    ],
-    "H. Hafidi": [
-        ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
-        ["Récupérations", "Touches de balle dans la surface de réparation"]
-    ],
-    "A. N'Diaye": [
-        ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
-        ["Touches de balle dans la surface de réparation"]
-    ],
-    "C. Gonçalves": [
-        ["Passes longues", "Passes longues précises", "% de passes longues précises"],
-        ["Récupérations", "Touches de balle dans la surface de réparation"]
-    ],
-    "T. Trinker": [
-        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
-        ["Passes dans le 3ème tiers", "Passes dans le 3ème tiers précises", "% de passes dans le 3ème tiers précises"],
-        ["Touches de balle dans la surface de réparation"]
-    ],
-    "M. Blanc": [
-        ["Passes dans le 3ème tiers", "Passes dans le 3ème tiers précises", "% de passes dans le 3ème tiers précises"],
-        ["Touches de balle dans la surface de réparation"]
-    ],
-    "Alexis Gonçalves": [
-        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
-        ["Centres", "Centres précis", "% de centres précis"],
-        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
-    ],
-    "C. Abbas": [
-        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
-        ["Centres", "Centres précis", "% de centres précis"],
-        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
-    ],
-    "D. Mai": [
-        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
-        ["Centres", "Centres précis", "% de centres précis"],
-        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
-    ],
-    "M. Lopes": [
-        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
-        ["Centres", "Centres précis", "% de centres précis"],
-        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
-    ],
-    "J. Mambu": [
-        ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
-        ["Centres", "Centres précis", "% de centres précis"],
-        ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
-    ],
-    "J. Domingues": [
-        ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
-        ["Touches de balle dans la surface de réparation"]
-    ],
-    "D. Segbe-Azankpo": [
-        ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
-        ["Touches de balle dans la surface de réparation"]
-    ],
-    "M. Mamadou Kamissoko": []
+    "24-25": {
+        "J. Aymes": [
+            ["Tirs contre", "Arrêts", "Arrêts réflexes"],
+            ["Passes", "Passes précises", "% de passes précises"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ],
+        "F. Vanni": [
+            ["Tirs contre", "Arrêts", "Arrêts réflexes"],
+            ["Passes", "Passes précises", "% de passes précises"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+        ],
+        "M. Fischer": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "L. Vinci": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"]
+        ],
+        "G. Pineau": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "H. Abderrahmane": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "J. Smith": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "C. N'Doye": [
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+            ["Récupérations"]
+        ],
+        "H. Hafidi": [
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+            ["Récupérations", "Touches de balle dans la surface de réparation"]
+        ],
+        "A. N'Diaye": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "C. Gonçalves": [
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"],
+            ["Récupérations", "Touches de balle dans la surface de réparation"]
+        ],
+        "T. Trinker": [
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Passes dans le 3ème tiers", "Passes dans le 3ème tiers précises", "% de passes dans le 3ème tiers précises"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "M. Blanc": [
+            ["Passes dans le 3ème tiers", "Passes dans le 3ème tiers précises", "% de passes dans le 3ème tiers précises"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "Alexis Gonçalves": [
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+        ],
+        "C. Abbas": [
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+        ],
+        "D. Mai": [
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+        ],
+        "M. Lopes": [
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+        ],
+        "J. Mambu": [
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"]
+        ],
+        "J. Domingues": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "D. Segbe-Azankpo": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "M. Mamadou Kamissoko": []
+    },
+    "25-26": {
+        "J. Aymes": [
+            ["Tirs contre", "Arrêts", "Arrêts réflexes"],
+            ["Passes", "Passes précises", "% de passes précises"]
+        ],
+        "F. Vanni": [
+            ["Tirs contre", "Arrêts", "Arrêts réflexes"],
+            ["Passes", "Passes précises", "% de passes précises"]
+        ],
+        "S. Corchia": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "R. Sylva": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "G. Pineau": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "H. Abderrahmane": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "J. Smith": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "C. N'Doye": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Récupérations", "Récupérations dans le terrain adverse"],
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"]
+        ],
+        "E. Caumont": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Récupérations", "Récupérations dans le terrain adverse"],
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"]
+        ],
+        "A. N'Diaye": [
+            ["Récupérations", "Récupérations dans le terrain adverse"],
+            ["Touches de balle dans la surface de réparation", "Tirs"],
+            ["Courses progressives"]
+        ],
+        "C. Gonçalves": [
+            ["Récupérations", "Récupérations dans le terrain adverse"],
+            ["Touches de balle dans la surface de réparation", "Tirs"],
+            ["Courses progressives"]
+        ],
+        "H. Hafidi": [
+            ["Récupérations", "Récupérations dans le terrain adverse"],
+            ["Touches de balle dans la surface de réparation", "Tirs"],
+            ["Courses progressives"]
+        ],
+        "M. Blanc": [
+            ["Récupérations", "Récupérations dans le terrain adverse"],
+            ["Touches de balle dans la surface de réparation", "Tirs"],
+            ["Courses progressives"]
+        ],
+        "C. Abbas": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "J. Mambu": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "E. Bonnaure": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "M. Boussaïd": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
+        "S. Doumbouya": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "B. M'Backé N'Diayé": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "A. Fernandes": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Touches de balle dans la surface de réparation"]
+        ]
+    }
 }
 
 metrics_by_position = [
@@ -3195,7 +3297,7 @@ def streamlit_application(all_df_dict):
 
                 st.subheader('Smart Goals (moyenne par match)')
 
-                colonnes_smart = smart_goal.get(nom_joueur, [])
+                colonnes_smart = smart_goal[st.session_state['saison']].get(nom_joueur, [])
 
                 for groupe in colonnes_smart:
                     cols = st.columns(len(groupe))
@@ -3352,7 +3454,7 @@ def streamlit_application(all_df_dict):
 
                 st.subheader('Smart Goals')
 
-                colonnes_smart = smart_goal.get(nom_joueur, [])
+                colonnes_smart = smart_goal[st.session_state['saison']].get(nom_joueur, [])
 
                 for groupe in colonnes_smart:
                     cols = st.columns(len(groupe))
