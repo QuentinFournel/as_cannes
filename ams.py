@@ -878,6 +878,16 @@ kpi_coefficients_by_role = {
             "Jeu défensif": 1
         }
     },
+    "Milieu offensif": {
+        "Milieu offensif": {
+            "Finition": 2,
+            "Apport offensif": 3,
+            "Qualité de passe": 4,
+            "Vision du jeu": 5,
+            "Percussion": 2,
+            "Jeu défensif": 1
+        }
+    },
     "Milieu": {
         "Milieu défensif": {
             "Apport offensif": 1,
