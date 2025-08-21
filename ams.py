@@ -1772,7 +1772,7 @@ def create_individual_radar(df, joueur, poste):
         )
     )
 
-    fig.set_facecolor('#f4f3ed')
+    fig.set_facecolor('#FFFFFF')
 
     return fig
 
@@ -1840,7 +1840,7 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
                       f"{df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Minutes jouées'].iloc[0]} minutes jouées",
                       fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#3d3a2a')
 
-    fig.set_facecolor('#f4f3ed')
+    fig.set_facecolor('#FFFFFF')
 
     return fig
 
@@ -2696,8 +2696,8 @@ def plot_rating_distribution(values, player_rating, kpi):
 
     fig.tight_layout()
 
-    fig.set_facecolor('#f4f3ed')
-    ax.set_facecolor('#f4f3ed')
+    fig.set_facecolor('#FFFFFF')
+    ax.set_facecolor('#FFFFFF')
 
     return fig
 
