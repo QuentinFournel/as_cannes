@@ -1683,7 +1683,7 @@ def calcul_scores_par_kpi(df, joueur, poste):
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
     df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
@@ -1728,7 +1728,7 @@ def create_individual_radar(df, joueur, poste):
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
     df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
@@ -1787,7 +1787,7 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
     if len(joueur_2_infos) > 1:
         joueur_2_infos = compute_weighted_stats_by_minutes(joueur_2_infos)
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
     df_filtré = df_filtré[(df_filtré['Joueur + Information'] != joueur_1) & (df_filtré['Joueur + Information'] != joueur_2)]
     df_filtré = pd.concat([df_filtré, joueur_1_infos, joueur_2_infos], ignore_index=True)
 
@@ -1850,7 +1850,7 @@ def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42) & (df[x_metric] != 0) & (df[y_metric] != 0)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500) & (df[x_metric] != 0) & (df[y_metric] != 0)]
     df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
@@ -2024,7 +2024,7 @@ def plot_team_metrics(df, x_metric, y_metric):
     return fig
 
 def search_recommended_players(df, poste, thresholds):
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
 
     df_ranked = rank_columns(df_filtré)
 
@@ -2518,7 +2518,7 @@ def compute_similarity(df, joueur, poste):
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
     df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
@@ -2707,7 +2707,7 @@ def points_forts_faibles(df, joueur, poste):
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 42)]
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
     df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
