@@ -218,6 +218,11 @@ smart_goal = {
             ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
             ["Centres", "Centres précis", "% de centres précis"]
         ],
+        "I. Umbdenstock": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Passes en avant", "Passes en avant précises", "% de passes en avant précises"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
         "G. Pineau": [
             ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
             ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
@@ -229,6 +234,11 @@ smart_goal = {
             ["Passes longues", "Passes longues précises", "% de passes longues précises"]
         ],
         "J. Smith": [
+            ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
+            ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
+            ["Passes longues", "Passes longues précises", "% de passes longues précises"]
+        ],
+        "L. Gueho": [
             ["Duels défensifs", "Duels défensifs gagnés", "% de duels défensifs gagnés"],
             ["Duels aériens", "Duels aériens gagnés", "% de duels aériens gagnés"],
             ["Passes longues", "Passes longues précises", "% de passes longues précises"]
