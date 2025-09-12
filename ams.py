@@ -2701,7 +2701,7 @@ def plot_rating_bars_panel(df, joueur_scores, kpis):
         ax.text(-2, yi, str(kpi), va="center", ha="right", fontsize=11, color="#000000")
 
         # note à droite
-        ax.text(102, yi + 0.1, f"Rating : " + r"$\mathbf{" + f"{player_rating:.1f}" + "}$",
+        ax.text(102, yi + 0.1, f"Note : " + r"$\mathbf{" + f"{player_rating:.1f}" + "}$",
                 va="center", ha="left", fontsize=11, color="#000000")
 
         ax.text(102, yi - 0.1, f"Percentile : " + r"$\mathbf{" + f"{percentile:.1f}" + "}$",
