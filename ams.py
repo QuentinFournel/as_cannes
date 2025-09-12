@@ -2667,44 +2667,54 @@ def create_player_data(nom_joueur, sélection_dataframe):
 
     return df_player
 
-def plot_rating_distribution(values, player_rating, kpi):
-    # Créer la figure et les axes
-    fig, ax = plt.subplots(figsize=(5, 3))
+def plot_rating_bars_panel(df, joueur_scores, kpis):
+    n = len(kpis)
 
-    # Courbe KDE (estimation de densité)
-    sns.kdeplot(values, fill=False, color="black", linewidth=1.5, ax=ax)
+    # dimensions : hauteur adaptable
+    fig_h = max(1.1 * n, 3)
+    fig, ax = plt.subplots(figsize=(7.2, fig_h))
 
-    # Créer des points pour la zone ombrée
-    x = np.linspace(0, 100, 1000)
-    kde = stats.gaussian_kde(values)
-    y = kde(x)
+    # positions Y (haut -> bas)
+    y = np.arange(n)[::-1]
+    bar_h = 0.55
 
-    # Remplir la zone jusqu’à la note du joueur
-    ax.fill_between(x, 0, y, where=(x <= player_rating), color='#ac141a')
+    # largeur de référence (0→100)
+    ax.barh(y, 100, height=bar_h, left=0, color="None", edgecolor="#000000")
 
-    # Calcul du percentile
-    percentile = stats.percentileofscore(values, player_rating)
+    # boucle des KPI
+    for yi, kpi in zip(y, kpis):
+        # récup valeurs pour percentile + note du joueur
+        values = np.asarray(df[kpi].dropna(), dtype=float)
+        player_rating = float(joueur_scores[kpi])
 
-    # Titre de l'axe
-    ax.set_title(f"{kpi}", fontsize=15, fontweight='bold', loc='center')
+        # couleur selon percentile
+        percentile = stats.percentileofscore(values, player_rating)
+        fill_color = assign_color(percentile)
 
-    # Texte centré dans la figure (et pas dans l'axe) – dans la marge blanche
-    fig.text(0.5, 0.8, f"Rating : {player_rating} | Percentile : {int(percentile)}",
-             fontsize=11, ha='center', va='bottom')
+        # borne dans [0,100] si c'est une échelle 0-100 (sinon supprime clamp)
+        pr_clamped = max(0, min(100, percentile))
 
-    # Supprimer les bordures noires autour
+        # barre de valeur
+        ax.barh(yi, pr_clamped, height=bar_h, left=0, color=fill_color, edgecolor="#000000")
+
+        # label KPI à gauche
+        ax.text(-2, yi, str(kpi), va="center", ha="right", fontsize=11, color="#000000")
+
+        # note à droite
+        ax.text(102, yi + 0.1, f"Rating : " + r"$\mathbf{" + f"{player_rating:.1f}" + "}$",
+                va="center", ha="left", fontsize=11, color="#000000")
+
+        ax.text(102, yi - 0.1, f"Percentile : " + r"$\mathbf{" + f"{percentile:.1f}" + "}$",
+                va="center", ha="left", fontsize=11, color="#000000")
+
+    # axes & cadresss
+    ax.set_yticks([])
+    ax.set_xticks([])
+
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    # Nettoyage des axes
-    ax.set_xticks(np.arange(0, 101, 20))
-    ax.set_yticks([])
-    ax.set_xlabel("")
-    ax.set_ylabel("")
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, max(y) * 1.25)
-
-    fig.tight_layout()
+    plt.tight_layout()
 
     fig.set_facecolor('#f4f3ed')
     ax.set_facecolor('#f4f3ed')
@@ -2933,6 +2943,16 @@ def streamlit_application(all_df_dict):
                     'US Lusitanos Saint-Maur VS FC Istres',
                     'AS Saint-Priest VS AS Cannes',
                     'Hyères FC VS Andrézieux-Bouthéon FC'
+                ],
+                "J4": [
+                    "Andrézieux-Bouthéon FC VS AS Cannes",
+                    "EFC Fréjus Saint-Raphaël VS GOAL FC",
+                    "FC 93 VS US Créteil Lusitanos",
+                    "GFA Rumilly Vallières VS FC Rousset Sainte-Victoire",
+                    "FC Limonest DSD VS US Lusitanos Saint-Maur",
+                    "RC Grasse VS AS Saint-Priest",
+                    "FC Istres VS Hyères FC",
+                    "SC Toulon VS Nîmes Olympique"
                 ]
             }
         }
@@ -3364,37 +3384,10 @@ def streamlit_application(all_df_dict):
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_poste = list(kpi_by_position[poste].keys())
 
-            col1, col2 = st.columns(2)
-
-            with col1:
-                fig1 = plot_rating_distribution(scores_df[kpis_poste[0]], joueur_scores[kpis_poste[0]], kpis_poste[0])
-                st.pyplot(fig1)
-
-                fig3 = plot_rating_distribution(scores_df[kpis_poste[2]], joueur_scores[kpis_poste[2]], kpis_poste[2])
-                st.pyplot(fig3)
-
-                fig5 = plot_rating_distribution(scores_df[kpis_poste[4]], joueur_scores[kpis_poste[4]], kpis_poste[4])
-                st.pyplot(fig5)
-
-            with col2:
-                fig2 = plot_rating_distribution(scores_df[kpis_poste[1]], joueur_scores[kpis_poste[1]], kpis_poste[1])
-                st.pyplot(fig2)
-
-                fig4 = plot_rating_distribution(scores_df[kpis_poste[3]], joueur_scores[kpis_poste[3]], kpis_poste[3])
-                st.pyplot(fig4)
-
-                fig6 = plot_rating_distribution(scores_df[kpis_poste[5]], joueur_scores[kpis_poste[5]], kpis_poste[5])
-                st.pyplot(fig6)
-
-            # Créer 3 colonnes pour centrer la fig 7
-            _, col_center, _ = st.columns([1, 2, 1])
-
-            with col_center:
-                fig7 = plot_rating_distribution(scores_df['Note globale'], joueur_scores['Note globale'], 'Note globale')
-                st.pyplot(fig7)
+            fig = plot_rating_bars_panel(scores_df, joueur_scores, kpis_poste)
+            st.pyplot(fig, use_container_width=True)
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
-
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab4:
