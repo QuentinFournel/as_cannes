@@ -3382,9 +3382,9 @@ def streamlit_application(all_df_dict):
         with tab3:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
-            kpis_poste = list(kpi_by_position[poste].keys())
+            kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
 
-            fig = plot_rating_bars_panel(scores_df, joueur_scores, kpis_poste)
+            fig = plot_rating_bars_panel(scores_df, joueur_scores, kpis_panel)
             st.pyplot(fig, use_container_width=True)
 
             st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
