@@ -6,6 +6,7 @@ import io
 from mplsoccer import Radar, FontManager, grid
 import streamlit as st
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import plotly.express as px
 import plotly.graph_objects as go
 import requests
@@ -1352,6 +1353,55 @@ points_faibles = {
     "Passes dans la zone dangereuse / Passes": "Effectue peu de passes dans les zones dangereuses par passe"
 }
 
+métriques_par_catégorie = {
+    "Général": [
+        "Équipe", "Équipe dans la période sélectionnée", "Compétition", "Poste", "Place",
+        "Âge", "Valeur sur le marché", "Contrat expiration", "Matchs joués", "Minutes jouées",
+        "Buts", "xG", "Passes décisives", "xA", "Duels par 90", "Duels gagnés, %",
+        "Pays de naissance", "Passeport pays", "Pied", "Taille", "Poids", "Sur prêt"
+    ],
+    "Attaque": [
+        "Attaques réussies par 90", "Buts", "Buts par 90", "Buts hors penalty",
+        "Buts hors penalty par 90", "xG", "xG par 90", "Buts de la tête", "Buts de la tête par 90",
+        "Tir", "Tirs par 90", "Tirs à la cible, %", "Taux de conversion but/tir",
+        "Passes décisives", "Passes décisives par 90", "Centres par 90", "Сentres précises, %",
+        "Centres du flanc gauche par 90", "Centres du flanc gauche précises, %",
+        "Centres du flanc droit par 90", "Centres du flanc droit précises, %",
+        "Centres dans la surface de but par 90", "Dribbles par 90", "Dribbles réussis, %",
+        "Duels offensifs par 90", "Duels de marquage, %", "Touches de balle dans la surface de réparation sur 90",
+        "Courses progressives par 90", "Accélérations par 90", "Passes réceptionnées par 90",
+        "Longues passes réceptionnées par 90", "Fautes subies par 90"
+    ],
+    "Passe": [
+        "Passes par 90", "Passes précises, %", "Passes avant par 90", "Passes en avant précises, %",
+        "Passes arrière par 90", "Passes arrière précises, %", "Passes latérales par 90",
+        "Passes latérales précises, %", "Passes courtes / moyennes par 90",
+        "Passes courtes / moyennes précises, %", "Passes longues par 90", "Longues passes précises, %",
+        "Longueur moyenne des passes, m", "Longueur moyenne des passes longues, m"
+    ],
+    "Passe clé": [
+        "xA", "xA par 90", "Passes décisives", "Passes décisives par 90",
+        "Passes décisives avec tir par 90", "Secondes passes décisives par 90",
+        "Troisièmes passes décisives par 90", "Passes judicieuses par 90",
+        "Passes intelligentes précises, %", "Passes quasi décisives par 90",
+        "Passes dans tiers adverse par 90", "Passes dans tiers adverse précises, %",
+        "Passes vers la surface de réparation par 90", "Passes vers la surface de réparation précises, %",
+        "Passes pénétrantes par 90", "Passes en profondeur précises, %",
+        "Réalisations en profondeur par 90", "Centres en profondeur, par 90",
+        "Passes progressives par 90", "Passes progressives précises, %"
+    ],
+    "Défense": [
+        "Actions défensives réussies par 90", "Duels défensifs par 90", "Duels défensifs gagnés, %",
+        "Duels aériens par 90", "Duels aériens gagnés, %", "Tacles glissés par 90",
+        "Tacles glissés PAdj", "Tirs contrés par 90", "Interceptions par 90", "Interceptions PAdj",
+        "Fautes par 90", "Cartons jaunes", "Cartons jaunes par 90", "Cartons rouges", "Cartons rouges par 90"
+    ],
+    "CPA": [
+        "Coups francs par 90", "Coups francs directs par 90", "Coups francs directs à la cible, %",
+        "Corners par 90", "Penalties pris", "Transformation des penalties, %"
+    ]
+}
+
 def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
@@ -1516,6 +1566,7 @@ def collect_individual_data():
         for df in (df_championnat_de_france, df_français, df_top5européen):
             if not df.empty:
                 df.columns = df.columns.str.strip()
+                df.rename(columns={"Buts hors penaltyButs hors penalty": "Buts hors penalty"}, inplace=True)
                 if "Contrat expiration" in df.columns:
                     df["Contrat expiration"] = pd.to_datetime(df["Contrat expiration"], errors="coerce").dt.date
 
@@ -2747,6 +2798,121 @@ def points_forts_faibles(df, joueur, poste):
 
     return points_forts, points_faibles
 
+def plot_player_ranking(df, joueur, poste):
+    # --- sélection du joueur ---
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+    if len(joueur_infos) > 1:
+        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+
+    # --- pool de comparaison ---
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 0)]
+    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    # --- ranking ---
+    df_ranked = rank_columns(df_filtré)
+    row_rank = df_ranked.loc[df_ranked['Joueur + Information'] == joueur].iloc[0]
+    row_raw  = df_filtré.loc[df_filtré['Joueur + Information'] == joueur].iloc[0]
+
+    # --- colonnes numériques ---
+    exclude = {'Joueur + Information','Poste','Minutes jouées','Âge','Valeur sur le marché','Matchs joués','Taille','Poids'}
+    numeric_cols = [c for c in df_ranked.columns if c not in exclude and pd.api.types.is_numeric_dtype(df_ranked[c])]
+
+    # --- items ---
+    items = []
+    ordered_keys = list(métriques_par_catégorie.keys())
+    if "Général" in ordered_keys:
+        ordered_keys = ["Général"] + [k for k in ordered_keys if k != "Général"]
+
+    for cat in ordered_keys:
+        mets = [m for m in métriques_par_catégorie[cat] if m in numeric_cols]
+        if not mets:
+            continue
+        if len(items) > 0:
+            items.append(("spacer", None))
+        items.append(("header", cat))
+        for m in mets:
+            items.append(("metric", m, row_raw.get(m, np.nan), row_rank.get(m, np.nan)))
+
+    # --- layout ---
+    bg, ink, mute, rail = "#f4f3ed", "#000000", "#000000", "#f4f3ed"
+    bar_len   = 55
+    val_gap   = 0.6
+    val_strip = 6.0
+    category_gap = 1.6
+    line_gap = 0.75
+
+    # positions Y
+    y_seq, y = [], 0.0
+    for it in items:
+        if it[0] == "spacer":
+            y += category_gap
+            continue
+        y_seq.append(y)
+        y += 1.0 if it[0] == "header" else line_gap  # 🔹 plus espacé entre lignes
+    y_seq = np.array(y_seq)
+    y_plot = (y_seq.max()) - y_seq
+
+    n_metrics = sum(1 for t,*_ in items if t == "metric")
+    n_spacers = sum(1 for t,*_ in items if t == "spacer")
+    fig_h = max(6.5, min(28, 0.37*n_metrics + 1.0*n_spacers*category_gap + 2.2))
+    fig_w = 11.5
+
+    fig = plt.figure(figsize=(fig_w, fig_h))
+    fig.patch.set_facecolor(bg)
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.4, 2.4], wspace=0.25)
+
+    axL = fig.add_subplot(gs[0, 0])
+    axR = fig.add_subplot(gs[0, 1])
+
+    for ax in (axL, axR):
+        ax.set_facecolor(bg)
+        ax.set_ylim(min(y_plot)-0.5, max(y_plot)+0.5)
+        ax.set_yticks([]); ax.set_xticks([])
+        for s in ax.spines.values():
+            s.set_visible(False)
+
+    # --- gauche : labels
+    axL.set_xlim(0, 1)
+    for yi, it in zip(y_plot, [i for i in items if i[0] != "spacer"]):
+        if it[0] == "header":
+            axL.text(0.02, yi, it[1], ha="left", va="center",
+                     fontsize=12.5, fontweight="bold", color=ink, transform=axL.transData)
+        elif it[0] == "metric":
+            axL.text(0.02, yi, it[1], ha="left", va="center",
+                     fontsize=10.5, color=ink, transform=axL.transData)
+
+    # --- droite : barres + valeurs
+    axR.set_xlim(-(val_strip), bar_len + 3)
+
+    bar_y, bar_vals, raw_vals = [], [], []
+    for yi, it in zip(y_plot, [i for i in items if i[0] != "spacer"]):
+        if it[0] == "metric":
+            _, name, raw, pct = it
+            bar_y.append(yi)
+            bar_vals.append(0.0 if pd.isna(pct) else pct)
+            raw_vals.append(raw)
+
+    # rails + barres
+    bar_height = 0.5
+    axR.barh(bar_y, [bar_len]*len(bar_y), height=bar_height, color=rail, edgecolor="#000000", zorder=2)
+    axR.barh(bar_y, [v*bar_len/100 for v in bar_vals], height=bar_height,
+             color=[assign_color(v) for v in bar_vals], edgecolor="#000000", zorder=3)
+
+    # valeurs gauche
+    for yi, txt in zip(bar_y, raw_vals):
+        axR.text(-val_gap, yi, txt, ha="right", va="center", fontsize=10.5, color=mute)
+
+    # pourcentages alignés au bout du rail (100%)
+    rail_offset = 0.4
+    for yi, v in zip(bar_y, bar_vals):
+        txt = "—" if np.isnan(v) else f"{int(v):d}%"
+        axR.text(bar_len + rail_offset, yi, txt,
+                 ha="left", va="center", fontsize=10.5, color=mute)
+
+    plt.subplots_adjust(left=0.05, right=0.98, top=0.98, bottom=0.04)
+    return fig
+
 def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
@@ -3325,9 +3491,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Statistique", "Radar", "KPI", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["Statistique", "Radar", "KPI", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
 
         with tab1:
             st.subheader('Informations')
@@ -3421,13 +3587,17 @@ def streamlit_application(all_df_dict):
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab4:
+            fig = plot_player_ranking(df, joueur, poste)
+            st.pyplot(fig, use_container_width=True)
+
+        with tab5:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
 
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
 
             st.dataframe(joueur_scores.iloc[joueur_scores.index.get_loc("Note globale")+1:].to_frame().T, use_container_width=True, hide_index=True)
 
-        with tab5:
+        with tab6:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
 
             col1, col2 = st.columns(2)
@@ -3456,7 +3626,7 @@ def streamlit_application(all_df_dict):
                                 unsafe_allow_html=True
                             )
 
-        with tab6:
+        with tab7:
             if poste != 'Gardien': 
                 metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
             else:
@@ -3469,7 +3639,7 @@ def streamlit_application(all_df_dict):
             fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
-        with tab7:
+        with tab8:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             similar_players = compute_similarity(df, joueur, poste)
@@ -3479,7 +3649,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(similar_players.head(nombre_joueur), use_container_width=True, hide_index=True)
 
         if team == "Cannes":
-            with tab8:
+            with tab9:
                 nom_joueur = joueur.split(" - ")[0]
 
                 df_player = create_player_data(nom_joueur, sélection_dataframe)
