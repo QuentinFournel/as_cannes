@@ -3588,7 +3588,7 @@ def streamlit_application(all_df_dict):
 
         with tab4:
             fig = plot_player_ranking(df, joueur, poste)
-            st.pyplot(fig, use_container_width=True)
+            st.pyplot(fig, use_container_width=True, format="svg")
 
         with tab5:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
