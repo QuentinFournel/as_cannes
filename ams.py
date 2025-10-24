@@ -3217,7 +3217,7 @@ def streamlit_application(all_df_dict):
                 colonnes_à_exclure = [
                     'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
                     'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
-                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penaltyButs hors penalty',
+                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
                     'Tir', 'Buts de la tête'
                 ]
 
@@ -3777,7 +3777,7 @@ def streamlit_application(all_df_dict):
                 colonnes_à_exclure = [
                     'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
                     'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
-                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penaltyButs hors penalty',
+                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
                     'Tir', 'Buts de la tête'
                 ]
 
