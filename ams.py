@@ -319,14 +319,14 @@ metrics_by_position = [
             "Attaques\nréussies": "Attaques réussies par 90",
             "Buts\nhors penalty": "Buts hors penalty par 90",
             "Buts - xG": "Buts - xG",
-            "xG\n/ Tirs": "xG / Tirs",
+            "Buts\n/ Tirs": "Taux de conversion but/tir",
             "Tirs cadrés\n/ Tirs": "Tirs à la cible, %",
             "Touches\ndans la surface": "Touches de balle dans la surface de réparation sur 90",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "xA\n/ Passes": "xA / Passes",
-            "Passes clés \n/ Passes": "Passes clés / Passes",
-            "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
+            "xA": "xA par 90",
+            "Passes\nclés": "Passes quasi décisives par 90",
+            "Passes\navant un tir": "Passes décisives avec tir par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\noffensifs": "Duels offensifs par 90",
@@ -342,13 +342,13 @@ metrics_by_position = [
             "Buts - xG": "Buts - xG",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "xA\n/ Passes": "xA / Passes",
-            "Passes clés\n/ Passes": "Passes clés / Passes",
-            "Passes judicieuses\n/ Passes": "Passes judicieuses / Passes",
-            "Passes surface\n/ Passes": "Passes vers la surface / Passes",
-            "Passes tiers adv.\n/ Passes": "Passes dans le tiers adverse / Passes",
-            "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
-            "Passes progressives\n/ Passes": "Passes progressives / Passes",
+            "xA": "xA par 90",
+            "Passes\nclés": "Passes quasi décisives par 90",
+            "Passes\njudicieuses": "Passes judicieuses par 90",
+            "Passes\nvers la surface": "Passes vers la surface de réparation par 90",
+            "Passes\ndans le tiers adverse": "Passes dans tiers adverse par 90",
+            "Passes\navant un tir": "Passes décisives avec tir par 90",
+            "Passes\nprogressives": "Passes progressives par 90",
             "Centres": "Centres par 90",
             "Centres\nréussis (%)": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
@@ -363,13 +363,13 @@ metrics_by_position = [
             "Attaques\nréussies": "Attaques réussies par 90",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "xA\n/ Passes": "xA / Passes",
-            "Passes clés\n/ Passes": "Passes clés / Passes",
-            "Passes judicieuses\n/ Passes": "Passes judicieuses / Passes",
-            "Passes surface\n/ Passes": "Passes vers la surface / Passes",
-            "Passes tiers adv.\n/ Passes": "Passes dans le tiers adverse / Passes",
-            "Passes avant tir\n/ Passes": "Passes avant tir / Passes",
-            "Passes progressives\n/ Passes": "Passes progressives / Passes",
+            "xA": "xA par 90",
+            "Passes\nclés": "Passes quasi décisives par 90",
+            "Passes\njudicieuses": "Passes judicieuses par 90",
+            "Passes\nvers la surface": "Passes vers la surface de réparation par 90",
+            "Passes\ndans le tiers adverse": "Passes dans tiers adverse par 90",
+            "Passes\navant un tir": "Passes décisives avec tir par 90",
+            "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
@@ -385,10 +385,10 @@ metrics_by_position = [
             "Attaques\nréussies": "Attaques réussies par 90",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "xA\n/ Passes": "xA / Passes",
-            "Passes avant\n/ Passes": "Passes avant / Passes",
-            "Passes clés\n/ Passes": "Passes clés / Passes",
-            "Passes progressives\n/ Passes": "Passes progressives / Passes",
+            "xA": "xA par 90",
+            "Passes\navant": "Passes avant par 90",
+            "Passes\nclés": "Passes quasi décisives par 90",
+            "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\ndéfensifs": "Duels défensifs par 90",
@@ -407,8 +407,8 @@ metrics_by_position = [
             "Attaques\nréussies": "Attaques réussies par 90",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "xA\n/ Passes": "xA / Passes",
-            "Passes avant\n/ Passes": "Passes avant / Passes",
+            "xA": "xA par 90",
+            "Passes\navant": "Passes avant par 90",
             "Centres": "Centres par 90",
             "Centres\nréussis (%)": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
@@ -428,11 +428,11 @@ metrics_by_position = [
         "metrics": {
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes avant\n/ Passes": "Passes avant / Passes",
+            "Passes\navant": "Passes avant par 90",
             "Passes\navant réussies (%)": "Passes en avant précises, %",
-            "Passes longues\n/ Passes": "Passes longues / Passes",
+            "Passes\nlongues": "Passes longues par 90",
             "Passes\nlongues réussies (%)": "Longues passes précises, %",
-            "Passes progressives\n/ Passes": "Passes progressives / Passes",
+            "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\ndéfensifs": "Duels défensifs par 90",
@@ -450,9 +450,9 @@ metrics_by_position = [
         "metrics": {
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
-            "Passes courtes\n/ Passes": "Passes courtes / Passes",
+            "Passes\ncourtes": "Passes courtes / moyennes par 90",
             "Passes\ncourtes réussies (%)": "Passes courtes / moyennes précises, %",
-            "Passes longues\n/ Passes": "Passes longues / Passes",
+            "Passes\nlongues": "Passes longues par 90",
             "Passes\nlongues réussies (%)": "Longues passes précises, %",
             "Buts\nconcédés": "Buts concédés par 90",
             "xG\nconcédés": "xG contre par 90",
@@ -489,15 +489,15 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA / Passes": 0.25,
-            "Passes clés / Passes": 0.2,
-            "Passes avant tir / Passes": 0.15,
-            "Passes judicieuses / Passes": 0.15,
-            "Passes dans la zone dangereuse / Passes": 0.1,
-            "Passes vers la surface / Passes": 0.05,
-            "Passes dans le tiers adverse / Passes": 0.04,
-            "Passes progressives / Passes": 0.03,
-            "Passes en profondeur / Passes": 0.03
+            "xA par 90": 0.25,
+            "Passes quasi décisives par 90": 0.2,
+            "Passes décisives avec tir par 90": 0.15,
+            "Passes judicieuses par 90": 0.15,
+            "Passes dans la zone dangereuse par 90": 0.1,
+            "Passes vers la surface de réparation par 90": 0.05,
+            "Passes dans tiers adverse par 90": 0.04,
+            "Passes progressives par 90": 0.03,
+            "Passes en profondeur par 90": 0.03
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -535,15 +535,15 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.03
         },
         "Vision du jeu": {
-            "xA / Passes": 0.25,
-            "Passes clés / Passes": 0.2,
-            "Passes avant tir / Passes": 0.15,
-            "Passes judicieuses / Passes": 0.15,
-            "Passes dans la zone dangereuse / Passes": 0.1,
-            "Passes vers la surface / Passes": 0.05,
-            "Passes dans le tiers adverse / Passes": 0.04,
-            "Passes progressives / Passes": 0.03,
-            "Passes en profondeur / Passes": 0.03
+            "xA par 90": 0.25,
+            "Passes quasi décisives par 90": 0.2,
+            "Passes décisives avec tir par 90": 0.15,
+            "Passes judicieuses par 90": 0.15,
+            "Passes dans la zone dangereuse par 90": 0.1,
+            "Passes vers la surface de réparation par 90": 0.05,
+            "Passes dans tiers adverse par 90": 0.04,
+            "Passes progressives par 90": 0.03,
+            "Passes en profondeur par 90": 0.03
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -583,15 +583,15 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA / Passes": 0.25,
-            "Passes clés / Passes": 0.2,
-            "Passes avant tir / Passes": 0.15,
-            "Passes judicieuses / Passes": 0.15,
-            "Passes dans la zone dangereuse / Passes": 0.1,
-            "Passes vers la surface / Passes": 0.05,
-            "Passes dans le tiers adverse / Passes": 0.04,
-            "Passes progressives / Passes": 0.03,
-            "Passes en profondeur / Passes": 0.03
+            "xA par 90": 0.25,
+            "Passes quasi décisives par 90": 0.2,
+            "Passes décisives avec tir par 90": 0.15,
+            "Passes judicieuses par 90": 0.15,
+            "Passes dans la zone dangereuse par 90": 0.1,
+            "Passes vers la surface de réparation par 90": 0.05,
+            "Passes dans tiers adverse par 90": 0.04,
+            "Passes progressives par 90": 0.03,
+            "Passes en profondeur par 90": 0.03
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -626,15 +626,15 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA / Passes": 0.25,
-            "Passes clés / Passes": 0.2,
-            "Passes avant tir / Passes": 0.15,
-            "Passes judicieuses / Passes": 0.15,
-            "Passes dans la zone dangereuse / Passes": 0.1,
-            "Passes vers la surface / Passes": 0.05,
-            "Passes dans le tiers adverse / Passes": 0.04,
-            "Passes progressives / Passes": 0.03,
-            "Passes en profondeur / Passes": 0.03
+            "xA par 90": 0.25,
+            "Passes quasi décisives par 90": 0.2,
+            "Passes décisives avec tir par 90": 0.15,
+            "Passes judicieuses par 90": 0.15,
+            "Passes dans la zone dangereuse par 90": 0.1,
+            "Passes vers la surface de réparation par 90": 0.05,
+            "Passes dans tiers adverse par 90": 0.04,
+            "Passes progressives par 90": 0.03,
+            "Passes en profondeur par 90": 0.03
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -675,15 +675,15 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.03
         },
         "Vision du jeu": {
-            "xA / Passes": 0.25,
-            "Passes clés / Passes": 0.2,
-            "Passes avant tir / Passes": 0.15,
-            "Passes judicieuses / Passes": 0.15,
-            "Passes dans la zone dangereuse / Passes": 0.1,
-            "Passes vers la surface / Passes": 0.05,
-            "Passes dans le tiers adverse / Passes": 0.04,
-            "Passes progressives / Passes": 0.03,
-            "Passes en profondeur / Passes": 0.03
+            "xA par 90": 0.25,
+            "Passes quasi décisives par 90": 0.2,
+            "Passes décisives avec tir par 90": 0.15,
+            "Passes judicieuses par 90": 0.15,
+            "Passes dans la zone dangereuse par 90": 0.1,
+            "Passes vers la surface de réparation par 90": 0.05,
+            "Passes dans tiers adverse par 90": 0.04,
+            "Passes progressives par 90": 0.03,
+            "Passes en profondeur par 90": 0.03
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -721,15 +721,15 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA / Passes": 0.25,
-            "Passes clés / Passes": 0.2,
-            "Passes avant tir / Passes": 0.15,
-            "Passes judicieuses / Passes": 0.15,
-            "Passes dans la zone dangereuse / Passes": 0.1,
-            "Passes vers la surface / Passes": 0.05,
-            "Passes dans le tiers adverse / Passes": 0.04,
-            "Passes progressives / Passes": 0.03,
-            "Passes en profondeur / Passes": 0.03
+            "xA par 90": 0.25,
+            "Passes quasi décisives par 90": 0.2,
+            "Passes décisives avec tir par 90": 0.15,
+            "Passes judicieuses par 90": 0.15,
+            "Passes dans la zone dangereuse par 90": 0.1,
+            "Passes vers la surface de réparation par 90": 0.05,
+            "Passes dans tiers adverse par 90": 0.04,
+            "Passes progressives par 90": 0.03,
+            "Passes en profondeur par 90": 0.03
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -756,11 +756,11 @@ kpi_by_position = {
             "Passes réceptionnées par 90": 1
         },
         "Jeu court": {
-            "Passes courtes / Passes": 0.5,
+            "Passes courtes / moyennes par 90": 0.5,
             "Passes courtes / moyennes précises, %": 0.5,
         },
         "Jeu long": {
-            "Passes longues / Passes": 0.5,
+            "Passes longues par 90": 0.5,
             "Longues passes précises, %": 0.5
         },
         "Sortie": {
@@ -1011,8 +1011,8 @@ metrics_x_y = {
         ]
     },
     "Apport par la passe": {
-        "metrics": ["Passes judicieuses / Passes", "Passes intelligentes précises, %"],
-        "names": ["Passes judicieuses / Passes", "Passes judicieuses réussies, %"],
+        "metrics": ["Passes judicieuses par 90", "Passes intelligentes précises, %"],
+        "names": ["Passes judicieuses par 90", "Passes judicieuses réussies, %"],
         "descriptions": [
             "Tente peu de passes<br>judicieuses mais<br>en réussit beaucoup",
             "Tente beaucoup de passes<br>judicieuses et<br>en réussit beaucoup",
@@ -1251,20 +1251,7 @@ points_forts = {
     "Passes progressives par 90": "Effectue beaucoup de passes progressives",
     "Passes progressives précises, %": "Précis dans ses passes progressives",
     "Transformation des penalties, %": "Transforme un fort pourcentage de penalties",
-    "Buts - xG": "Marque plus que prévu par ses xG",
-    "xG / Tirs": "Tire avec une forte qualité moyenne",
-    "xA / Passes": "Crée beaucoup d'occasions par passe",
-    "Passes courtes / Passes": "Effectue beaucoup de passes courtes par passe",
-    "Passes avant / Passes": "Effectue beaucoup de passes vers l'avant par passe",
-    "Passes longues / Passes": "Effectue beaucoup de passes longues par passe",
-    "Passes clés / Passes": "Effectue beaucoup de passes clés par passe",
-    "Passes judicieuses / Passes": "Effectue beaucoup de passes intelligentes par passe",
-    "Passes vers la surface / Passes": "Effectue beaucoup de passes vers la surface par passe",
-    "Passes en profondeur / Passes": "Effectue beaucoup de passes en profondeur par passe",
-    "Passes dans le tiers adverse / Passes": "Effectue beaucoup de passes dans le dernier tiers par passe",
-    "Passes avant tir / Passes": "Effectue beaucoup de passes avant un tir par passe",
-    "Passes progressives / Passes": "Effectue beaucoup de passes progressives par passe",
-    "Passes dans la zone dangereuse / Passes": "Effectue beaucoup de passes dans les zones dangereuses par passe"
+    "Buts - xG": "Marque plus que prévu par ses xG"
 }
 
 points_faibles = {
@@ -1337,20 +1324,7 @@ points_faibles = {
     "Passes progressives par 90": "Effectue peu de passes progressives",
     "Passes progressives précises, %": "Imprécis dans ses passes progressives",
     "Transformation des penalties, %": "Transforme un faible pourcentage de penalties",
-    "Buts - xG": "Marque moins que prévu par ses xG",
-    "xG / Tirs": "Tire avec une faible qualité moyenne",
-    "xA / Passes": "Crée peu d'occasions par passe",
-    "Passes courtes / Passes": "Effectue peu de passes courtes par passe",
-    "Passes avant / Passes": "Effectue peu de passes vers l'avant par passe",
-    "Passes longues / Passes": "Effectue peu de passes longues par passe",
-    "Passes clés / Passes": "Effectue peu de passes clés par passe",
-    "Passes judicieuses / Passes": "Effectue peu de passes intelligentes par passe",
-    "Passes vers la surface / Passes": "Effectue peu de passes vers la surface par passe",
-    "Passes en profondeur / Passes": "Effectue peu de passes en profondeur par passe",
-    "Passes dans le tiers adverse / Passes": "Effectue peu de passes dans le dernier tiers par passe",
-    "Passes avant tir / Passes": "Effectue peu de passes avant un tir par passe",
-    "Passes progressives / Passes": "Effectue peu de passes progressives par passe",
-    "Passes dans la zone dangereuse / Passes": "Effectue peu de passes dans les zones dangereuses par passe"
+    "Buts - xG": "Marque moins que prévu par ses xG"
 }
 
 métriques_par_catégorie = {
@@ -1499,20 +1473,7 @@ def add_new_columns(all_df):
             continue
 
         new_columns = {
-            'Buts - xG': df['Buts par 90'] - df['xG par 90'],
-            'xG / Tirs': np.where(df['Tirs par 90'] != 0, df['xG par 90'] / df['Tirs par 90'], 0),
-            'xA / Passes': np.where(df['Passes par 90'] != 0, df['xA par 90'] / df['Passes par 90'], 0),
-            'Passes courtes / Passes': np.where(df['Passes par 90'] != 0, df['Passes courtes / moyennes par 90'] / df['Passes par 90'], 0),
-            'Passes avant / Passes': np.where(df['Passes par 90'] != 0, df['Passes avant par 90'] / df['Passes par 90'], 0),
-            'Passes longues / Passes': np.where(df['Passes par 90'] != 0, df['Passes longues par 90'] / df['Passes par 90'], 0),
-            'Passes clés / Passes': np.where(df['Passes par 90'] != 0, df['Passes quasi décisives par 90'] / df['Passes par 90'], 0),
-            'Passes judicieuses / Passes': np.where(df['Passes par 90'] != 0, df['Passes judicieuses par 90'] / df['Passes par 90'], 0),
-            'Passes vers la surface / Passes': np.where(df['Passes par 90'] != 0, df['Passes vers la surface de réparation par 90'] / df['Passes par 90'], 0),
-            'Passes en profondeur / Passes': np.where(df['Passes par 90'] != 0, df['Passes pénétrantes par 90'] / df['Passes par 90'], 0),
-            'Passes dans le tiers adverse / Passes': np.where(df['Passes par 90'] != 0, df['Passes dans tiers adverse par 90'] / df['Passes par 90'], 0),
-            'Passes avant tir / Passes': np.where(df['Passes par 90'] != 0, df['Passes décisives avec tir par 90'] / df['Passes par 90'], 0),
-            'Passes progressives / Passes': np.where(df['Passes par 90'] != 0, df['Passes progressives par 90'] / df['Passes par 90'], 0),
-            'Passes dans la zone dangereuse / Passes': np.where(df['Passes par 90'] != 0, df['Réalisations en profondeur par 90'] / df['Passes par 90'], 0),
+            'Buts - xG': df['Buts par 90'] - df['xG par 90']
         }
 
         all_df[name] = pd.concat([df, pd.DataFrame(new_columns, index=df.index)], axis=1)
