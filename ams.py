@@ -1867,6 +1867,56 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
 
     return fig
 
+def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
+    scores_df_1 = calcul_scores_par_kpi(df, joueur_1, poste)
+    joueur_1_scores = scores_df_1[scores_df_1['Joueur + Information'] == joueur_1]
+
+    scores_df_2 = calcul_scores_par_kpi(df, joueur_2, poste)
+    joueur_2_scores = scores_df_2[scores_df_2['Joueur + Information'] == joueur_2]
+
+    # Colonnes communes entre les deux DataFrames
+    colonnes_communes = joueur_1_scores.columns.intersection(joueur_2_scores.columns)
+
+    # Sélection des colonnes numériques en excluant 'Minutes jouées'
+    colonnes_kpi = [col for col in kpis_panel if col in colonnes_communes]
+
+    # Récupération des valeurs
+    values_1 = joueur_1_scores[colonnes_kpi].values.flatten()
+    values_2 = joueur_2_scores[colonnes_kpi].values.flatten()
+
+    y_pos = np.arange(len(colonnes_kpi))
+    bar_height = 0.35
+
+    fig, ax = plt.subplots(figsize=(10, 10))
+    _ = ax.barh(y_pos - bar_height / 2, values_1, bar_height,
+                         label=f"{joueur_1.split(' - ')[0]}", color='#1440AC', edgecolor="#000000")
+    _ = ax.barh(y_pos + bar_height / 2, values_2, bar_height,
+                         label=f"{joueur_2.split(' - ')[0]}", color='#AC141A', edgecolor="#000000")
+
+    # Ajouter les valeurs à la fin des barres
+    for i, (v1, v2) in enumerate(zip(values_1, values_2)):
+        ax.text(v1 + 1, y_pos[i] - bar_height / 2, f"{v1:.1f}", 
+                va='center', fontsize=9, fontweight="bold")
+        ax.text(v2 + 1, y_pos[i] + bar_height / 2, f"{v2:.1f}", 
+                va='center', fontsize=9, fontweight="bold")
+
+    ax.set_xticks([])
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(colonnes_kpi)
+    ax.invert_yaxis()
+    ax.legend()
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    plt.tight_layout()
+
+    # Transparence
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+
+    return fig
+
 def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4):
     joueur_infos = df[df['Joueur + Information'] == joueur]
 
@@ -3726,8 +3776,14 @@ def streamlit_application(all_df_dict):
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
 
+        type_de_comparaison = st.radio("Sélectionnez le type de comparaison", ["Radar", "KPI"])
+
         if st.button("Comparer"):
-            fig = create_comparison_radar(df, joueur_1, joueur_2, poste)
+            if type_de_comparaison == "Radar":
+                fig = create_comparison_radar(df, joueur_1, joueur_2, poste)
+            if type_de_comparaison == "KPI":
+                kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
+                fig = plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel)
             st.pyplot(fig, use_container_width=True)
             
     elif page == "Scouting":
