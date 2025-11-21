@@ -474,10 +474,13 @@ kpi_by_position = {
             "Taux de conversion but/tir": 0.1
         },
         "Apport offensif": {
-            "Attaques réussies par 90": 0.5,
-            "Touches de balle dans la surface de réparation sur 90": 0.3,
-            "Duels offensifs par 90": 0.1,
-            "Duels de marquage, %": 0.1
+            "xG par 90": 0.3,
+            "Attaques réussies par 90": 0.2,
+            "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Tirs par 90": 0.1,
+            "Centres par 90": 0.1,
+            "Duels offensifs par 90": 0.05,
+            "Duels de marquage, %": 0.05
         },
         "Qualité de passe": {
             "Passes intelligentes précises, %": 0.3,
@@ -506,8 +509,8 @@ kpi_by_position = {
             "Dribbles réussis, %": 0.2
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.5,
-            "Duels aériens gagnés, %": 0.5
+            "Duels aériens par 90": 0.4,
+            "Duels aériens gagnés, %": 0.6
         }
     },
 
@@ -518,9 +521,11 @@ kpi_by_position = {
             "Taux de conversion but/tir": 0.1
         },
         "Apport offensif": {
-            "Attaques réussies par 90": 0.4,
-            "Centres par 90": 0.3,
+            "xG par 90": 0.3,
+            "Attaques réussies par 90": 0.2,
             "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Tirs par 90": 0.1,
+            "Centres par 90": 0.1,
             "Duels offensifs par 90": 0.05,
             "Duels de marquage, %": 0.05
         },
@@ -554,8 +559,8 @@ kpi_by_position = {
         "Jeu défensif": {
             "Actions défensives réussies par 90": 0.35,
             "Interceptions PAdj": 0.25,
-            "Duels défensifs par 90": 0.15,
-            "Duels défensifs gagnés, %": 0.15,
+            "Duels défensifs gagnés, %": 0.2,
+            "Duels défensifs par 90": 0.1,
             "Tacles glissés PAdj": 0.05,
             "Tirs contrés par 90": 0.05
         }
@@ -568,10 +573,13 @@ kpi_by_position = {
             "Taux de conversion but/tir": 0.1
         },
         "Apport offensif": {
-            "Attaques réussies par 90": 0.5,
-            "Touches de balle dans la surface de réparation sur 90": 0.3,
-            "Duels offensifs par 90": 0.1,
-            "Duels de marquage, %": 0.1
+            "xG par 90": 0.3,
+            "Attaques réussies par 90": 0.2,
+            "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Tirs par 90": 0.1,
+            "Centres par 90": 0.1,
+            "Duels offensifs par 90": 0.05,
+            "Duels de marquage, %": 0.05
         },
         "Qualité de passe": {
             "Passes intelligentes précises, %": 0.3,
@@ -602,8 +610,8 @@ kpi_by_position = {
         "Jeu défensif": {
             "Actions défensives réussies par 90": 0.35,
             "Interceptions PAdj": 0.25,
-            "Duels défensifs par 90": 0.15,
-            "Duels défensifs gagnés, %": 0.15,
+            "Duels défensifs gagnés, %": 0.2,
+            "Duels défensifs par 90": 0.1,
             "Tacles glissés PAdj": 0.05,
             "Tirs contrés par 90": 0.05
         }
@@ -611,10 +619,13 @@ kpi_by_position = {
 
     "Milieu": {
         "Apport offensif": {
-            "Attaques réussies par 90": 0.5,
-            "Touches de balle dans la surface de réparation sur 90": 0.3,
-            "Duels offensifs par 90": 0.1,
-            "Duels de marquage, %": 0.1
+            "xG par 90": 0.3,
+            "Attaques réussies par 90": 0.2,
+            "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Tirs par 90": 0.1,
+            "Centres par 90": 0.1,
+            "Duels offensifs par 90": 0.05,
+            "Duels de marquage, %": 0.05
         },
         "Qualité de passe": {
             "Passes intelligentes précises, %": 0.3,
@@ -645,22 +656,24 @@ kpi_by_position = {
         "Jeu défensif": {
             "Actions défensives réussies par 90": 0.35,
             "Interceptions PAdj": 0.25,
-            "Duels défensifs par 90": 0.15,
-            "Duels défensifs gagnés, %": 0.15,
+            "Duels défensifs gagnés, %": 0.2,
+            "Duels défensifs par 90": 0.1,
             "Tacles glissés PAdj": 0.05,
             "Tirs contrés par 90": 0.05
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.5,
-            "Duels aériens gagnés, %": 0.5
+            "Duels aériens par 90": 0.4,
+            "Duels aériens gagnés, %": 0.6
         }
     },
 
     "Latéral": {
         "Apport offensif": {
-            "Attaques réussies par 90": 0.4,
-            "Centres par 90": 0.3,
+            "xG par 90": 0.3,
+            "Attaques réussies par 90": 0.2,
             "Touches de balle dans la surface de réparation sur 90": 0.2,
+            "Tirs par 90": 0.1,
+            "Centres par 90": 0.1,
             "Duels offensifs par 90": 0.05,
             "Duels de marquage, %": 0.05
         },
@@ -694,14 +707,14 @@ kpi_by_position = {
         "Jeu défensif": {
             "Actions défensives réussies par 90": 0.35,
             "Interceptions PAdj": 0.25,
-            "Duels défensifs par 90": 0.15,
-            "Duels défensifs gagnés, %": 0.15,
+            "Duels défensifs gagnés, %": 0.2,
+            "Duels défensifs par 90": 0.1,
             "Tacles glissés PAdj": 0.05,
             "Tirs contrés par 90": 0.05
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.5,
-            "Duels aériens gagnés, %": 0.5
+            "Duels aériens par 90": 0.4,
+            "Duels aériens gagnés, %": 0.6
         }
     },
 
@@ -740,14 +753,14 @@ kpi_by_position = {
         "Jeu défensif": {
             "Actions défensives réussies par 90": 0.35,
             "Interceptions PAdj": 0.25,
-            "Duels défensifs par 90": 0.15,
-            "Duels défensifs gagnés, %": 0.15,
+            "Duels défensifs gagnés, %": 0.2,
+            "Duels défensifs par 90": 0.1,
             "Tacles glissés PAdj": 0.05,
             "Tirs contrés par 90": 0.05
         },
         "Jeu aérien": {
-            "Duels aériens par 90": 0.5,
-            "Duels aériens gagnés, %": 0.5
+            "Duels aériens par 90": 0.4,
+            "Duels aériens gagnés, %": 0.6
         }
     },
 
@@ -767,8 +780,8 @@ kpi_by_position = {
             "Sorties par 90": 1
         },
         "Présence aérienne": {
-            "Duels aériens par 90": 0.5,
-            "Duels aériens gagnés, %": 0.5
+            "Duels aériens par 90": 0.4,
+            "Duels aériens gagnés, %": 0.6
         },
         "Efficacité sur sa ligne": {
             "Buts évités par 90": 0.75,
