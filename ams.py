@@ -1931,15 +1931,8 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
     return fig
 
 def plot_stat_comparison(df, joueur_1, joueur_2, poste):
-    import numpy as np
-    import matplotlib.pyplot as plt
-
     # palette
     bg, ink = "#f4f3ed", "#3d3a2a"
-
-    # Noms raccourcis pour l'affichage (avant le " - ")
-    short_1 = joueur_1.split(" - ")[0]
-    short_2 = joueur_2.split(" - ")[0]
 
     # --- sélection du joueur 1 ---
     joueur1_infos = df[df['Joueur + Information'] == joueur_1]
@@ -1953,10 +1946,12 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
 
     # --- pool de comparaison (même poste, minutes >= 500) ---
     df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)].copy()
+
     df_filtré = df_filtré[
         (df_filtré['Joueur + Information'] != joueur_1) &
         (df_filtré['Joueur + Information'] != joueur_2)
     ]
+
     df_filtré = pd.concat([df_filtré, joueur1_infos, joueur2_infos], ignore_index=True)
 
     # --- colonnes numériques brutes ---
@@ -1981,8 +1976,8 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
     header_rows_idx = []
     metric_rows_info = []
 
-    # ligne des noms (avec noms raccourcis)
-    table_data.append(["", short_1, short_2])
+    # ligne des noms
+    table_data.append(["", joueur_1, joueur_2])
     row_idx = 1
 
     # catégories + métriques
@@ -2009,20 +2004,16 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
             metric_rows_info.append((row_idx, m))
             row_idx += 1
 
-    # ---------------- FIGURE FULL LARGEUR ----------------
+    # ---------------- FIGURE (adaptée Streamlit) ----------------
     n_rows = len(table_data)
-
-    # très large, assez haut pour les lignes
-    fig_w = 18
-    fig_h = max(10, min(30, 0.45 * n_rows))  # tu peux monter le 0.45 si tu veux encore plus haut
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=120)
+    fig_h = max(9, min(28, 0.38 * n_rows))   # hauteur en fonction du nb de lignes
+    fig_w = 13                               # un peu plus large
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=140)
 
     fig.patch.set_facecolor(bg)
     ax.set_facecolor(bg)
     ax.axis("off")
-
-    # l'axe occupe toute la figure → max de place
-    ax.set_position([0.01, 0.01, 0.98, 0.98])
+    ax.set_position([0.03, 0.02, 0.94, 0.96])  # quasi plein écran
 
     table = ax.table(
         cellText=table_data,
@@ -2031,8 +2022,8 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
     )
 
     table.auto_set_font_size(False)
-    table.set_fontsize(12)      # 🔎 gros texte
-    table.scale(2.0, 1.9)       # 🔎 cellules bien larges et hautes
+    table.set_fontsize(11)        # 🔎 police plus grosse
+    table.scale(1.4, 1.5)         # 🔎 cellules agrandies (x, y)
 
     # styling de base
     for (r, c), cell in table.get_celld().items():
@@ -2040,7 +2031,7 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
         cell.set_edgecolor("#3d3a2a")
         cell.get_text().set_color(ink)
 
-    # ligne des noms : pas de bordure, noms bien visibles
+    # ligne des noms : pas de bordure, gras
     name_row = 0
     for col in range(3):
         cell = table[name_row, col]
@@ -2050,7 +2041,6 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
             cell.get_text().set_text("")
         else:
             cell.get_text().set_fontweight("bold")
-            cell.get_text().set_fontsize(14)
 
     # lignes de catégories
     cat_bg = "#ecebe3"
@@ -2091,6 +2081,9 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
         else:
             table[row_i, 2].set_facecolor(couleur_meilleur)
             table[row_i, 1].set_facecolor(couleur_moins_bon)
+
+    plt.tight_layout(pad=0.3)
+    plt.show()
 
     return fig
 
