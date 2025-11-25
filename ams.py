@@ -1931,6 +1931,9 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
     return fig
 
 def plot_stat_comparison(df, joueur_1, joueur_2, poste):
+    import numpy as np
+    import matplotlib.pyplot as plt
+
     # palette
     bg, ink = "#f4f3ed", "#3d3a2a"
 
@@ -1950,12 +1953,10 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
 
     # --- pool de comparaison (même poste, minutes >= 500) ---
     df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)].copy()
-
     df_filtré = df_filtré[
         (df_filtré['Joueur + Information'] != joueur_1) &
         (df_filtré['Joueur + Information'] != joueur_2)
     ]
-
     df_filtré = pd.concat([df_filtré, joueur1_infos, joueur2_infos], ignore_index=True)
 
     # --- colonnes numériques brutes ---
@@ -2008,16 +2009,20 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
             metric_rows_info.append((row_idx, m))
             row_idx += 1
 
-    # ---------------- FIGURE (adaptée Streamlit) ----------------
+    # ---------------- FIGURE FULL LARGEUR ----------------
     n_rows = len(table_data)
-    fig_h = max(9, min(28, 0.38 * n_rows))
-    fig_w = 13
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=140)
+
+    # très large, assez haut pour les lignes
+    fig_w = 18
+    fig_h = max(10, min(30, 0.45 * n_rows))  # tu peux monter le 0.45 si tu veux encore plus haut
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=120)
 
     fig.patch.set_facecolor(bg)
     ax.set_facecolor(bg)
     ax.axis("off")
-    ax.set_position([0.03, 0.02, 0.94, 0.96])
+
+    # l'axe occupe toute la figure → max de place
+    ax.set_position([0.01, 0.01, 0.98, 0.98])
 
     table = ax.table(
         cellText=table_data,
@@ -2026,11 +2031,8 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
     )
 
     table.auto_set_font_size(False)
-    table.set_fontsize(10)      # un peu moins gros pour éviter que ça déborde
-    table.scale(1.3, 1.4)       # cellules légèrement agrandies
-
-    # ajuste automatiquement les largeurs des colonnes
-    table.auto_set_column_width(col=list(range(3)))
+    table.set_fontsize(12)      # 🔎 gros texte
+    table.scale(2.0, 1.9)       # 🔎 cellules bien larges et hautes
 
     # styling de base
     for (r, c), cell in table.get_celld().items():
@@ -2038,7 +2040,7 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
         cell.set_edgecolor("#3d3a2a")
         cell.get_text().set_color(ink)
 
-    # ligne des noms : pas de bordure, noms en gras
+    # ligne des noms : pas de bordure, noms bien visibles
     name_row = 0
     for col in range(3):
         cell = table[name_row, col]
@@ -2048,7 +2050,7 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
             cell.get_text().set_text("")
         else:
             cell.get_text().set_fontweight("bold")
-            cell.get_text().set_fontsize(11)  # un chouïa plus gros pour les noms
+            cell.get_text().set_fontsize(14)
 
     # lignes de catégories
     cat_bg = "#ecebe3"
@@ -2089,9 +2091,6 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
         else:
             table[row_i, 2].set_facecolor(couleur_meilleur)
             table[row_i, 1].set_facecolor(couleur_moins_bon)
-
-    plt.tight_layout(pad=0.3)
-    plt.show()
 
     return fig
 
