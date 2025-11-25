@@ -1930,6 +1930,164 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
 
     return fig
 
+def plot_stat_comparison(df, joueur_1, joueur_2, poste):
+    # même palette que ta fonction précédente
+    bg, ink = "#f4f3ed", "#000000"
+
+    # --- sélection du joueur 1 ---
+    joueur1_infos = df[df['Joueur + Information'] == joueur_1]
+    if len(joueur1_infos) > 1:
+        joueur1_infos = compute_weighted_stats_by_minutes(joueur1_infos)
+
+    # --- sélection du joueur 2 ---
+    joueur2_infos = df[df['Joueur + Information'] == joueur_2]
+    if len(joueur2_infos) > 1:
+        joueur2_infos = compute_weighted_stats_by_minutes(joueur2_infos)
+
+    # --- pool de comparaison (même poste, minutes >= 500) ---
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)].copy()
+
+    # On enlève les versions brutes des deux joueurs pour éviter les doublons
+    df_filtré = df_filtré[
+        (df_filtré['Joueur + Information'] != joueur_1) &
+        (df_filtré['Joueur + Information'] != joueur_2)
+    ]
+
+    # On ajoute les versions consolidées des deux joueurs
+    df_filtré = pd.concat([df_filtré, joueur1_infos, joueur2_infos], ignore_index=True)
+
+    # --- colonnes numériques brutes ---
+    exclude = {
+        'Joueur + Information','Poste','Minutes jouées','Âge','Valeur sur le marché',
+        'Matchs joués','Taille','Poids'
+    }
+    numeric_cols = [
+        c for c in df_filtré.columns
+        if c not in exclude and pd.api.types.is_numeric_dtype(df_filtré[c])
+    ]
+
+    # Stats brutes des deux joueurs
+    p1_raw = df_filtré[df_filtré["Joueur + Information"] == joueur_1].iloc[0]
+    p2_raw = df_filtré[df_filtré["Joueur + Information"] == joueur_2].iloc[0]
+
+    # ordre des catégories : "Général" en premier
+    ordered_keys = list(métriques_par_catégorie.keys())
+    if "Général" in ordered_keys:
+        ordered_keys = ["Général"] + [k for k in ordered_keys if k != "Général"]
+
+    table_data = []
+    header_rows_idx = []   # indices (dans table_data) des lignes de catégorie
+    metric_rows_info = []  # (row_idx, metric_name) pour colorer ensuite
+
+    # 1) Ligne "header" avec juste les noms (sans bordure ensuite)
+    table_data.append(["", joueur_1, joueur_2])
+    row_idx = 1  # les catégories commencent à la ligne 1
+
+    # 2) Catégories + métriques
+    for catégorie in ordered_keys:
+        metrics_list = métriques_par_catégorie[catégorie]
+
+        métriques_valides = []
+        for m in metrics_list:
+            if m in numeric_cols:
+                v1 = p1_raw.get(m, np.nan)
+                v2 = p2_raw.get(m, np.nan)
+                if not (pd.isna(v1) and pd.isna(v2)):  # garder seulement si au moins une valeur non NaN
+                    métriques_valides.append((m, v1, v2))
+
+        if not métriques_valides:
+            continue
+
+        # Ligne de catégorie
+        table_data.append([catégorie, "", ""])
+        header_rows_idx.append(row_idx)
+        row_idx += 1
+
+        # Lignes de métriques
+        for m, v1, v2 in métriques_valides:
+            table_data.append([m, f"{v1:.2f}", f"{v2:.2f}"])
+            metric_rows_info.append((row_idx, m))
+            row_idx += 1
+
+    fig, ax = plt.subplots(figsize=(11, 2 + len(table_data) * 0.25))
+    fig.patch.set_facecolor(bg)
+    ax.set_facecolor(bg)
+    ax.axis("off")
+
+    # Tableau (sans colLabels)
+    table = ax.table(
+        cellText=table_data,
+        loc="center",
+        cellLoc="center"
+    )
+
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1, 1.2)
+
+    # Styling de base
+    for (r, c), cell in table.get_celld().items():
+        cell.set_facecolor(bg)
+        cell.set_edgecolor("#000000")
+        cell.get_text().set_color(ink)
+
+    # 1) LIGNE DES NOMS : pas de bordure → visuellement "en dehors" du tableau
+    name_row = 0
+    for col in range(3):
+        cell = table[name_row, col]
+        cell.set_edgecolor(bg)       # même couleur que le fond → bordure invisible
+        cell.set_linewidth(0.0)
+        if col == 0:
+            cell.get_text().set_text("")  # pas de texte en colonne catégorie
+        else:
+            cell.get_text().set_fontweight("bold")
+
+    # 2) Lignes de catégories (fond gris + gras)
+    cat_bg = "#ecebe3"
+    for row_i in header_rows_idx:
+        for col_i in range(3):
+            cell = table[row_i, col_i]
+            cell.set_facecolor(cat_bg)
+            cell.get_text().set_fontweight("bold")
+
+    lower_is_better = {
+        "Fautes par 90", "Cartons jaunes", "Cartons jaunes par 90",
+        "Cartons rouges", "Cartons rouges par 90"
+    }
+
+    couleur_meilleur = "#d4edda"   # vert clair
+    couleur_moins_bon = "#f8d7da"  # rouge clair
+
+    for row_i, metric_name in metric_rows_info:
+        v1 = p1_raw.get(metric_name, np.nan)
+        v2 = p2_raw.get(metric_name, np.nan)
+
+        if pd.isna(v1) and pd.isna(v2):
+            continue
+        if v1 == v2:
+            continue
+
+        if metric_name in lower_is_better:
+            v1_comp = -v1
+            v2_comp = -v2
+        else:
+            v1_comp = v1
+            v2_comp = v2
+
+        best = "player1" if v1_comp > v2_comp else "player2"
+
+        if best == "player1":
+            table[row_i, 1].set_facecolor(couleur_meilleur)
+            table[row_i, 2].set_facecolor(couleur_moins_bon)
+        else:
+            table[row_i, 2].set_facecolor(couleur_meilleur)
+            table[row_i, 1].set_facecolor(couleur_moins_bon)
+
+    plt.tight_layout()
+    plt.show()
+    
+    return fig
+
 def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4):
     joueur_infos = df[df['Joueur + Information'] == joueur]
 
@@ -3809,7 +3967,7 @@ def streamlit_application(all_df_dict):
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
 
-        type_de_comparaison = st.radio("Sélectionnez le type de comparaison", ["Radar", "KPI"])
+        type_de_comparaison = st.radio("Sélectionnez le type de comparaison", ["Radar", "KPI", "Statistiques avancées"])
 
         if st.button("Comparer"):
             if type_de_comparaison == "Radar":
@@ -3817,6 +3975,8 @@ def streamlit_application(all_df_dict):
             if type_de_comparaison == "KPI":
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
                 fig = plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel)
+            if type_de_comparaison == "Statistiques avancées":
+                fig = plot_stat_comparison(df, joueur_1, joueur_2, poste)
             st.pyplot(fig, use_container_width=True)
             
     elif page == "Scouting":
