@@ -1902,9 +1902,9 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
 
     fig, ax = plt.subplots(figsize=(10, 10))
     _ = ax.barh(y_pos - bar_height / 2, values_1, bar_height,
-                         label=f"{joueur_1.split(' - ')[0]}", color='#1440AC', edgecolor="#000000")
+                         label=f"{joueur_1.split(' - ')[0]}", color='#1440AC', edgecolor='#3d3a2a')
     _ = ax.barh(y_pos + bar_height / 2, values_2, bar_height,
-                         label=f"{joueur_2.split(' - ')[0]}", color='#AC141A', edgecolor="#000000")
+                         label=f"{joueur_2.split(' - ')[0]}", color='#AC141A', edgecolor='#3d3a2a')
 
     # Ajouter les valeurs à la fin des barres
     for i, (v1, v2) in enumerate(zip(values_1, values_2)):
@@ -1932,7 +1932,7 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
 
 def plot_stat_comparison(df, joueur_1, joueur_2, poste):
     # même palette que ta fonction précédente
-    bg, ink = "#f4f3ed", "#000000"
+    bg, ink = "#f4f3ed", "#3d3a2a"
 
     # --- sélection du joueur 1 ---
     joueur1_infos = df[df['Joueur + Information'] == joueur_1]
@@ -2028,7 +2028,7 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
     # Styling de base
     for (r, c), cell in table.get_celld().items():
         cell.set_facecolor(bg)
-        cell.set_edgecolor("#000000")
+        cell.set_edgecolor("#3d3a2a")
         cell.get_text().set_color(ink)
 
     # 1) LIGNE DES NOMS : pas de bordure → visuellement "en dehors" du tableau
@@ -2913,7 +2913,7 @@ def plot_rating_bars_panel(df, joueur_scores, kpis):
     bar_h = 0.55
 
     # largeur de référence (0→100)
-    ax.barh(y, 100, height=bar_h, left=0, color="None", edgecolor="#000000")
+    ax.barh(y, 100, height=bar_h, left=0, color="None", edgecolor="#3d3a2a")
 
     # boucle des KPI
     for yi, kpi in zip(y, kpis):
@@ -2929,17 +2929,17 @@ def plot_rating_bars_panel(df, joueur_scores, kpis):
         pr_clamped = max(0, min(100, percentile))
 
         # barre de valeur
-        ax.barh(yi, pr_clamped, height=bar_h, left=0, color=fill_color, edgecolor="#000000")
+        ax.barh(yi, pr_clamped, height=bar_h, left=0, color=fill_color, edgecolor="#3d3a2a")
 
         # label KPI à gauche
-        ax.text(-2, yi, str(kpi), va="center", ha="right", fontsize=11, color="#000000")
+        ax.text(-2, yi, str(kpi), va="center", ha="right", fontsize=11, color="#3d3a2a")
 
         # note à droite
         ax.text(102, yi + 0.1, f"Note : " + r"$\mathbf{" + f"{player_rating:.1f}" + "}$",
-                va="center", ha="left", fontsize=11, color="#000000")
+                va="center", ha="left", fontsize=11, color="#3d3a2a")
 
         ax.text(102, yi - 0.1, f"Percentile : " + r"$\mathbf{" + f"{percentile:.1f}" + "}$",
-                va="center", ha="left", fontsize=11, color="#000000")
+                va="center", ha="left", fontsize=11, color="#3d3a2a")
 
     # axes & cadresss
     ax.set_yticks([])
@@ -3018,7 +3018,7 @@ def plot_player_ranking(df, joueur, poste):
             items.append(("metric", m, row_raw.get(m, np.nan), row_rank.get(m, np.nan)))
 
     # --- layout ---
-    bg, ink, mute, rail = "#f4f3ed", "#000000", "#000000", "#f4f3ed"
+    bg, ink, mute, rail = "#f4f3ed", "#3d3a2a", "#3d3a2a", "#f4f3ed"
     bar_len   = 55
     val_gap   = 0.6
     val_strip = 6.0
@@ -3078,9 +3078,9 @@ def plot_player_ranking(df, joueur, poste):
 
     # rails + barres
     bar_height = 0.5
-    axR.barh(bar_y, [bar_len]*len(bar_y), height=bar_height, color=rail, edgecolor="#000000", zorder=2)
+    axR.barh(bar_y, [bar_len]*len(bar_y), height=bar_height, color=rail, edgecolor="#3d3a2a", zorder=2)
     axR.barh(bar_y, [v*bar_len/100 for v in bar_vals], height=bar_height,
-             color=[assign_color(v) for v in bar_vals], edgecolor="#000000", zorder=3)
+             color=[assign_color(v) for v in bar_vals], edgecolor="#3d3a2a", zorder=3)
 
     # valeurs gauche
     for yi, txt in zip(bar_y, raw_vals):
