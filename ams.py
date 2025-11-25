@@ -2022,7 +2022,7 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
     )
 
     table.auto_set_font_size(False)
-    table.set_fontsize(9)
+    table.set_fontsize(10)
     table.scale(1, 1.2)
 
     # Styling de base
