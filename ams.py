@@ -3430,7 +3430,7 @@ def streamlit_application(all_df_dict):
             st.download_button(
                 label="📦 Télécharger le pack vidéo de l'équipe",
                 data=zip_buffer,
-                file_name=f"{equipe.replace(' ', '_')}_{saison}_videos.zip",
+                file_name=f"{équipe.replace(' ', '_')}_{st.session_state['saison']}_videos.zip",
                 mime="application/zip"
             )
 
