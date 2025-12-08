@@ -3409,26 +3409,26 @@ def streamlit_application(all_df_dict):
         else:
             st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
-        if st.button(f"Télécharger tous les buts des matchs de {équipe} en vidéo"):
-            zip_buffer = io.BytesIO()
+        zip_buffer = io.BytesIO()
 
-            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-                for j, matchs in journées[st.session_state["saison"]].items():
-                    for m in matchs:
-                        if équipe in m:
-                            src_path = f"data/Data {st.session_state['saison']}/{j} - {m}.mp4"
-                            if os.path.exists(src_path):
-                                filename = f"{j} - {m}.mp4"
-                                arcname = os.path.join(équipe, filename)
-                                zipf.write(src_path, arcname=arcname)
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+            for j, matchs in journées[st.session_state["saison"]].items():
+                for m in matchs:
+                    if équipe in m:
+                        src_path = f"data/Data {st.session_state['saison']}/{j} - {m}.mp4"
+                        if os.path.exists(src_path):
+                            filename = f"{j} - {m}.mp4"
+                            arcname = os.path.join(équipe, filename)
+                            zipf.write(src_path, arcname=arcname)
 
-            zip_buffer.seek(0)
+        zip_buffer.seek(0)
 
-            st.download_button(
-                data=zip_buffer,
-                file_name=f"{équipe.replace(' ', '_')}_{st.session_state['saison']}_videos.zip",
-                mime="application/zip"
-            )
+        st.download_button(
+            label=f"Télécharger tous les buts des matchs de {équipe} en vidéo",
+            data=zip_buffer,
+            file_name=f"{équipe.replace(' ', '_')}_{st.session_state['saison']}_videos.zip",
+            mime="application/zip"
+        )
 
     elif page == "Analyse collective":
         st.header("Analyse collective")
