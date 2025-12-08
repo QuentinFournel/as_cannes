@@ -3386,12 +3386,21 @@ def streamlit_application(all_df_dict):
             }
         }
 
-        col1, col2 = st.columns([1, 3])
+        col1, col2 = st.columns([3, 1])
+
+        équipes = sorted({
+            club.strip()
+            for matchs in journées[st.session_state['saison']].values()
+            for match in matchs
+            for club in match.split("VS")
+        })
 
         with col1:
-            journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
+            équipe = st.selectbox("Sélectionnez une équipe", équipes)
         with col2:
-            match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
+            journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
+
+        match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
         # Affichage si la vidéo existe
         if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
