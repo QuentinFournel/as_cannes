@@ -309,6 +309,11 @@ smart_goal = {
             ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
             ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
             ["Touches de balle dans la surface de réparation"]
+        ],
+        "J. Gouache": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Touches de balle dans la surface de réparation"]
         ]
     }
 }
