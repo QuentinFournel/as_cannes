@@ -1809,10 +1809,10 @@ def create_individual_radar(df, joueur, poste):
         blank_alpha=0.4,
         kwargs_slices=dict(edgecolor="#3d3a2a", zorder=2, linewidth=1),
         kwargs_params=dict(
-            color="#3d3a2a", fontsize=9, va="center"
+            color="#3d3a2a", fontsize=8, va="center"
         ),
         kwargs_values=dict(
-            color="#f4f3ed", fontsize=9, zorder=3,
+            color="#f4f3ed", fontsize=8, zorder=3,
             bbox=dict(
                 edgecolor="#3d3a2a", facecolor="cornflowerblue",
                 boxstyle="round,pad=0.2", lw=1
