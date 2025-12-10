@@ -338,7 +338,8 @@ metrics_by_position = [
             "Duels\noffensifs": "Duels offensifs par 90",
             "Duels\noffensifs gagnés (%)": "Duels de marquage, %",
             "Duels\naériens": "Duels aériens par 90",
-            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %"
+            "Duels\naériens gagnés (%)": "Duels aériens gagnés, %",
+            "Actions déf.\nréussies": "Actions défensives réussies par 90"
         }
     },
     {
@@ -360,13 +361,15 @@ metrics_by_position = [
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Dribbles": "Dribbles par 90",
-            "Dribbles\nréussis (%)": "Dribbles réussis, %"
+            "Dribbles\nréussis (%)": "Dribbles réussis, %",
+            "Actions déf.\nréussies": "Actions défensives réussies par 90"
         }
     },
     {
         "position": "Milieu offensif",
         "metrics": {
             "Attaques\nréussies": "Attaques réussies par 90",
+            "xG": "xG par 90",
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "xA": "xA par 90",
@@ -394,6 +397,7 @@ metrics_by_position = [
             "xA": "xA par 90",
             "Passes\navant": "Passes avant par 90",
             "Passes\nclés": "Passes quasi décisives par 90",
+            "Passes\ndans le tiers adverse": "Passes dans tiers adverse par 90",
             "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
@@ -415,6 +419,7 @@ metrics_by_position = [
             "Précision\npasses": "Passes précises, %",
             "xA": "xA par 90",
             "Passes\navant": "Passes avant par 90",
+            "Passes\nvers la surface": "Passes vers la surface de réparation par 90",
             "Centres": "Centres par 90",
             "Centres\nréussis (%)": "Сentres précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
@@ -439,6 +444,7 @@ metrics_by_position = [
             "Passes\nlongues": "Passes longues par 90",
             "Passes\nlongues réussies (%)": "Longues passes précises, %",
             "Passes\nprogressives": "Passes progressives par 90",
+            "Passes\nprogressives réussies (%)": "Passes progressives précises, %",
             "Courses\nprogressives": "Courses progressives par 90",
             "Accélérations": "Accélérations par 90",
             "Duels\ndéfensifs": "Duels défensifs par 90",
