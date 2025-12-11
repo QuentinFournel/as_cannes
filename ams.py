@@ -1545,11 +1545,15 @@ def collect_individual_data():
              *dfs["National 1"].values(),
              *dfs["National 2"].values()]
         )
+        df_n1_n2 = safe_concat(
+            [*dfs["National 1"].values(),
+             *dfs["National 2"].values()]
+        )
         df_français = safe_concat(dfs["Français"].values())
         df_top5européen = safe_concat(dfs["Top 5 Européen"].values())
 
         # Nettoyage
-        for df in (df_championnat_de_france, df_français, df_top5européen):
+        for df in (df_championnat_de_france, df_n1_n2, df_français, df_top5européen):
             if not df.empty:
                 df.columns = df.columns.str.strip()
                 df.rename(columns={"Buts hors penaltyButs hors penalty": "Buts hors penalty"}, inplace=True)
@@ -1558,6 +1562,7 @@ def collect_individual_data():
 
         all_df = {
             'Joueur du championnat de France': df_championnat_de_france,
+            'Joueur de National 1 et National 2': df_n1_n2,
             'Joueur français': df_français,
             'Joueur du top 5 européen': df_top5européen
         }
@@ -2908,7 +2913,7 @@ def create_player_data(nom_joueur, sélection_dataframe):
     # Renommer les colonnes
     df_player.columns = colonnes
 
-    if sélection_dataframe == 'Joueur du championnat de France':
+    if sélection_dataframe == 'Joueur du championnat de France' or sélection_dataframe == 'Joueur de National 1 et National 2':
         df_player = df_player[df_player['Competition'] == 'France. National 2']
 
     return df_player
