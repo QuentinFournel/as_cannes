@@ -3909,15 +3909,13 @@ def streamlit_application(all_df_dict):
         
         with tab6:
             ipr_score = calcul_ipr(df, joueur, poste)
-            ipr_score[
-                ipr_score['Joueur + Information'] == joueur
-            ][[
-                "ipr_viseur",
-                "ipr_perforateur",
-                "ipr_duelliste"
-            ]]
 
-            st.dataframe(ipr_score, use_container_width=True, hide_index=True)
+            df_joueur = ipr_score.loc[
+                ipr_score["Joueur + Information"] == joueur,
+                ["ipr_viseur", "ipr_perforateur", "ipr_duelliste"]
+            ]
+
+            st.dataframe(df_joueur, use_container_width=True, hide_index=True)
 
         with tab7:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
