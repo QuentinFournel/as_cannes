@@ -3126,7 +3126,7 @@ def calcul_ipr(df, joueur, poste):
         + df_filtré["Longues passes réceptionnées par 90"]
     )
 
-    df_filtré["ipr_viseur"] = (
+    df_filtré["IPR Viseur"] = (
         (df_filtré["Passes judicieuses par 90"]
         + df_filtré["Passes quasi décisives par 90"]
         + df_filtré["Passes dans tiers adverse par 90"]
@@ -3136,18 +3136,18 @@ def calcul_ipr(df, joueur, poste):
         / df_filtré["influence"]
     )
 
-    df_filtré["ipr_perforateur"] = (
+    df_filtré["IPR Perforateur"] = (
         (df_filtré["Courses progressives par 90"]
         + df_filtré["Accélérations par 90"])
         / df_filtré["influence"]
     )
 
-    df_filtré["ipr_duelliste"] = df_filtré["Dribbles par 90"] / df_filtré["influence"]
+    df_filtré["IPR Duelliste"] = df_filtré["Dribbles par 90"] / df_filtré["influence"]
 
-    df_filtré["ipr"] = (
-        df_filtré["ipr_viseur"] / 6
-        + df_filtré["ipr_perforateur"] / 2
-        + df_filtré["ipr_duelliste"]
+    df_filtré["IPR"] = (
+        df_filtré["IPR Viseur"] / 6
+        + df_filtré["IPR Perforateur"] / 2
+        + df_filtré["IPR Duelliste"]
     )
 
     df_ranked = rank_columns(df_filtré)
@@ -3912,7 +3912,7 @@ def streamlit_application(all_df_dict):
 
             df_joueur = ipr_score.loc[
                 ipr_score["Joueur + Information"] == joueur,
-                ["ipr_viseur", "ipr_perforateur", "ipr_duelliste"]
+                ["IPR Viseur", "IPR Perforateur", "IPR Duelliste"]
             ]
 
             st.dataframe(df_joueur, use_container_width=True, hide_index=True)
