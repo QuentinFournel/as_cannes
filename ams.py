@@ -3113,12 +3113,53 @@ def plot_player_ranking(df, joueur, poste):
     plt.subplots_adjust(left=0.05, right=0.98, top=0.98, bottom=0.04)
     return fig
 
+def calcul_ipr(df, joueur, poste):
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)].copy()
+
+    if joueur not in df_filtré['Joueur + Information'].values:
+        df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    df_filtré["influence"] = (
+        df_filtré["Passes réceptionnées par 90"]
+        + df_filtré["Longues passes réceptionnées par 90"]
+    )
+
+    df_filtré["ipr_viseur"] = (
+        (df_filtré["Passes judicieuses par 90"]
+        + df_filtré["Passes quasi décisives par 90"]
+        + df_filtré["Passes dans tiers adverse par 90"]
+        + df_filtré["Passes vers la surface de réparation par 90"]
+        + df_filtré["Passes pénétrantes par 90"]
+        + df_filtré["Passes progressives par 90"])
+        / df_filtré["influence"]
+    )
+
+    df_filtré["ipr_perforateur"] = (
+        (df_filtré["Courses progressives par 90"]
+        + df_filtré["Accélérations par 90"])
+        / df_filtré["influence"]
+    )
+
+    df_filtré["ipr_duelliste"] = df_filtré["Dribbles par 90"] / df_filtré["influence"]
+
+    df_filtré["ipr"] = (
+        df_filtré["ipr_viseur"] / 6
+        + df_filtré["ipr_perforateur"] / 2
+        + df_filtré["ipr_duelliste"]
+    )
+
+    df_ranked = rank_columns(df_filtré)
+
+    return df_ranked
+
 def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
             "Saison",
             ["24-25", "25-26"],
-            index=["24-25", "25-26"].index(st.session_state.get("saison", "24-25")),
+            index=["24-25", "25-26"].index(st.session_state.get("saison", "25-26")),
             key="saison",
             label_visibility="collapsed"
         )
@@ -3760,9 +3801,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR","Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
 
         with tab1:
             st.subheader('Informations')
@@ -3865,8 +3906,20 @@ def streamlit_application(all_df_dict):
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
 
             st.dataframe(joueur_scores.iloc[joueur_scores.index.get_loc("Note globale")+1:].to_frame().T, use_container_width=True, hide_index=True)
-
+        
         with tab6:
+            ipr_score = calcul_ipr(df, joueur, poste)
+            ipr_score[
+                ipr_score['Joueur + Information'] == ipr_score
+            ][[
+                "ipr_viseur",
+                "ipr_perforateur",
+                "ipr_duelliste"
+            ]]
+
+            st.dataframe(ipr_score, use_container_width=True, hide_index=True)
+
+        with tab7:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
 
             col1, col2 = st.columns(2)
@@ -3895,7 +3948,7 @@ def streamlit_application(all_df_dict):
                                 unsafe_allow_html=True
                             )
 
-        with tab7:
+        with tab8:
             if poste != 'Gardien': 
                 metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
             else:
@@ -3908,7 +3961,7 @@ def streamlit_application(all_df_dict):
             fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
-        with tab8:
+        with tab9:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             similar_players = compute_similarity(df, joueur, poste)
@@ -3918,7 +3971,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(similar_players.head(nombre_joueur), use_container_width=True, hide_index=True)
 
         if team == "Cannes":
-            with tab9:
+            with tab10:
                 nom_joueur = joueur.split(" - ")[0]
 
                 df_player = create_player_data(nom_joueur, sélection_dataframe)
@@ -4185,7 +4238,7 @@ if __name__ == '__main__':
 
     if st.session_state.authenticated:
         if "saison" not in st.session_state:
-            st.session_state["saison"] = "24-25"
+            st.session_state["saison"] = "25-26"
 
         all_df_dict = collect_individual_data()
         streamlit_application(all_df_dict)
