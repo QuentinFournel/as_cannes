@@ -3159,7 +3159,6 @@ def streamlit_application(all_df_dict):
         st.selectbox(
             "Saison",
             ["24-25", "25-26"],
-            index=["24-25", "25-26"].index(st.session_state.get("saison", "25-26")),
             key="saison",
             label_visibility="collapsed"
         )
