@@ -285,6 +285,11 @@ smart_goal = {
             ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
             ["Centres", "Centres précis", "% de centres précis"]
         ],
+        "M. Noc": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
         "E. Bonnaure": [
             ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
             ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
@@ -311,6 +316,11 @@ smart_goal = {
             ["Touches de balle dans la surface de réparation"]
         ],
         "J. Gouache": [
+            ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Touches de balle dans la surface de réparation"]
+        ],
+        "R. Gerbeaud": [
             ["Duels offensifs", "Duels offensifs gagnés", "% de duels offensifs gagnés"],
             ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
             ["Touches de balle dans la surface de réparation"]
