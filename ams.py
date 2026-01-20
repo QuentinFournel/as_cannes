@@ -290,6 +290,11 @@ smart_goal = {
             ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
             ["Centres", "Centres précis", "% de centres précis"]
         ],
+        "B. Oggad": [
+            ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
+            ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
+            ["Centres", "Centres précis", "% de centres précis"]
+        ],
         "E. Bonnaure": [
             ["Tirs", "Tirs cadrés", "% de tirs cadrés"],
             ["Dribbles", "Dribbles réussis", "% de dribbles réussis"],
