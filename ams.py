@@ -4144,79 +4144,63 @@ def streamlit_application(all_df_dict):
                                             value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                             step=1)
 
-        tab1, tab2 = st.tabs(["Classement", "Recommandation"])
+        
+        metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
 
-        with tab1:
-            nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
+        if metric_or_kpi == "Métrique":
+            colonnes_à_exclure = [
+                'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
+                'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
+                'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
+                'Tir', 'Buts de la tête'
+            ]
 
-            top_players = calcul_scores_par_kpi(df, "", poste)
-            top_players = top_players[((top_players['Âge'] >= min_age) & (top_players['Âge'] <= max_age)) & 
-                                    ((top_players['Taille'] >= min_taille) & (top_players['Taille'] <= max_taille) | (top_players['Taille'] == 0))]
-            top_players = top_players.sort_values(by='Note globale', ascending=False).head(nombre_joueur)
+            colonnes_filtrées = [
+                col for col in df.select_dtypes(include='number').columns
+                if col not in colonnes_à_exclure
+            ]
+            
+            métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
-            top_players.insert(0, "Classement", range(1, len(top_players) + 1))
+            thresholds = {}
+            for métrique in métriques_selectionnées:
+                thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
-            st.dataframe(top_players, use_container_width=True, hide_index=True)
+            recommended_players = search_recommended_players(df, poste, thresholds)
+            recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                                                    ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
+            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
-            st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
+            recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
-        with tab2:
-            metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
+            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
-            if metric_or_kpi == "Métrique":
-                colonnes_à_exclure = [
-                    'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
-                    'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
-                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
-                    'Tir', 'Buts de la tête'
-                ]
+        elif metric_or_kpi == "KPI":
+            scores_df = calcul_scores_par_kpi(df, "", poste)
 
-                colonnes_filtrées = [
-                    col for col in df.select_dtypes(include='number').columns
-                    if col not in colonnes_à_exclure
-                ]
-                
-                métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
+            colonnes_à_exclure = [
+                'Minutes jouées', 'Âge', 'Taille'
+            ]
 
-                thresholds = {}
-                for métrique in métriques_selectionnées:
-                    thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
+            colonnes_filtrées = [
+                col for col in scores_df.select_dtypes(include='number').columns
+                if col not in colonnes_à_exclure
+            ]
 
-                recommended_players = search_recommended_players(df, poste, thresholds)
-                recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                        ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
-                recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
+            kpis_sélectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
-                recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
+            thresholds = {}
+            for kpi in kpis_sélectionnées:
+                thresholds[kpi] = st.slider(f"Sélectionnez le top % pour le KPI : {kpi}", min_value=0, max_value=100, value=50, step=5, key=kpi)
 
-                st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+            recommended_players = search_recommended_players(scores_df, poste, thresholds)
+            recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                                                    ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
+            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
-            elif metric_or_kpi == "KPI":
-                scores_df = calcul_scores_par_kpi(df, "", poste)
+            recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
-                colonnes_à_exclure = [
-                    'Minutes jouées', 'Âge', 'Taille'
-                ]
-
-                colonnes_filtrées = [
-                    col for col in scores_df.select_dtypes(include='number').columns
-                    if col not in colonnes_à_exclure
-                ]
-
-                kpis_sélectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
-
-                thresholds = {}
-                for kpi in kpis_sélectionnées:
-                    thresholds[kpi] = st.slider(f"Sélectionnez le top % pour le KPI : {kpi}", min_value=0, max_value=100, value=50, step=5, key=kpi)
-
-                recommended_players = search_recommended_players(scores_df, poste, thresholds)
-                recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                        ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
-                recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
-
-                recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
-
-                st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
