@@ -196,6 +196,25 @@ smart_goal = {
 
 analyse_par_poste = [
     {
+        "position" : "Gardien",
+        "animation_offensive": {
+            "Passes": "Passes",
+            "Pourcentage de passes réussies": "Passes précises / Passes",
+            "Passes longues": "Passes longues",
+            "Pourcentage de passes longues réussies": "Passes longues précises / Passes longues",
+            "Dégagements" : "Dégagements"
+        },
+        "animation_défensive": {
+            "Buts évités": "Buts concédés - xG concédés",
+            "Tirs concédés": "Tirs contre",
+            "Arrêts": "Arrêts",
+            "Arrêts réflexes": "Arrêts réflexes",
+            "Sorties": "Sorties",
+            "Duels aériens": "Duels aériens",
+            "Duels aériens gagnés (%)": "Duels aériens gagnés / Duels aériens"
+        },
+    },
+    {   
         "position": "Défenseur central",
         "animation_offensive": {
             "Passes": "Passes",
@@ -3214,17 +3233,25 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
 
     for col_name, metric in metrics:
         # Cas 1 : métrique simple
-        if "/" not in metric:
+        if "/" not in metric and "-" not in metric:
             if metric in df.columns:
                 df[col_name] = df[metric].round(1)
                 selected_cols.append(col_name)
 
         # Cas 2 : métrique du type "A / B"
-        else:
+        if "/" in metric and "-" not in metric:
             num, den = [m.strip() for m in metric.split("/")]
 
             if num in df.columns and den in df.columns:
                 df[col_name] = (df[num] / df[den].replace(0, np.nan) * 100).round(1).astype(str) + "%"
+                selected_cols.append(col_name)
+
+        # Cas 3 : métrique du type "A - B"
+        if "-" in metric and "/" not in metric:
+            part_a, part_b = [m.strip() for m in metric.split("-")]
+
+            if part_a in df.columns and part_b in df.columns:
+                df[col_name] = (df[part_a] - df[part_b]).round(1)
                 selected_cols.append(col_name)
 
     return df[selected_cols]
