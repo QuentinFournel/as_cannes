@@ -294,7 +294,8 @@ analyse_par_poste = [
             "Courses progressives": "Courses progressives",
             "Tirs": "Tirs",
             "Pourcentage de tirs cadrés": "Tirs cadrés / Tirs",
-            "xG": "xG"
+            "xG": "xG",
+            "Touches de balle dans la surface adverse": "Touches de balle dans la surface de réparation"
         },
         "animation_défensive": {
             "Duels défensifs": "Duels défensifs",
@@ -314,7 +315,6 @@ analyse_par_poste = [
             "Pourcentage de passes vers la surface de réparation réussies": "Passes vers la surface de réparation précises / Passes vers la surface de réparation",
             "Centres": "Centres",
             "Pourcentage de centres réussis": "Centres précis / Centres",
-            "Secondes passes décisives": "Secondes passes décisives",
             "xA": "xA",
             "Courses progressives": "Courses progressives",
             "Dribbles": "Dribbles",
@@ -343,7 +343,6 @@ analyse_par_poste = [
             "Courses progressives": "Courses progressives",
             "Dribbles": "Dribbles",
             "Pourcentage de dribbles réussis": "Dribbles réussis / Dribbles",
-            "Fautes subies": "Fautes subies",
             "Tirs": "Tirs",
             "Pourcentage de tirs cadrés": "Tirs cadrés / Tirs",
             "xG": "xG",
@@ -3896,9 +3895,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistique", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR","Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR","Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
 
         with tab1:
             st.subheader('Informations')
@@ -3959,8 +3958,17 @@ def streamlit_application(all_df_dict):
                 st.subheader('Smart Goals (moyenne par match)')
 
                 df_player_mean = get_player_metrics_by_position(df_player_mean, nom_joueur, smart_goal, analyse_par_poste, st.session_state['saison'])
-                
-                st.dataframe(df_player_mean, use_container_width=True, hide_index=True)
+
+                cols = list(df_player_mean.columns)
+
+                for i in range(0, len(cols), 3):
+                    row = st.columns(3)
+
+                    for j, col_name in enumerate(cols[i:i + 3]):
+                        value = df_player_mean[col_name].iloc[0]
+                        bordered_metric(row[j], col_name, value, 225)
+
+                    st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
         with tab2:
             fig = create_individual_radar(df, joueur, poste)
