@@ -4105,12 +4105,16 @@ def streamlit_application(all_df_dict):
 
                     for j, col_name in enumerate(cols[i:i + 3]):
                         value = df_player[col_name].iloc[0]
-                        value = int(value)
+                        mean_value = df_player_mean[col_name].iloc[0]
 
-                        mean_value = df_player_mean[col_name].values[0]
-                        color = "#1aac14" if value > mean_value else "#ac141a"
-
-                        bordered_metric(row[j], col_name, value, 225, color)
+                        if isinstance(value, str) and "%" in value:
+                            v = float(value.replace("%", ""))
+                            m = float(mean_value.replace("%", ""))
+                            color = "#1aac14" if v > m else "#ac141a"
+                            bordered_metric(row[j], col_name, value, 225, color)
+                        else:
+                            color = "#1aac14" if value > mean_value else "#ac141a"
+                            bordered_metric(row[j], col_name, round(value, 1), 225, color)
 
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
