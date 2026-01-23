@@ -201,11 +201,11 @@ analyse_par_poste = [
             "Passes": "Passes",
             "Pourcentage de passes réussies": "Passes précises / Passes",
             "Passes longues": "Passes longues",
-            "Pourcentage de passes longues réussies": "Passes longues précises / Passes longues",
-            "Dégagements" : "Dégagements"
+            "Pourcentage de passes longues réussies": "Passes longues précises / Passes longues"
         },
         "animation_défensive": {
-            "Buts évités": "Buts concédés - xG concédés",
+            "xCG": "xCG",
+            "Buts évités": "Buts concédés - xCG",
             "Tirs concédés": "Tirs contre",
             "Arrêts": "Arrêts",
             "Arrêts réflexes": "Arrêts réflexes",
