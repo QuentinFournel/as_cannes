@@ -4095,7 +4095,7 @@ def streamlit_application(all_df_dict):
                 matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", df_player["Match"].unique())
                 
                 if not matches:
-                    st.info("Sélectionne au moins un match pour calculer la note.")
+                    st.info("Sélectionne au moins un match.")
                     st.stop()
 
                 df_player = df_player[df_player["Match"].isin(matches)]
@@ -4135,15 +4135,17 @@ def streamlit_application(all_df_dict):
 
                 st.subheader('Smart Goals')
 
-                df_player = get_player_metrics_by_position(df_player, nom_joueur, smart_goal, analyse_par_poste, st.session_state['saison'])
+                df_player_mean_on_selected_matches = df_player.mean(numeric_only=True).to_frame().T
 
-                cols = list(df_player.columns)
+                df_player_mean_on_selected_matches = get_player_metrics_by_position(df_player_mean_on_selected_matches, nom_joueur, smart_goal, analyse_par_poste, st.session_state['saison'])
+
+                cols = list(df_player_mean_on_selected_matches.columns)
 
                 for i in range(0, len(cols), 3):
                     row = st.columns(3)
 
                     for j, col_name in enumerate(cols[i:i + 3]):
-                        value = df_player[col_name].iloc[0]
+                        value = df_player_mean_on_selected_matches[col_name].iloc[0]
                         mean_value = df_player_mean[col_name].iloc[0]
 
                         if isinstance(value, str) and "%" in value:
