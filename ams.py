@@ -204,8 +204,8 @@ analyse_par_poste = [
             "Pourcentage de passes longues réussies": "Passes longues précises / Passes longues"
         },
         "animation_défensive": {
+            "Buts concédés": "Buts concédés",
             "xCG": "xCG",
-            "Buts évités": "Buts concédés - xCG",
             "Tirs concédés": "Tirs contre",
             "Arrêts": "Arrêts",
             "Arrêts réflexes": "Arrêts réflexes",
