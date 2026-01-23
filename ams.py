@@ -4092,32 +4092,39 @@ def streamlit_application(all_df_dict):
 
                 df_player = ajouter_pourcentages(df_player)
 
-                match = st.selectbox("Sélectionnez le match à analyser", df_player["Match"].unique())
-                df_player = df_player[df_player["Match"] == match]
+                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", df_player["Match"].unique())
+                df_player = df_player[df_player["Match"].isin(matches)]
 
-                note = performance_index(df_player, poste, match)
+                notes_par_match = []
+
+                for match in matches:
+                    df_match = df_player[df_player["Match"] == match]
+                    note_match = performance_index(df_match, poste, match)
+                    notes_par_match.append(note_match)
+
+                note_moyenne = sum(notes_par_match) / len(notes_par_match)
 
                 st.subheader('Statistiques générales')
 
                 col1, col2, col3, col4 = st.columns(4)
 
                 with col1:
-                    bordered_metric(col1, "Minutes jouées", df_player["Minutes jouées"].values[0], 165)
+                    bordered_metric(col1, "Minutes jouées", df_player["Minutes jouées"].sum(), 165)
 
                 with col2:
                     if poste != 'Gardien':
-                        bordered_metric(col2, "But", df_player["But"].values[0], 165)
+                        bordered_metric(col2, "But", df_player["But"].sum(), 165)
                     else:
-                        bordered_metric(col2, "Buts concédés", df_player["Buts concédés"].values[0], 165)
+                        bordered_metric(col2, "Buts concédés", df_player["Buts concédés"].sum(), 165)
 
                 with col3:
                     if poste != 'Gardien':
-                        bordered_metric(col3, "Passe décisive", df_player["Passe décisive"].values[0], 165)
+                        bordered_metric(col3, "Passe décisive", df_player["Passe décisive"].sum(), 165)
                     else:
-                        bordered_metric(col3, "xG concédés", df_player["xCG"].values[0], 165)
+                        bordered_metric(col3, "xG concédés", df_player["xCG"].sum(), 165)
 
                 with col4:
-                    bordered_metric(col4, "Note", note, 165, color="#ac141a")
+                    bordered_metric(col4, "Note", note_moyenne, 165, color="#ac141a")
 
                 st.markdown("---")
 
