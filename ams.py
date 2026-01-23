@@ -4096,24 +4096,21 @@ def streamlit_application(all_df_dict):
 
                 st.subheader('Smart Goals')
 
-                colonnes_smart = smart_goal[st.session_state['saison']].get(nom_joueur, [])
+                df_player = get_player_metrics_by_position(df_player, nom_joueur, smart_goal, analyse_par_poste, st.session_state['saison'])
 
-                for groupe in colonnes_smart:
-                    cols = st.columns(len(groupe))
+                cols = list(df_player.columns)
 
-                    for i, col_name in enumerate(groupe):
-                        val = df_player[col_name].values[0]
-                        val = int(val)
+                for i in range(0, len(cols), 3):
+                    row = st.columns(3)
 
-                        mean_val = df_player_mean[col_name].values[0]
-                        color = "#1aac14" if val > mean_val else "#ac141a"
+                    for j, col_name in enumerate(cols[i:i + 3]):
+                        value = df_player[col_name].iloc[0]
+                        value = int(value)
 
-                        if len(groupe) == 3:
-                            bordered_metric(cols[i], col_name, val, 225, color)
-                        elif len(groupe) == 2:
-                            bordered_metric(cols[i], col_name, val, 345, color)
-                        elif len(groupe) == 1:
-                            bordered_metric(cols[i], col_name, val, 705, color)
+                        mean_value = df_player_mean[col_name].values[0]
+                        color = "#1aac14" if value > mean_value else "#ac141a"
+
+                        bordered_metric(row[j], col_name, value, 225, color)
 
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
