@@ -4107,7 +4107,7 @@ def streamlit_application(all_df_dict):
                     note_match = performance_index(df_match, poste, match)
                     notes_par_match.append(note_match)
 
-                note_moyenne = sum(notes_par_match) / len(notes_par_match)
+                note_moyenne = (sum(notes_par_match) / len(notes_par_match)).round(1)
 
                 st.subheader('Statistiques générales')
 
