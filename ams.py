@@ -3216,7 +3216,7 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
         # Cas 1 : métrique simple
         if "/" not in metric:
             if metric in df.columns:
-                df[col_name] = df[metric]
+                df[col_name] = df[metric].round(1)
                 selected_cols.append(col_name)
 
         # Cas 2 : métrique du type "A / B"
@@ -3224,7 +3224,7 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
             num, den = [m.strip() for m in metric.split("/")]
 
             if num in df.columns and den in df.columns:
-                df[col_name] = df[num] / df[den].replace(0, np.nan) * 100
+                df[col_name] = (df[num] / df[den].replace(0, np.nan) * 100).round(1)
                 selected_cols.append(col_name)
 
     return df[selected_cols]
@@ -3622,7 +3622,7 @@ def streamlit_application(all_df_dict):
             df_filtré = collect_collective_data(équipe)
             df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
             df_stats = df_filtré[df_filtré['Équipe'] == équipe]
-            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
+            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(1)
             df_stats['Équipe'] = équipe
             df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
             df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
