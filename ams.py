@@ -4093,6 +4093,11 @@ def streamlit_application(all_df_dict):
                 df_player = ajouter_pourcentages(df_player)
 
                 matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", df_player["Match"].unique())
+                
+                if not matches:
+                    st.info("Sélectionne au moins un match pour calculer la note.")
+                    st.stop()
+
                 df_player = df_player[df_player["Match"].isin(matches)]
 
                 notes_par_match = []
