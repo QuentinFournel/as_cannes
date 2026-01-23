@@ -3224,7 +3224,7 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
             num, den = [m.strip() for m in metric.split("/")]
 
             if num in df.columns and den in df.columns:
-                df[col_name] = (df[num] / df[den].replace(0, np.nan) * 100).round(1)
+                df[col_name] = f"{(df[num] / df[den].replace(0, np.nan) * 100).round(1)}%"
                 selected_cols.append(col_name)
 
     return df[selected_cols]
