@@ -4092,7 +4092,14 @@ def streamlit_application(all_df_dict):
 
                 df_player = ajouter_pourcentages(df_player)
 
-                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", df_player["Match"].unique())
+                match_options = df_player["Match"].dropna().unique().tolist()
+
+                if "selected_matches" not in st.session_state:
+                    st.session_state.selected_matches = []
+
+                st.session_state.selected_matches = [m for m in st.session_state.selected_matches if m in match_options]
+
+                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options, default=st.session_state.selected_matches, key="selected_matches")
                 
                 if not matches:
                     st.info("Sélectionne au moins un match.")
