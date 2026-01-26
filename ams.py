@@ -3922,9 +3922,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Points forts/Points faibles", "Nuage de points", "Joueur similaire", "Match"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Points forts/Points faibles", "Nuage de points", "Joueurs similaires", "Matchs"])
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR","Points forts/Points faibles", "Nuage de points", "Joueur similaire"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR","Points forts/Points faibles", "Nuage de points", "Joueurs similaires"])
 
         with tab1:
             st.subheader('Informations')
@@ -4094,12 +4094,9 @@ def streamlit_application(all_df_dict):
 
                 match_options = df_player["Match"].dropna().unique().tolist()
 
-                if "selected_matches" not in st.session_state:
-                    st.session_state.selected_matches = []
+                st.session_state["selected_matches"] = [m for m in st.session_state["selected_matches"] if m in match_options]
 
-                st.session_state.selected_matches = [m for m in st.session_state.selected_matches if m in match_options]
-
-                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options, default=st.session_state.selected_matches, key="selected_matches")
+                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options, key="selected_matches")
                 
                 if not matches:
                     st.info("Sélectionne au moins un match.")
