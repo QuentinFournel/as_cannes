@@ -136,7 +136,7 @@ smart_goal = {
         [
             "C. Abbas",
             "J. Mambu",
-            "A. Gonçalves",
+            "Alexis Gonçalves",
             "D. Mai",
             "M. Lopes"
         ],
