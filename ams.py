@@ -3358,6 +3358,8 @@ def streamlit_application(all_df_dict):
     elif page == "Vidéo des buts":
         st.header("Vidéo des buts")
 
+        tab1, tab2 = st.tabs(['Vidéos par équipe', 'Vidéos par journée'])
+
         journées = {
             "24-25": {
                 "J24": [
@@ -3575,27 +3577,42 @@ def streamlit_application(all_df_dict):
             }
         }
 
-        col1, col2 = st.columns([3, 1])
+        with tab1:
+            col1, col2 = st.columns([3, 1])
 
-        équipes = sorted({
-            club.strip()
-            for matchs in journées[st.session_state['saison']].values()
-            for match in matchs
-            for club in match.split("VS")
-        })
+            équipes = sorted({
+                club.strip()
+                for matchs in journées[st.session_state['saison']].values()
+                for match in matchs
+                for club in match.split("VS")
+            })
 
-        with col1:
-            équipe = st.selectbox("Sélectionnez une équipe", équipes)
-        with col2:
-            journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
+            with col1:
+                équipe = st.selectbox("Sélectionnez une équipe", équipes)
+            with col2:
+                journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
 
-        match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
+            match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
-        # Affichage si la vidéo existe
-        if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
-            st.video(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4")
-        else:
-            st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
+            # Affichage si la vidéo existe
+            if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
+                st.video(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4")
+            else:
+                st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
+
+        with tab2:
+            col1, col2 = st.columns([1, 3])
+
+            with col1:
+                journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
+            with col2:
+                match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
+
+            # Affichage si la vidéo existe
+            if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
+                st.video(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4")
+            else:
+                st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
     elif page == "Analyse collective":
         st.header("Analyse collective")
