@@ -3590,7 +3590,7 @@ def streamlit_application(all_df_dict):
             with col1:
                 équipe = st.selectbox("Sélectionnez une équipe", équipes)
             with col2:
-                journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
+                journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()), key="sb_journee_tab1")
 
             match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
@@ -3604,7 +3604,7 @@ def streamlit_application(all_df_dict):
             col1, col2 = st.columns([1, 3])
 
             with col1:
-                journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()))
+                journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()), key="sb_journee_tab2")
             with col2:
                 match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
