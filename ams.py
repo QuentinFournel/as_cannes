@@ -4094,19 +4094,30 @@ def streamlit_application(all_df_dict):
 
                 match_options = df_player["Match"].dropna().unique().tolist()
 
-                st.session_state["selected_matches"] = [m for m in st.session_state["selected_matches"] if m in match_options]
+                ALL_MATCHES_LABEL = "Tous les matchs"
+                match_options_with_all = [ALL_MATCHES_LABEL] + match_options
 
-                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options, key="selected_matches")
+                st.session_state["selected_matches"] = [
+                    m for m in st.session_state.get("selected_matches", [])
+                    if m in match_options_with_all
+                ]
+
+                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options_with_all, key="selected_matches")
                 
                 if not matches:
                     st.info("Sélectionne au moins un match.")
                     st.stop()
 
-                df_player = df_player[df_player["Match"].isin(matches)]
+                if ALL_MATCHES_LABEL in matches:
+                    selected_matches = match_options
+                else:
+                    selected_matches = matches
+
+                df_player = df_player[df_player["Match"].isin(selected_matches)]
 
                 notes_par_match = []
 
-                for match in matches:
+                for match in selected_matches:
                     df_match = df_player[df_player["Match"] == match]
                     note_match = performance_index(df_match, poste, match)
                     notes_par_match.append(note_match)
