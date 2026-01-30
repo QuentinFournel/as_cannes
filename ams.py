@@ -97,11 +97,11 @@ def load_all_files_from_drive():
             download_file(service, file['id'], file['name'], output_folder=local_dir)
 
 league_rating = {
-    "Ligue 1": 1,
-    "Ligue 2": 0.875008125,
-    "National 1": 0.807142174,
-    "National 2": 0.746953201,
-    "National 3": 0.669607688
+    "Ligue 1": 82.9,
+    "Ligue 2": 73.1,
+    "National 1": 67.5,
+    "National 2": 62.9,
+    "National 3": 57.8
 }
 
 smart_goal = {
@@ -1813,7 +1813,7 @@ def calcul_scores_par_kpi(df, joueur, poste):
     # Calcul des scores par KPI
     for kpi, metrics in kpi_metrics.items():
         # Extraire la ligue et remplacer les valeurs absentes par 1
-        coeffs = df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].apply(lambda x: league_rating.get(x, 1))
+        coeffs = df_scores["Joueur + Information"].str.extract(r'\((.*?)\)')[0].apply(lambda x: league_rating.get(x, league_rating["Ligue 1"]) / league_rating["Ligue 1"])
 
         # Appliquer le calcul du score avec la pondération
         df_scores[kpi] = (
