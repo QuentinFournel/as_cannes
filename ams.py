@@ -4060,6 +4060,24 @@ def streamlit_application(all_df_dict):
 
             st.dataframe(df_joueur, use_container_width=True, hide_index=True)
 
+            st.info(
+            "L’IPR (Indice de Prise de Risque) est un indicateur qui mesure la fréquence à laquelle un joueur tente des actions à risque **à chaque ballon touché**. "
+            "Il ne mesure donc pas un volume brut d’actions, mais la **propension du joueur à prendre des initiatives risquées lorsqu’il est impliqué dans le jeu**.\n\n"
+
+            "L’IPR est normalisé par l’« influence » du joueur (ballons reçus), ce qui permet de comparer des profils ayant des volumes de jeu différents. "
+            "Un IPR élevé indique un joueur qui, à chaque prise de balle, cherche régulièrement à déséquilibrer le jeu par une action ambitieuse. "
+            "À l’inverse, un IPR plus faible traduit un joueur plus sécurisé, privilégiant la continuité du jeu.\n\n"
+
+            "L’IPR Viseur mesure la part de **passes à forte intention offensive** (progression, pénétration, création) parmi les ballons joués par le joueur.\n\n"
+
+            "L’IPR Perforateur évalue la fréquence des **prises de risque par la conduite de balle**, à travers les courses progressives et les accélérations.\n\n"
+
+            "L’IPR Duelliste quantifie la prise de risque en **1 contre 1**, en mesurant le recours au dribble par ballon touché.\n\n"
+
+            "Il est essentiel d’interpréter l’IPR en fonction du poste, du rôle et du style de jeu collectif, "
+            "un IPR élevé n’étant ni intrinsèquement positif ni négatif, mais révélateur d’un **profil décisionnel**."
+            )
+
         with tab7:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
 
