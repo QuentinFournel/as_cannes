@@ -189,7 +189,8 @@ smart_goal = {
             "S. Doumbouya",
             "B. M'Backé N'Diayé",
             "A. Fernandes",
-            "R. Gerbeaud"
+            "R. Gerbeaud",
+            "G. Morgan"
         ]
     }
 }
