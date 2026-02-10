@@ -4296,7 +4296,7 @@ def streamlit_application(all_df_dict):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         with col1:
             min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
@@ -4311,9 +4311,6 @@ def streamlit_application(all_df_dict):
                                             max_value=int(df['Taille'].max(skipna=True)), 
                                             value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                             step=1)
-            
-        with col3:
-            pied_fort = st.selectbox("Sélectionnez le pied fort", ["Indifférent", "Droite", "Gauche"], index=0)
         
         metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
 
@@ -4338,8 +4335,7 @@ def streamlit_application(all_df_dict):
 
             recommended_players = search_recommended_players(df, poste, thresholds)
             recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                    ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
-                                                    ((recommended_players['Pied'] == pied_fort) | (pied_fort == "Les deux"))]
+                                                    ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
