@@ -3306,7 +3306,7 @@ def streamlit_application(all_df_dict):
                     "24-25": {
                         "National 2": {
                             "Groupe A": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                                 "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-a/scorerliste/wettbewerb/CN2A/saison_id/2024"
                             },
                             "Groupe B": {
@@ -3356,7 +3356,7 @@ def streamlit_application(all_df_dict):
                     "25-26": {
                         "National 2": {
                             "Groupe A": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                                 "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-a/scorerliste/wettbewerb/CN2A/saison_id/2025"
                             },
                             "Groupe B": {
