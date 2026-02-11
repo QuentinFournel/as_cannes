@@ -3307,106 +3307,84 @@ def streamlit_application(all_df_dict):
                     "24-25": {
                         "National 2": {
                             "Groupe A": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-a/scorerliste/wettbewerb/CN2A/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe B": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-b/scorerliste/wettbewerb/CN2B/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe C": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-c/scorerliste/wettbewerb/CN2C/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             }
                         },
                         "National 3": {
                             "Groupe A": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-corse-mediterranee/scorerliste/wettbewerb/C3CM/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe B": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-nouvelle-aquitaine/scorerliste/wettbewerb/C3NA/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe C": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-centre-val-de-loire/scorerliste/wettbewerb/C3VL/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe D": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-pays-de-la-loire/scorerliste/wettbewerb/C3PL/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe E": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-bretagne/scorerliste/wettbewerb/C3BR/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe F": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-normandie/scorerliste/wettbewerb/C3NO/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe G": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-hauts-de-france/scorerliste/wettbewerb/C3HF/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe H": {
-                                "Classement": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-paris-ile-de-france/scorerliste/wettbewerb/C3IF/saison_id/2024"
+                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             }
                         }
                     },
                     "25-26": {
                         "National 2": {
                             "Groupe A": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-a/scorerliste/wettbewerb/CN2A/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe B": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-b/scorerliste/wettbewerb/CN2B/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe C": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-2-groupe-c/scorerliste/wettbewerb/CN2C/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             }
                         },
                         "National 3": {
                             "Groupe A": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-corse-mediterranee/scorerliste/wettbewerb/C3CM/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe B": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-nouvelle-aquitaine/scorerliste/wettbewerb/C3NA/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe C": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-centre-val-de-loire/scorerliste/wettbewerb/C3VL/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe D": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-pays-de-la-loire/scorerliste/wettbewerb/C3PL/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe E": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-bretagne/scorerliste/wettbewerb/C3BR/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe F": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-normandie/scorerliste/wettbewerb/C3NO/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe G": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-hauts-de-france/scorerliste/wettbewerb/C3HF/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             },
                             "Groupe H": {
-                                "Classement": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
-                                "Buteurs + passeurs": "https://www.transfermarkt.fr/championnat-national-3-paris-ile-de-france/scorerliste/wettbewerb/C3IF/saison_id/2025"
+                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                             }
                         }
                     }
                 }
 
-                url = division[st.session_state['saison']][championnat][groupe]["Classement"]
+                url = division[st.session_state['saison']][championnat][groupe][0]
                 
                 response = requests.get(url)
                 response.encoding = "ISO-8859-1"
