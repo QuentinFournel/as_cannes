@@ -20,6 +20,7 @@ from sklearn.metrics.pairwise import cosine_distances
 import seaborn as sns
 from scipy import stats
 from pathlib import Path
+from bs4 import BeautifulSoup
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -3420,6 +3421,48 @@ def streamlit_application(all_df_dict):
                 classement = classement.rename(columns={'Rangs': 'Classement'})
 
                 st.dataframe(classement, use_container_width=True, hide_index=True)
+            
+            with tab2:
+                url = division[st.session_state['saison']][championnat][groupe]["Buteurs + passeurs"]
+
+                headers = {
+                    "User-Agent": "Mozilla/5.0",
+                    "Accept-Language": "fr-FR,fr;q=0.9",
+                    "Referer": "https://www.transfermarkt.fr/",
+                }
+
+                r = requests.get(url, headers=headers, timeout=30)
+                r.raise_for_status()
+
+                soup = BeautifulSoup(r.text, "lxml")
+                table = soup.select_one("table.items")
+
+                rows = []
+                for tr in table.select("tbody > tr"):
+                    tds = tr.find_all("td")
+
+                    classement = int(tds[0].get_text(strip=True))
+                    joueur = tds[1].find("a").get_text(strip=True)
+                    poste = tds[4].get_text(strip=True)
+                    age = int(tds[7].get_text(strip=True))
+                    matchs = int(tds[8].get_text(strip=True))
+                    buts = int(tds[9].get_text(strip=True))
+                    passes_d = int(tds[10].get_text(strip=True))
+                    total = int(tds[11].get_text(strip=True))
+
+                    rows.append({
+                        "Classement": classement,
+                        "Joueur": joueur,
+                        "Âge": age,
+                        "Poste": poste,
+                        "Matchs joués": matchs,
+                        "Buts": buts,
+                        "Passes décisives": passes_d,
+                        "Total": total
+                    })
+
+                df = pd.DataFrame(rows)
+                st.dataframe(df, use_container_width=True, hide_index=True)
 
     elif page == "Vidéo des buts":
         st.header("Vidéo des buts")
