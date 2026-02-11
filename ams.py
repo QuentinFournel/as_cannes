@@ -3362,6 +3362,8 @@ def streamlit_application(all_df_dict):
             df = df[df['Division'] == championnat]
             df = df[df['Groupe'] == groupe]
 
+            df = df.drop(columns=['Division', 'Groupe'])
+
             st.dataframe(df, use_container_width=True, hide_index=True)
 
     elif page == "Vidéo des buts":
