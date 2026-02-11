@@ -3306,80 +3306,36 @@ def streamlit_application(all_df_dict):
                 division = {
                     "24-25": {
                         "National 2": {
-                            "Groupe A": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe B": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe C": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            }
+                            "Groupe A": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe B": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe C": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                         },
                         "National 3": {
-                            "Groupe A": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe B": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe C": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe D": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe E": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe F": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe G": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe H": {
-                                f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            }
+                            "Groupe A": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe B": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe C": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe D": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe E": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe F": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe G": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe H": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                         }
                     },
                     "25-26": {
                         "National 2": {
-                            "Groupe A": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe B": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe C": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            }
+                            "Groupe A": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe B": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe C": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                         },
                         "National 3": {
-                            "Groupe A": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe B": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe C": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe D": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe E": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe F": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe G": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            },
-                            "Groupe H": {
-                                f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
-                            }
+                            "Groupe A": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe B": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe C": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe D": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-d-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe E": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-e-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe F": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-f-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe G": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-g-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
+                            "Groupe H": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-h-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                         }
                     }
                 }
