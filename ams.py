@@ -1462,6 +1462,24 @@ métriques_par_catégorie = {
     ]
 }
 
+division = {
+    "National 2": {
+        "Groupe A": "https://www.transfermarkt.fr/championnat-national-2-groupe-a/scorerliste/wettbewerb/CN2A/saison_id",
+        "Groupe B": "https://www.transfermarkt.fr/championnat-national-2-groupe-b/scorerliste/wettbewerb/CN2B/saison_id",
+        "Groupe C": "https://www.transfermarkt.fr/championnat-national-2-groupe-c/scorerliste/wettbewerb/CN2C/saison_id"
+        },
+    "National 3": {
+        "Groupe A": "https://www.transfermarkt.fr/championnat-national-3-corse-mediterranee/scorerliste/wettbewerb/C3CM/saison_id",
+        "Groupe B": "https://www.transfermarkt.fr/championnat-national-3-nouvelle-aquitaine/scorerliste/wettbewerb/C3NA/saison_id",
+        "Groupe C": "https://www.transfermarkt.fr/championnat-national-3-centre-val-de-loire/scorerliste/wettbewerb/C3VL/saison_id",
+        "Groupe D": "https://www.transfermarkt.fr/championnat-national-3-pays-de-la-loire/scorerliste/wettbewerb/C3PL/saison_id",
+        "Groupe E": "https://www.transfermarkt.fr/championnat-national-3-bretagne/scorerliste/wettbewerb/C3BR/saison_id",
+        "Groupe F": "https://www.transfermarkt.fr/championnat-national-3-normandie/scorerliste/wettbewerb/C3NO/saison_id",
+        "Groupe G": "https://www.transfermarkt.fr/championnat-national-3-hauts-de-france/scorerliste/wettbewerb/C3HF/saison_id",
+        "Groupe H": "https://www.transfermarkt.fr/championnat-national-3-paris-ile-de-france/scorerliste/wettbewerb/C3IF/saison_id"
+        }
+}
+
 def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
@@ -2350,55 +2368,12 @@ def search_recommended_players(df, poste, thresholds):
 
     df_ranked = rank_columns(df_filtré)
 
-    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Taille', 'Minutes jouées', 'Contrat expiration'] + list(thresholds.keys())].copy()
+    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Taille', 'Minutes jouées', 'Contrat expiration'   ] + list(thresholds.keys())].copy()
 
     for métrique, seuil in thresholds.items():
         df_scores = df_scores[df_scores[métrique] >= seuil]
 
     return df_scores
-
-def creation_moyenne_anglaise(résultats, type_classement, journée_début, journée_fin):
-    # Filtrer les journées
-    résultats_filtrés = résultats[(résultats["Journée"] >= journée_début) & (résultats["Journée"] <= journée_fin)].copy()
-
-    # Initialiser un dictionnaire pour stocker les stats
-    stats = {}
-
-    for _, row in résultats_filtrés.iterrows():
-        eq_dom = row["Équipe à domicile"]
-        eq_ext = row["Équipe à l'extérieur"]
-        score = row["Score"]
-        buts_dom, buts_ext = map(int, score.split(" - "))
-
-        if type_classement == "Général":
-            équipes_concernées = [(eq_dom, buts_dom, buts_ext, True), (eq_ext, buts_ext, buts_dom, False)]
-        elif type_classement == "Domicile":
-            équipes_concernées = [(eq_dom, buts_dom, buts_ext, True)]
-        elif type_classement == "Extérieur":
-            équipes_concernées = [(eq_ext, buts_ext, buts_dom, False)]
-        else:
-            raise ValueError("Type de classement non reconnu")
-
-        for équipe, bp, bc, is_home in équipes_concernées:
-            if équipe not in stats:
-                stats[équipe] = {"Moyenne anglaise": 0}
-
-            # Détermination du résultat
-            if bp > bc:
-                stats[équipe]["Moyenne anglaise"] += 0 if is_home else 2
-            elif bp == bc:
-                stats[équipe]["Moyenne anglaise"] += -2 if is_home else 0
-            else:
-                stats[équipe]["Moyenne anglaise"] += -3 if is_home else -1
-
-    # Conversion en DataFrame
-    df_ranking = pd.DataFrame.from_dict(stats, orient='index')
-    df_ranking.index.name = "Equipes"
-
-    # Tri simplement par valeur, car c'est une Series ou DataFrame d'une colonne
-    df_ranking = df_ranking.sort_values("Moyenne anglaise", ascending=False).reset_index()
-
-    return df_ranking
 
 def performance_index(df_player, poste, match):
     df_match = df_player[df_player["Match"] == match]
@@ -3345,12 +3320,6 @@ def streamlit_application(all_df_dict):
             classement = classement.iloc[:, :-1]
 
             classement.columns = [col.replace('\xa0', ' ').strip() for col in classement.columns]
-
-            df_résultats = pd.read_excel(f"data/Data {st.session_state['saison']}/résultats.xlsx")
-            df_résultats.columns = df_résultats.columns.str.strip()
-
-            moyenne_anglaise = creation_moyenne_anglaise(df_résultats, type_classement, journée_début, journée_fin)
-            classement = classement.merge(moyenne_anglaise, on="Equipes", how="left")
 
             classement = classement.rename(columns={'Rangs': 'Classement'})
 
