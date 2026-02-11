@@ -3286,7 +3286,7 @@ def streamlit_application(all_df_dict):
             else:
                 groupe = st.selectbox("Sélectionnez un groupe", ['Groupe A', 'Groupe B', 'Groupe C', 'Groupe D', 'Groupe E', 'Groupe F', 'Groupe G', 'Groupe H'])
 
-        tab1, tab2 = st.tabs(["Classement", "Buteurs + passeurs"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Classement", "Buteurs", "Passeurs", "Buteurs + passeurs"])
 
         with tab1:
             type_classement = st.selectbox("Sélectionnez un type de classement", ['Général', 'Domicile', 'Extérieur'])
@@ -3357,12 +3357,32 @@ def streamlit_application(all_df_dict):
                 st.dataframe(classement, use_container_width=True, hide_index=True)
             
         with tab2:
-            df = pd.read_excel(f"data/Data {st.session_state['saison']}/Classement_buteurs_passeurs.xlsx")
+            df = pd.read_excel(f"data/Data {st.session_state['saison']}/buteurs_n2_n3.xlsx")
 
-            df = df[df['Division'] == championnat]
+            df = df[df['Championnat'] == championnat]
             df = df[df['Groupe'] == groupe]
 
-            df = df.drop(columns=['Division', 'Groupe'])
+            df = df.drop(columns=['Championnat', 'Groupe'])
+
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+        with tab3:
+            df = pd.read_excel(f"data/Data {st.session_state['saison']}/passeurs_n2_n3.xlsx")
+
+            df = df[df['Championnat'] == championnat]
+            df = df[df['Groupe'] == groupe]
+
+            df = df.drop(columns=['Championnat', 'Groupe'])
+
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+        with tab4:
+            df = pd.read_excel(f"data/Data {st.session_state['saison']}/buteurs_passeurs_n2_n3.xlsx")
+
+            df = df[df['Championnat'] == championnat]
+            df = df[df['Groupe'] == groupe]
+
+            df = df.drop(columns=['Championnat', 'Groupe'])
 
             st.dataframe(df, use_container_width=True, hide_index=True)
 
