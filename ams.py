@@ -3384,7 +3384,7 @@ def streamlit_application(all_df_dict):
                     }
                 }
 
-                url = division[st.session_state['saison']][championnat][groupe][0]
+                url = division[st.session_state['saison']][championnat][groupe]
                 
                 response = requests.get(url)
                 response.encoding = "ISO-8859-1"
