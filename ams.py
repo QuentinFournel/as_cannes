@@ -3777,7 +3777,7 @@ def streamlit_application(all_df_dict):
                 dfs = {}
 
                 for col in colonnes_filtrées:
-                    df_temp = df_filtré[['Joueur', 'Poste', 'Équipe dans la période sélectionnée', 'Matchs joués', col]].copy()
+                    df_temp = df_filtré[['Joueur', 'Équipe dans la période sélectionnée', 'Matchs joués', col]].copy()
 
                     # Classement sans supprimer les NaN
                     ranked = df_temp[col].rank(ascending=False, method='min')
