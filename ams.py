@@ -3901,7 +3901,9 @@ def streamlit_application(all_df_dict):
                             df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
                             df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
                         else:
-                            df_stats = df_collective.mean(numeric_only=True).to_frame().T.round(1)
+                            df_filtré = df_collective[df_collective['Compétition'] == 'France. National 2']
+                            df_stats = df_filtré[df_filtré['Équipe'] == équipe]
+                            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(1)
                             df_stats['Équipe'] = équipe
                             df_stats['Matchs analysés'] = len(selected_matches)
                             df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
