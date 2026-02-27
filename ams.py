@@ -3864,6 +3864,29 @@ def streamlit_application(all_df_dict):
                 tab3, tab4 = st.tabs(['Statistiques moyennes', 'Statistiques par match'])
 
                 with tab3:
+                    match_options = df_collective["Match"].dropna().unique().tolist()
+
+                    ALL_MATCHES_LABEL = "Tous les matchs"
+                    match_options_with_all = [ALL_MATCHES_LABEL] + match_options
+
+                    st.session_state["selected_matches"] = [
+                        m for m in st.session_state.get("selected_matches", [])
+                        if m in match_options_with_all
+                    ]
+
+                    matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options_with_all, key="selected_matches")
+                
+                    if not matches:
+                        st.info("Sélectionne au moins un match.")
+                        st.stop()
+
+                    if ALL_MATCHES_LABEL in matches:
+                        selected_matches = match_options
+                    else:
+                        selected_matches = matches
+
+                    df_collective = df_collective[df_collective["Match"].isin(selected_matches)]
+
                     colonnes_a_ranker = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
 
                     df_stats_ranks = df_stats_moyennes.copy()
