@@ -3887,25 +3887,34 @@ def streamlit_application(all_df_dict):
 
                     df_collective = df_collective[df_collective["Match"].isin(selected_matches)]
 
-                    colonnes_a_ranker = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+                    df_stats = df_collective.mean(numeric_only=True).to_frame().T.round(1)
+                    df_stats['Équipe'] = équipe
+                    df_stats['Matchs analysés'] = len(selected_matches)
 
-                    df_stats_ranks = df_stats_moyennes.copy()
+                    df_stats = df_stats.drop(['Championnat'], axis=1)
+
+                    cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats.columns if col not in ['Équipe', 'Matchs analysés']]
+                    df_stats = df_stats[cols]
+
+                    colonnes_a_ranker = [col for col in df_stats.columns if col not in ['Équipe', 'Matchs analysés']]
+
+                    df_stats_ranks = df_stats.copy()
 
                     for col in colonnes_a_ranker:
                         if col in colonnes_bas_mieux:
                             # Plus c'est bas, mieux c'est
-                            df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=True, method='min')
+                            df_stats_ranks[col] = df_stats[col].rank(ascending=True, method='min')
                         else:
                             # Plus c'est haut, mieux c'est
-                            df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=False, method='min')
+                            df_stats_ranks[col] = df_stats[col].rank(ascending=False, method='min')
 
                     # Colonnes non numériques inchangées
-                    df_stats_ranks['Équipe'] = df_stats_moyennes['Équipe']
-                    df_stats_ranks['Matchs analysés'] = df_stats_moyennes['Matchs analysés']
+                    df_stats_ranks['Équipe'] = df_stats['Équipe']
+                    df_stats_ranks['Matchs analysés'] = df_stats['Matchs analysés']
                     df_stats_ranks = df_stats_ranks[cols]
                     df_stats_ranks = df_stats_ranks.astype({col: int for col in colonnes_a_ranker})
 
-                    équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
+                    équipe_analysée = df_stats[df_stats["Équipe"] == team]
                     équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
 
                     tab5, tab6, tab7, tab8, tab9 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
