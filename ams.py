@@ -3648,6 +3648,8 @@ def streamlit_application(all_df_dict):
             }
         }
 
+        extensions = [".mp4", ".mov"]
+
         with tab1:
             col1, col2 = st.columns([3, 1])
 
@@ -3665,9 +3667,15 @@ def streamlit_application(all_df_dict):
 
             match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
-            # Affichage si la vidéo existe
-            if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
-                st.video(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4")
+            video_path = None
+            for ext in extensions:
+                path = f"data/Data {st.session_state['saison']}/{journée} - {match}{ext}"
+                if os.path.exists(path):
+                    video_path = path
+                    break
+
+            if video_path:
+                st.video(video_path)
             else:
                 st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
@@ -3679,9 +3687,15 @@ def streamlit_application(all_df_dict):
             with col2:
                 match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
-            # Affichage si la vidéo existe
-            if os.path.exists(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4"):
-                st.video(f"data/Data {st.session_state['saison']}/{journée} - {match}.mp4")
+            video_path = None
+            for ext in extensions:
+                path = f"data/Data {st.session_state['saison']}/{journée} - {match}{ext}"
+                if os.path.exists(path):
+                    video_path = path
+                    break
+
+            if video_path:
+                st.video(video_path)
             else:
                 st.warning("⚠️ Vidéo non disponible pour ce match : il est possible qu'il n'y ait pas eu de but (0-0) ou que la vidéo ne soit pas encore disponible.")
 
