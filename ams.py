@@ -3644,6 +3644,16 @@ def streamlit_application(all_df_dict):
                     "SC Toulon VS GOAL FC",
                     "EFC Fréjus Saint-Raphaël VS FC Rousset Sainte-Victoire",
                     "FC Istres VS AS Cannes"
+                ],
+                "J20": [
+                    "Hyères FC VS GFA Rumilly Vallières",
+                    "GOAL FC VS FC 93",
+                    "Nîmes Olympique VS RC Grasse",
+                    "US Créteil Lusitanos VS AS Saint-Priest",
+                    "US Lusitanos Saint-Maur VS EFC Fréjus Saint-Raphaël",
+                    "AS Cannes VS FC Limonest DSD",
+                    "FC Rousset Sainte-Victoire VS SC Toulon",
+                    "Andrézieux-Bouthéon FC VS FC Istres"
                 ]
             }
         }
