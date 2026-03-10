@@ -2261,7 +2261,7 @@ def plot_team_metrics(df, x_metric, y_metric):
     y_mean = df[y_metric].mean()
 
     logos_dict = {
-        "Andrézieux": "https://upload.wikimedia.org/wikipedia/fr/thumb/d/d1/Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg/langfr-1024px-Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg.png",
+        "Andrézieux": "https://upload.wikimedia.org/wikipedia/fr/d/d1/Logo_Andr%C3%A9zieux-Bouth%C3%A9on_FC_2019.svg",
         "Anglet Genets": "https://upload.wikimedia.org/wikipedia/fr/thumb/8/84/Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg/langfr-1024px-Logo_Les_Gen%C3%AAts_d%27Anglet_-_2018.svg.png",
         "Angoulême": "https://upload.wikimedia.org/wikipedia/fr/thumb/c/c5/Angoul%C3%AAme_CFC_2020.svg/langfr-1024px-Angoul%C3%AAme_CFC_2020.svg.png",
         "Bergerac": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Logo_Bergerac_P%C3%A9rigord_FC.svg/langfr-800px-Logo_Bergerac_P%C3%A9rigord_FC.svg.png",
@@ -4495,12 +4495,12 @@ def streamlit_application(all_df_dict):
 if __name__ == '__main__':
     st.set_page_config(
         page_title="AS Cannes",
-        page_icon="https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png"
+        page_icon="https://upload.wikimedia.org/wikipedia/fr/7/72/AS_Cannes_foot_Logo_2017.svg"
     )
 
     st.title("AS Cannes")
 
-    logo = "https://upload.wikimedia.org/wikipedia/fr/thumb/7/72/AS_Cannes_foot_Logo_2017.svg/langfr-800px-AS_Cannes_foot_Logo_2017.svg.png"
+    logo = "https://upload.wikimedia.org/wikipedia/fr/7/72/AS_Cannes_foot_Logo_2017.svg"
 
     # CSS pour placer le logo en haut à droite
     st.markdown(
