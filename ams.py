@@ -3902,7 +3902,6 @@ def streamlit_application(all_df_dict):
                 
                     if not matches:
                         st.info("Sélectionne au moins un match.")
-                        st.stop()
 
                     if ALL_MATCHES_LABEL in matches:
                         selected_matches = match_options
