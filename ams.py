@@ -1572,8 +1572,8 @@ def collect_individual_data():
     load_all_files_from_drive()
 
     saisons = ["24-25", "25-26"]
-    competitions = ["Ligue 1", "Ligue 2", "National 1", "National 2", "Français", "Top 5 Européen"]
-    positions = ["Ailier", "Buteur", "Défenseur central", "Latéral", "Milieu", "Milieu offensif", "Gardien"]
+    competitions = ["Ligue 1", "Ligue 2", "National 1", "National 2", "Francais", "Top 5 Europeen"]
+    positions = ["Ailier", "Buteur", "Defenseur central", "Lateral", "Milieu", "Milieu offensif", "Gardien"]
 
     all_df_dict = {}
 
@@ -1615,8 +1615,8 @@ def collect_individual_data():
             [*dfs["National 1"].values(),
              *dfs["National 2"].values()]
         )
-        df_français = safe_concat(dfs["Français"].values())
-        df_top5européen = safe_concat(dfs["Top 5 Européen"].values())
+        df_français = safe_concat(dfs["Francais"].values())
+        df_top5européen = safe_concat(dfs["Top 5 Europeen"].values())
 
         # Nettoyage
         for df in (df_championnat_de_france, df_n1_n2, df_français, df_top5européen):
