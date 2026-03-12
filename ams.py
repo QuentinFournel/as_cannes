@@ -1580,10 +1580,14 @@ def collect_individual_data():
     def safe_read(path_str):
         path = Path(path_str)
         if not path.exists():
+            print(f"Fichier introuvable : {path}")
             return None
         try:
-            return read_with_competition(str(path))
-        except:
+            df = read_with_competition(str(path))
+            print(f"Fichier chargé : {path}")
+            return df
+        except Exception as e:
+            print(f"Erreur lecture {path} : {e}")
             return None
 
     def safe_concat(list_df):
