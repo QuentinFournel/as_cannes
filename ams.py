@@ -1467,8 +1467,18 @@ def read_with_competition(filepath):
     # Extrait la compétition depuis le nom du fichier
     competition = filepath.split('/')[-1].split(' - ')[0].strip()
 
+    if competition == "Francais":
+        competition = "Français"
+    elif competition == "Top 5 Europeen":
+        competition = "Top 5 européen"
+
     # Extrait le poste depuis le nom du fichier
     poste = filepath.split('/')[-1].split(' - ')[1].split('.')[0].strip()
+
+    if poste == "Defenseur central":
+        poste = "Défenseur central"
+    elif poste == "Lateral":
+        poste = "Latéral"
     
     # Lecture du fichier
     df = pd.read_excel(filepath)
@@ -1577,19 +1587,6 @@ def collect_individual_data():
 
     all_df_dict = {}
 
-    def safe_read(path_str):
-        path = Path(path_str)
-        if not path.exists():
-            print(f"Fichier introuvable : {path}")
-            return None
-        try:
-            df = read_with_competition(str(path))
-            print(f"Fichier chargé : {path}")
-            return df
-        except Exception as e:
-            print(f"Erreur lecture {path} : {e}")
-            return None
-
     def safe_concat(list_df):
         valid_df = [df for df in list_df if df is not None and not df.empty]
         return pd.concat(valid_df, ignore_index=True) if valid_df else pd.DataFrame()
@@ -1602,7 +1599,7 @@ def collect_individual_data():
         for comp in competitions:
             for pos in positions:
                 fichier = base_dir / f"{comp} - {pos}.xlsx"
-                dfs[comp][pos] = safe_read(fichier)
+                dfs[comp][pos] = df = read_with_competition(str(Path(fichier)))
 
         # Concat selon tes regroupements
         df_championnat_de_france = safe_concat(
@@ -3761,6 +3758,7 @@ def streamlit_application(all_df_dict):
 
         for équipe in équipes[st.session_state['saison']]:
             if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx"):
+                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
                 continue
             df_filtré = collect_collective_data(équipe)
             df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
