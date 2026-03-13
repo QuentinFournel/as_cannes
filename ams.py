@@ -4085,9 +4085,9 @@ def streamlit_application(all_df_dict):
             )
         
         if team == "Cannes":
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Points forts/Points faibles", "Nuage de points", "Joueurs similaires", "Matchs"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Proportion des passes", "Points forts/Points faibles", "Nuage de points", "Joueurs similaires", "Matchs"])
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR","Points forts/Points faibles", "Nuage de points", "Joueurs similaires"])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Statistiques", "Radar", "KPI", "Statistiques avancées", "Type de profil", "IPR", "Proportion des passes", "Points forts/Points faibles", "Nuage de points", "Joueurs similaires"])
 
         with tab1:
             st.subheader('Informations')
@@ -4215,6 +4215,19 @@ def streamlit_application(all_df_dict):
             )
 
         with tab7:
+            passes = df[['Joueur + Information', 'Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']]
+
+            total_passes = passes[['Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']].sum(axis=1)
+
+            passes['Proportion de passes vers l’arrière (%)'] = (passes['Passes arrière par 90'] / total_passes * 100).round(2)
+            passes['Proportion de passes latérales (%)'] = (passes['Passes latérales par 90'] / total_passes * 100).round(2)
+            passes['Proportion de passes vers l’avant (%)'] = (passes['Passes avant par 90'] / total_passes * 100).round(2)
+
+            passes_proportions = passes[['Joueur + Information', 'Proportion de passes vers l’arrière (%)', 'Proportion de passes latérales (%)', 'Proportion de passes vers l’avant (%)']]
+
+            st.dataframe(passes_proportions[passes_proportions['Joueur + Information'] == joueur], use_container_width=True, hide_index=True)
+
+        with tab8:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
 
             col1, col2 = st.columns(2)
@@ -4243,7 +4256,7 @@ def streamlit_application(all_df_dict):
                                 unsafe_allow_html=True
                             )
 
-        with tab8:
+        with tab9:
             if poste != 'Gardien': 
                 metrics_label  = st.selectbox("Sélectionnez une base de comparaison", [k for k in metrics_x_y.keys() if k != "Buts évités"])
             else:
@@ -4256,7 +4269,7 @@ def streamlit_application(all_df_dict):
             fig = plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4)
             st.plotly_chart(fig, use_container_width=True)
 
-        with tab9:
+        with tab10:
             nombre_joueur = st.number_input("Sélectionnez le nombre de joueurs que vous voulez voir apparaître", min_value=1, max_value=50, value=10)
 
             similar_players = compute_similarity(df, joueur, poste)
@@ -4266,7 +4279,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(similar_players.head(nombre_joueur), use_container_width=True, hide_index=True)
 
         if team == "Cannes":
-            with tab10:
+            with tab11:
                 nom_joueur = joueur.split(" - ")[0]
 
                 df_player = create_player_data(nom_joueur, sélection_dataframe)
