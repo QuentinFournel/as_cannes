@@ -4439,7 +4439,7 @@ def streamlit_application(all_df_dict):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
 
         with col1:
             min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
@@ -4454,6 +4454,14 @@ def streamlit_application(all_df_dict):
                                             max_value=int(df['Taille'].max(skipna=True)), 
                                             value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                             step=1)
+            
+        with col3:
+            min_contrat, max_contrat = st.slider("Sélectionnez une tranche de durée de contrat restante", 
+                                                min_value=int(df['Contrat expiration'].min(skipna=True)), 
+                                                max_value=int(df['Contrat expiration'].max(skipna=True)), 
+                                                value=(int(df['Contrat expiration'].min(skipna=True)), int(df['Contrat expiration'].max(skipna=True))), 
+                                                step=1)
+
         col1, col2 = st.columns(2)
 
         with col1:
