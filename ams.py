@@ -4454,7 +4454,9 @@ def streamlit_application(all_df_dict):
                                         max_value=int(df['Taille'].max(skipna=True)), 
                                         value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                         step=1)
-        
+            
+        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
+
         with col3:
             min_contrat, max_contrat = st.slider("Sélectionnez une tranche de durée de contrat restante",
                                         min_value=df['Contrat expiration'].min(skipna=True).to_pydatetime(),
