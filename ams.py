@@ -4458,14 +4458,14 @@ def streamlit_application(all_df_dict):
         df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
 
         with col3:
-            min_contrat, max_contrat = st.slider("Sélectionnez une tranche de durée de contrat restante",
-                                        min_value=df['Contrat expiration'].min(skipna=True).to_pydatetime(),
-                                        max_value=df['Contrat expiration'].max(skipna=True).to_pydatetime(),
+            min_contrat, max_contrat = st.slider("Sélectionnez une année de fin de contrat",
+                                        min_value=int(df['Contrat expiration'].dt.year.min(skipna=True)),
+                                        max_value=int(df['Contrat expiration'].dt.year.max(skipna=True)),
                                         value=(
-                                            df['Contrat expiration'].min(skipna=True).to_pydatetime(),
-                                            df['Contrat expiration'].max(skipna=True).to_pydatetime()
+                                            int(df['Contrat expiration'].dt.year.min(skipna=True)),
+                                            int(df['Contrat expiration'].dt.year.max(skipna=True))
                                         ),
-                                        format="DD/MM/YYYY")
+                                        step=1)
 
         col1, col2 = st.columns(2)
 
