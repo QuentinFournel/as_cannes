@@ -4450,17 +4450,20 @@ def streamlit_application(all_df_dict):
 
         with col2:
             min_taille, max_taille = st.slider("Sélectionnez une tranche de taille", 
-                                            min_value=int(df['Taille'].min(skipna=True)), 
-                                            max_value=int(df['Taille'].max(skipna=True)), 
-                                            value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
-                                            step=1)
-            
+                                        min_value=int(df['Taille'].min(skipna=True)), 
+                                        max_value=int(df['Taille'].max(skipna=True)), 
+                                        value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
+                                        step=1)
+        
         with col3:
-            min_contrat, max_contrat = st.slider("Sélectionnez une tranche de durée de contrat restante", 
-                                                min_value=int(df['Contrat expiration'].min(skipna=True)), 
-                                                max_value=int(df['Contrat expiration'].max(skipna=True)), 
-                                                value=(int(df['Contrat expiration'].min(skipna=True)), int(df['Contrat expiration'].max(skipna=True))), 
-                                                step=1)
+            min_contrat, max_contrat = st.slider("Sélectionnez une tranche de durée de contrat restante",
+                                        min_value=df['Contrat expiration'].min(skipna=True).to_pydatetime(),
+                                        max_value=df['Contrat expiration'].max(skipna=True).to_pydatetime(),
+                                        value=(
+                                            df['Contrat expiration'].min(skipna=True).to_pydatetime(),
+                                            df['Contrat expiration'].max(skipna=True).to_pydatetime()
+                                        ),
+                                        format="DD/MM/YYYY")
 
         col1, col2 = st.columns(2)
 
