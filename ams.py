@@ -4439,13 +4439,24 @@ def streamlit_application(all_df_dict):
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
+
+        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
 
         with col1:
             min_age, max_age = st.slider("Sélectionnez une tranche d'âge", 
                                         min_value=int(df['Âge'].min(skipna=True)), 
                                         max_value=int(df['Âge'].max(skipna=True)), 
                                         value=(int(df['Âge'].min(skipna=True)), int(df['Âge'].max(skipna=True))), 
+                                        step=1)
+            
+            min_contrat, max_contrat = st.slider("Sélectionnez une tranche de contrat",
+                                        min_value=int(df['Contrat expiration'].dt.year.min(skipna=True)),
+                                        max_value=int(df['Contrat expiration'].dt.year.max(skipna=True)),
+                                        value=(
+                                            int(df['Contrat expiration'].dt.year.min(skipna=True)),
+                                            int(df['Contrat expiration'].dt.year.max(skipna=True))
+                                        ),
                                         step=1)
 
         with col2:
@@ -4455,19 +4466,11 @@ def streamlit_application(all_df_dict):
                                         value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                         step=1)
             
-        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
-
-        with col3:
-            min_contrat, max_contrat = st.slider("Sélectionnez une fin de contrat",
-                                        min_value=int(df['Contrat expiration'].dt.year.min(skipna=True)),
-                                        max_value=int(df['Contrat expiration'].dt.year.max(skipna=True)),
-                                        value=(
-                                            int(df['Contrat expiration'].dt.year.min(skipna=True)),
-                                            int(df['Contrat expiration'].dt.year.max(skipna=True))
-                                        ),
-                                        step=1)
-
-        col1, col2 = st.columns(2)
+            min_minutes, max_minutes = st.slider("Sélectionnez une tranche de minutes jouées",
+                                        min_value=int(df['Minutes jouées'].min(skipna=True)), 
+                                        max_value=int(df['Minutes jouées'].max(skipna=True)), 
+                                        value=(int(df['Minutes jouées'].min(skipna=True)), int(df['Minutes jouées'].max(skipna=True))), 
+                                        step=50)
 
         with col1:
             metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
@@ -4496,6 +4499,7 @@ def streamlit_application(all_df_dict):
             recommended_players = recommended_players[
                 ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
                 ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
+                ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
                 ((recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
                 (recommended_players['Contrat expiration'].dt.year <= max_contrat))
             ]
@@ -4531,6 +4535,7 @@ def streamlit_application(all_df_dict):
             recommended_players = recommended_players[
                 ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
                 ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
+                ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
                 ((recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
                 (recommended_players['Contrat expiration'].dt.year <= max_contrat))
             ]
