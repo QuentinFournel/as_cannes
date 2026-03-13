@@ -4454,8 +4454,10 @@ def streamlit_application(all_df_dict):
                                             max_value=int(df['Taille'].max(skipna=True)), 
                                             value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                             step=1)
-        
-        metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
+        col1, col2 = st.columns(2)
+
+        with col1:
+            metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
 
         if metric_or_kpi == "Métrique":
             colonnes_à_exclure = [
@@ -4470,7 +4472,8 @@ def streamlit_application(all_df_dict):
                 if col not in colonnes_à_exclure
             ]
             
-            métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
+            with col2:
+                métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
 
             thresholds = {}
             for métrique in métriques_selectionnées:
@@ -4497,7 +4500,8 @@ def streamlit_application(all_df_dict):
                 if col not in colonnes_à_exclure
             ]
 
-            kpis_sélectionnées = st.multiselect("Sélectionnez des KPIs", colonnes_filtrées)
+            with col2:
+                kpis_sélectionnées = st.multiselect("Sélectionnez des KPIs", colonnes_filtrées)
 
             thresholds = {}
             for kpi in kpis_sélectionnées:
