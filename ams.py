@@ -4493,8 +4493,12 @@ def streamlit_application(all_df_dict):
                 thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
 
             recommended_players = search_recommended_players(df, poste, thresholds)
-            recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                    ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
+            recommended_players = recommended_players[
+                ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
+                ((recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
+                (recommended_players['Contrat expiration'].dt.year <= max_contrat))
+            ]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
@@ -4521,8 +4525,12 @@ def streamlit_application(all_df_dict):
                 thresholds[kpi] = st.slider(f"Sélectionnez le top % pour le KPI : {kpi}", min_value=0, max_value=100, value=50, step=5, key=kpi)
 
             recommended_players = search_recommended_players(scores_df, poste, thresholds)
-            recommended_players = recommended_players[((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                                                    ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0))]
+            recommended_players = recommended_players[
+                ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+                ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
+                ((recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
+                (recommended_players['Contrat expiration'].dt.year <= max_contrat))
+            ]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
