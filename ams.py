@@ -4455,7 +4455,7 @@ def streamlit_application(all_df_dict):
                                         value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                         step=1)
             
-        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce').dt.date
+        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
 
         with col3:
             min_contrat, max_contrat = st.slider("Sélectionnez une fin de contrat",
@@ -4503,7 +4503,10 @@ def streamlit_application(all_df_dict):
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
-            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+            df_affichage = recommended_players.copy()
+            df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
+
+            st.dataframe(df_affichage, use_container_width=True, hide_index=True)
 
         elif metric_or_kpi == "KPI":
             scores_df = calcul_scores_par_kpi(df, "", poste)
@@ -4535,7 +4538,10 @@ def streamlit_application(all_df_dict):
 
             recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
 
-            st.dataframe(recommended_players, use_container_width=True, hide_index=True)
+            df_affichage = recommended_players.copy()
+            df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
+
+            st.dataframe(df_affichage, use_container_width=True, hide_index=True)
 
 if __name__ == '__main__':
     st.set_page_config(
