@@ -4455,7 +4455,7 @@ def streamlit_application(all_df_dict):
                                         value=(int(df['Taille'].min(skipna=True)), int(df['Taille'].max(skipna=True))), 
                                         step=1)
             
-        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce')
+        df['Contrat expiration'] = pd.to_datetime(df['Contrat expiration'], errors='coerce').dt.date
 
         with col3:
             min_contrat, max_contrat = st.slider("Sélectionnez une fin de contrat",
