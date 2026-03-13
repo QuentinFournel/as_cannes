@@ -4225,7 +4225,12 @@ def streamlit_application(all_df_dict):
 
             passes_proportions = passes[['Joueur + Information', 'Proportion de passes vers l’arrière (%)', 'Proportion de passes latérales (%)', 'Proportion de passes vers l’avant (%)']]
 
-            st.dataframe(passes_proportions[passes_proportions['Joueur + Information'] == joueur], use_container_width=True, hide_index=True)
+            df_joueur = passes_proportions.loc[
+                passes_proportions["Joueur + Information"] == joueur,
+                ["Proportion de passes vers l’arrière (%)", "Proportion de passes latérales (%)", "Proportion de passes vers l’avant (%)"]
+            ]
+
+            st.dataframe(df_joueur, use_container_width=True, hide_index=True)
 
         with tab8:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
