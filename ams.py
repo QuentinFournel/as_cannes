@@ -3757,11 +3757,18 @@ def streamlit_application(all_df_dict):
         df_stats_moyennes = pd.DataFrame()
 
         for équipe in équipes[st.session_state['saison']]:
-            equipe_normalized = unicodedata.normalize("NFC", équipe)
-            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {equipe_normalized}.xlsx"):
-                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibleeeeeees.")
+            
+            fichier = None
+            for f in os.listdir(f"data/Data {st.session_state['saison']}"):
+                if équipe.lower() in f.lower() and f.endswith(".xlsx"):
+                    fichier = f
+                    break
+
+            if fichier is None:
+                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
                 continue
-            df_filtré = collect_collective_data(equipe_normalized)
+
+            df_filtré = collect_collective_data(équipe)
             df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
             df_stats = df_filtré[df_filtré['Équipe'] == équipe]
             df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
