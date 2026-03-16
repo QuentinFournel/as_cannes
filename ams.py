@@ -3757,7 +3757,7 @@ def streamlit_application(all_df_dict):
         df_stats_moyennes = pd.DataFrame()
 
         for équipe in équipes[st.session_state['saison']]:
-            équipe_normalisée = unicodedata.normalize("NFC", équipe)
+            équipe_normalisée = unicodedata.normalize("NFD", équipe)
             if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
                 st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
                 continue
