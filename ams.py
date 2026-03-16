@@ -3735,19 +3735,19 @@ def streamlit_application(all_df_dict):
                 "Toulon"
             ],
             "25-26": [
-                "Andrézieux",
+                "Andrézieux",
                 "Cannes",
                 "Fréjus St-Raphaël",
                 "GOAL FC",
                 "Grasse",
-                "Hyères FC",
+                "Hyères FC",
                 "Istres",
-                "Rumilly Vallières",
+                "Rumilly Vallières",
                 "Saint-Priest",
                 "Toulon",
-                "Créteil",
+                "Créteil",
                 "St Maur Lusitanos",
-                "Nîmes",
+                "Nîmes",
                 "FC 93 Bobigny BG",
                 "Rousset-Ste Victoire",
                 "Limonest"
@@ -3758,7 +3758,7 @@ def streamlit_application(all_df_dict):
 
         for équipe in équipes[st.session_state['saison']]:
             if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx"):
-                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibleees.")
+                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
                 continue
             df_filtré = collect_collective_data(équipe)
             df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
