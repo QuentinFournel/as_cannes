@@ -3737,7 +3737,7 @@ def streamlit_application(all_df_dict):
             "25-26": [
                 "Andrézieux",
                 "Cannes",
-                "Fréjus St-Raphaël",
+                "Fréjus St-Raphaël",
                 "GOAL FC",
                 "Grasse",
                 "Hyères FC",
@@ -3757,17 +3757,9 @@ def streamlit_application(all_df_dict):
         df_stats_moyennes = pd.DataFrame()
 
         for équipe in équipes[st.session_state['saison']]:
-            
-            fichier = None
-            for f in os.listdir(f"data/Data {st.session_state['saison']}"):
-                if équipe.lower() in f.lower() and f.endswith(".xlsx"):
-                    fichier = f
-                    break
-
-            if fichier is None:
-                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
+            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx"):
+                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibleees.")
                 continue
-
             df_filtré = collect_collective_data(équipe)
             df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
             df_stats = df_filtré[df_filtré['Équipe'] == équipe]
