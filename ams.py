@@ -3688,9 +3688,11 @@ def streamlit_application(all_df_dict):
 
             match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
+            match_normalisée = unicodedata.normalize("NFD", match)
+
             video_path = None
             for ext in extensions:
-                path = f"data/Data {st.session_state['saison']}/{journée} - {match}{ext}"
+                path = f"data/Data {st.session_state['saison']}/{journée} - {match_normalisée}{ext}"
                 if os.path.exists(path):
                     video_path = path
                     break
@@ -3708,9 +3710,11 @@ def streamlit_application(all_df_dict):
             with col2:
                 match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
+            match_normalisée = unicodedata.normalize("NFD", match)
+
             video_path = None
             for ext in extensions:
-                path = f"data/Data {st.session_state['saison']}/{journée} - {match}{ext}"
+                path = f"data/Data {st.session_state['saison']}/{journée} - {match_normalisée}{ext}"
                 if os.path.exists(path):
                     video_path = path
                     break
