@@ -4167,7 +4167,12 @@ def streamlit_application(all_df_dict):
             if team == "Cannes":
                 nom_joueur = joueur.split(" - ")[0]
 
-                df_player = create_player_data(nom_joueur, sélection_dataframe)
+                if st.session_state['saison'] != "24-25":
+                    nom_normalisé = unicodedata.normalize("NFD", nom_joueur)
+                else:
+                    nom_normalisé = nom_joueur
+                
+                df_player = create_player_data(nom_normalisé, sélection_dataframe)
 
                 df_player_mean = df_player.mean(numeric_only=True).to_frame().T
                 df_player_mean = ajouter_pourcentages(df_player_mean)
@@ -4316,7 +4321,12 @@ def streamlit_application(all_df_dict):
             with tab11:
                 nom_joueur = joueur.split(" - ")[0]
 
-                df_player = create_player_data(nom_joueur, sélection_dataframe)
+                if st.session_state['saison'] != "24-25":
+                    nom_normalisé = unicodedata.normalize("NFD", nom_joueur)
+                else:
+                    nom_normalisé = nom_joueur
+
+                df_player = create_player_data(nom_normalisé, sélection_dataframe)
 
                 df_player = ajouter_pourcentages(df_player)
 
