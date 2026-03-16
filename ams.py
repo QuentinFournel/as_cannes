@@ -3688,10 +3688,10 @@ def streamlit_application(all_df_dict):
 
             match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
-            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21", "J22", "J23", "J24", "J25", "J26", "J27", "J28", "J29", "J30"]:
-               match_normalisée = unicodedata.normalize("NFD", match)
+            if st.session_state['saison'] == "24-25" or (st.session_state['saison'] == "25-26" and journée in ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9", "J10", "J11", "J12", "J13", "J14", "J15", "J16", "J17", "J18", "J19"]):
+               match_normalisée = match 
             else:
-                match_normalisée = match 
+                match_normalisée = unicodedata.normalize("NFD", match)
 
             video_path = None
             for ext in extensions:
@@ -3713,10 +3713,10 @@ def streamlit_application(all_df_dict):
             with col2:
                 match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
-            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21", "J22", "J23", "J24", "J25", "J26", "J27", "J28", "J29", "J30"]:
-               match_normalisée = unicodedata.normalize("NFD", match)
+            if st.session_state['saison'] == "24-25" or (st.session_state['saison'] == "25-26" and journée in ["J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9", "J10", "J11", "J12", "J13", "J14", "J15", "J16", "J17", "J18", "J19"]):
+               match_normalisée = match 
             else:
-                match_normalisée = match 
+                match_normalisée = unicodedata.normalize("NFD", match)
 
             video_path = None
             for ext in extensions:
@@ -3777,7 +3777,10 @@ def streamlit_application(all_df_dict):
         df_stats_moyennes = pd.DataFrame()
 
         for équipe in équipes[st.session_state['saison']]:
-            équipe_normalisée = unicodedata.normalize("NFD", équipe)
+            if st.session_state['saison'] != "24-25":
+                équipe_normalisée = unicodedata.normalize("NFD", équipe)
+            else:
+                équipe_normalisée = équipe
             if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
                 st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
                 continue
@@ -3902,7 +3905,11 @@ def streamlit_application(all_df_dict):
         with tab2:
             team = st.selectbox("Sélectionnez une équipe", équipes[st.session_state['saison']], index=équipes[st.session_state['saison']].index("Cannes"))
 
-            normalized_team = unicodedata.normalize("NFD", team)
+            if st.session_state['saison'] != "24-25":
+                normalized_team = unicodedata.normalize("NFD", team)
+            else:
+                normalized_team = team
+
             if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {normalized_team}.xlsx"):
                 st.warning(f"⚠️ Fichier non trouvé pour {team}.")
 
