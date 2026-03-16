@@ -3882,11 +3882,12 @@ def streamlit_application(all_df_dict):
         with tab2:
             team = st.selectbox("Sélectionnez une équipe", équipes[st.session_state['saison']], index=équipes[st.session_state['saison']].index("Cannes"))
 
-            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {team}.xlsx"):
+            normalized_team = unicodedata.normalize("NFD", team)
+            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {normalized_team}.xlsx"):
                 st.warning(f"⚠️ Fichier non trouvé pour {team}.")
 
             else:
-                df_collective = collect_collective_data(team)
+                df_collective = collect_collective_data(normalized_team)
 
                 tab3, tab4 = st.tabs(['Statistiques par match', 'Statistiques moyennes'])
 
