@@ -3849,7 +3849,12 @@ def streamlit_application(all_df_dict):
                     for col in other_cols:
                         df_temp = df_stats_moyennes[base_cols + [col]].copy()
                         ascending = True if col in colonnes_bas_mieux else False
-                        df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
+                        df_temp['Classement'] = (
+                            df_temp[col]
+                            .replace([float('inf'), float('-inf')], pd.NA)
+                            .rank(ascending=ascending, method='min')
+                            .astype('Int64')
+                        )
 
                         display_col = f"{col} (par 90)"
                         df_temp.rename(columns={col: display_col}, inplace=True)
