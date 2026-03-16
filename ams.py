@@ -3735,19 +3735,19 @@ def streamlit_application(all_df_dict):
                 "Toulon"
             ],
             "25-26": [
-                "Andrézieux",
+                "Andrézieux",
                 "Cannes",
-                "Fréjus St-Raphaël",
+                "Fréjus St-Raphaël",
                 "GOAL FC",
                 "Grasse",
-                "Hyères FC",
+                "Hyères FC",
                 "Istres",
-                "Rumilly Vallières",
+                "Rumilly Vallières",
                 "Saint-Priest",
                 "Toulon",
-                "Créteil",
+                "Créteil",
                 "St Maur Lusitanos",
-                "Nîmes",
+                "Nîmes",
                 "FC 93 Bobigny BG",
                 "Rousset-Ste Victoire",
                 "Limonest"
@@ -3849,12 +3849,7 @@ def streamlit_application(all_df_dict):
                     for col in other_cols:
                         df_temp = df_stats_moyennes[base_cols + [col]].copy()
                         ascending = True if col in colonnes_bas_mieux else False
-                        df_temp['Classement'] = (
-                            df_temp[col]
-                            .replace([float('inf'), float('-inf')], pd.NA)
-                            .rank(ascending=ascending, method='min')
-                            .astype('Int64')
-                        )
+                        df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
 
                         display_col = f"{col} (par 90)"
                         df_temp.rename(columns={col: display_col}, inplace=True)
