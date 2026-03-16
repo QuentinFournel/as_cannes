@@ -3688,7 +3688,10 @@ def streamlit_application(all_df_dict):
 
             match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
-            match_normalisée = unicodedata.normalize("NFD", match)
+            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21"]:
+               match_normalisée = unicodedata.normalize("NFD", match)
+            else:
+                match_normalisée = match 
 
             video_path = None
             for ext in extensions:
@@ -3710,7 +3713,10 @@ def streamlit_application(all_df_dict):
             with col2:
                 match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
-            match_normalisée = unicodedata.normalize("NFD", match)
+            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21"]:
+               match_normalisée = unicodedata.normalize("NFD", match)
+            else:
+                match_normalisée = match 
 
             video_path = None
             for ext in extensions:
