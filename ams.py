@@ -3688,7 +3688,7 @@ def streamlit_application(all_df_dict):
 
             match = next((m for m in journées[st.session_state['saison']][journée] if équipe in m), None)
 
-            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21"]:
+            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21", "J22", "J23", "J24", "J25", "J26", "J27", "J28", "J29", "J30"]:
                match_normalisée = unicodedata.normalize("NFD", match)
             else:
                 match_normalisée = match 
@@ -3713,7 +3713,7 @@ def streamlit_application(all_df_dict):
             with col2:
                 match = st.selectbox("Sélectionnez un match", journées[st.session_state['saison']][journée])
 
-            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21"]:
+            if st.session_state['saison'] == "25-26" and journée in ["J20", "J21", "J22", "J23", "J24", "J25", "J26", "J27", "J28", "J29", "J30"]:
                match_normalisée = unicodedata.normalize("NFD", match)
             else:
                 match_normalisée = match 
