@@ -2254,7 +2254,7 @@ def plot_team_metrics(df, x_metric, y_metric):
     colonnes_bas_mieux = {
         'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
         'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
-        'Cartons jaunes', 'Cartons rouges', 'PPDA'
+        'Cartons jaunes', 'Cartons rouges', 'PPDA', 'Distance moyenne de tir'
     }
 
     df = df.copy()
@@ -3800,7 +3800,7 @@ def streamlit_application(all_df_dict):
         colonnes_bas_mieux = {
             'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
             'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
-            'Cartons jaunes', 'Cartons rouges', 'PPDA'
+            'Cartons jaunes', 'Cartons rouges', 'PPDA', 'Distance moyenne de tir'
         }
         
         with tab1:
