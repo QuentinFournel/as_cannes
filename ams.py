@@ -3994,10 +3994,14 @@ def streamlit_application(all_df_dict):
                     df_stats_moyennes = pd.DataFrame()
 
                     for équipe in équipes[st.session_state['saison']]:
+                        if st.session_state['saison'] != "24-25":
+                            équipe_normalisée = unicodedata.normalize("NFD", équipe)
+                        else:
+                            équipe_normalisée = équipe
                         if équipe != team:
-                            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx"):
+                            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
                                 continue
-                            df_filtré = collect_collective_data(équipe)
+                            df_filtré = collect_collective_data(équipe_normalisée)
                             df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
                             df_stats = df_filtré[df_filtré['Équipe'] == équipe]
                             df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
