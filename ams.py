@@ -4257,9 +4257,9 @@ def streamlit_application(all_df_dict):
 
             total_passes = passes[['Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']].sum(axis=1)
 
-            passes['Proportion de passes vers l’arrière (%)'] = (passes['Passes arrière par 90'] / total_passes * 100).round(2)
-            passes['Proportion de passes latérales (%)'] = (passes['Passes latérales par 90'] / total_passes * 100).round(2)
-            passes['Proportion de passes vers l’avant (%)'] = (passes['Passes avant par 90'] / total_passes * 100).round(2)
+            passes['Proportion de passes vers l’arrière (%)'] = (passes['Passes arrière par 90'] / total_passes * 100).round(1)
+            passes['Proportion de passes latérales (%)'] = (passes['Passes latérales par 90'] / total_passes * 100).round(1)
+            passes['Proportion de passes vers l’avant (%)'] = (passes['Passes avant par 90'] / total_passes * 100).round(1)
 
             passes_proportions = passes[['Joueur + Information', 'Proportion de passes vers l’arrière (%)', 'Proportion de passes latérales (%)', 'Proportion de passes vers l’avant (%)']]
 
