@@ -4253,22 +4253,39 @@ def streamlit_application(all_df_dict):
             )
 
         with tab7:
-            passes = df[['Joueur + Information', 'Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']]
+            if poste != 'Gardien':
+                passes = df[['Joueur + Information', 'Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']]
 
-            total_passes = passes[['Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']].sum(axis=1)
+                total_passes = passes[['Passes arrière par 90', 'Passes latérales par 90', 'Passes avant par 90']].sum(axis=1)
 
-            passes['Proportion de passes vers l’arrière (%)'] = (passes['Passes arrière par 90'] / total_passes * 100).round(1)
-            passes['Proportion de passes latérales (%)'] = (passes['Passes latérales par 90'] / total_passes * 100).round(1)
-            passes['Proportion de passes vers l’avant (%)'] = (passes['Passes avant par 90'] / total_passes * 100).round(1)
+                passes['Proportion de passes vers l’arrière (%)'] = (passes['Passes arrière par 90'] / total_passes * 100).round(1)
+                passes['Proportion de passes latérales (%)'] = (passes['Passes latérales par 90'] / total_passes * 100).round(1)
+                passes['Proportion de passes vers l’avant (%)'] = (passes['Passes avant par 90'] / total_passes * 100).round(1)
 
-            passes_proportions = passes[['Joueur + Information', 'Proportion de passes vers l’arrière (%)', 'Proportion de passes latérales (%)', 'Proportion de passes vers l’avant (%)']]
+                passes_proportions = passes[['Joueur + Information', 'Proportion de passes vers l’arrière (%)', 'Proportion de passes latérales (%)', 'Proportion de passes vers l’avant (%)']]
 
-            df_joueur = passes_proportions.loc[
-                passes_proportions["Joueur + Information"] == joueur,
-                ["Proportion de passes vers l’arrière (%)", "Proportion de passes latérales (%)", "Proportion de passes vers l’avant (%)"]
-            ]
+                df_joueur = passes_proportions.loc[
+                    passes_proportions["Joueur + Information"] == joueur,
+                    ["Proportion de passes vers l’arrière (%)", "Proportion de passes latérales (%)", "Proportion de passes vers l’avant (%)"]
+                ]
 
-            st.dataframe(df_joueur, use_container_width=True, hide_index=True)
+                st.dataframe(df_joueur, use_container_width=True, hide_index=True)
+            else:
+                passes = df[['Joueur + Information', 'Passes courtes / moyennes par 90', 'Passes longues par 90']]
+
+                total_passes = passes[['Passes courtes / moyennes par 90', 'Passes longues par 90']].sum(axis=1)
+
+                passes['Proportion de passes courtes (%)'] = (passes['Passes courtes / moyennes par 90'] / total_passes * 100).round(1)
+                passes['Proportion de passes longues (%)'] = (passes['Passes longues par 90'] / total_passes * 100).round(1)
+
+                passes_proportions = passes[['Joueur + Information', 'Proportion de passes courtes (%)', 'Proportion de passes longues (%)']]
+
+                df_joueur = passes_proportions.loc[
+                    passes_proportions["Joueur + Information"] == joueur,
+                    ["Proportion de passes courtes (%)", "Proportion de passes longues (%)"]
+                ]
+
+                st.dataframe(df_joueur, use_container_width=True, hide_index=True)
 
         with tab8:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
