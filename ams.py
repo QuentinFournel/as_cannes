@@ -3141,31 +3141,50 @@ def calcul_ipr(df, joueur, poste):
     if joueur not in df_filtré['Joueur + Information'].values:
         df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
-    df_filtré["influence"] = (
+    df_filtré["Influence"] = (
         df_filtré["Passes réceptionnées par 90"]
         + df_filtré["Longues passes réceptionnées par 90"]
     )
 
+    df_filtré["IPR Artilleur"] = (
+        df_filtré["Tirs par 90"]
+        / df_filtré["Influence"]
+    )
+
     df_filtré["IPR Viseur"] = (
-        (df_filtré["Passes judicieuses par 90"]
-        + df_filtré["Passes quasi décisives par 90"]
-        + df_filtré["Passes dans tiers adverse par 90"]
-        + df_filtré["Passes vers la surface de réparation par 90"]
-        + df_filtré["Passes pénétrantes par 90"]
-        + df_filtré["Passes progressives par 90"])
-        / df_filtré["influence"]
+        (
+            df_filtré["Passes judicieuses par 90"]
+            + df_filtré["Passes quasi décisives par 90"]
+            + df_filtré["Passes dans tiers adverse par 90"]
+            + df_filtré["Passes vers la surface de réparation par 90"]
+            + df_filtré["Passes pénétrantes par 90"]
+            + df_filtré["Passes progressives par 90"]
+        )
+        / df_filtré["Influence"]
+    )
+
+    df_filtré["IPR Centreur"] = (
+        df_filtré["Centres par 90"]
+        / df_filtré["Influence"]
     )
 
     df_filtré["IPR Perforateur"] = (
-        (df_filtré["Courses progressives par 90"]
-        + df_filtré["Accélérations par 90"])
-        / df_filtré["influence"]
+        (
+            df_filtré["Courses progressives par 90"]
+            + df_filtré["Accélérations par 90"]
+        )
+        / df_filtré["Influence"]
     )
 
-    df_filtré["IPR Duelliste"] = df_filtré["Dribbles par 90"] / df_filtré["influence"]
+    df_filtré["IPR Duelliste"] = (
+        df_filtré["Dribbles par 90"]
+        / df_filtré["Influence"]
+    )
 
     df_filtré["IPR"] = (
-        df_filtré["IPR Viseur"] / 6
+        df_filtré["IPR Artilleur"]
+        + df_filtré["IPR Viseur"] / 6
+        + df_filtré["IPR Centreur"]
         + df_filtré["IPR Perforateur"] / 2
         + df_filtré["IPR Duelliste"]
     )
@@ -4229,27 +4248,31 @@ def streamlit_application(all_df_dict):
 
             df_joueur = ipr_score.loc[
                 ipr_score["Joueur + Information"] == joueur,
-                ["IPR Viseur", "IPR Perforateur", "IPR Duelliste"]
+                ["IPR Artilleur", "IPR Viseur", "IPR Centreur", "IPR Perforateur", "IPR Duelliste"]
             ]
 
             st.dataframe(df_joueur, use_container_width=True, hide_index=True)
 
             st.info(
-            "L’IPR (Indice de Prise de Risque) est un indicateur qui mesure la fréquence à laquelle un joueur tente des actions à risque **à chaque ballon touché**. "
-            "Il ne mesure donc pas un volume brut d’actions, mais la **propension du joueur à prendre des initiatives risquées lorsqu’il est impliqué dans le jeu**.\n\n"
+                "L’IPR (Indice de Prise de Risque) est un indicateur qui mesure la fréquence à laquelle un joueur tente des actions à risque **à chaque ballon touché**. "
+                "Il ne mesure donc pas un volume brut d’actions, mais la **propension du joueur à prendre des initiatives risquées lorsqu’il est impliqué dans le jeu**.\n\n"
 
-            "L’IPR est normalisé par l’« influence » du joueur (ballons reçus), ce qui permet de comparer des profils ayant des volumes de jeu différents. "
-            "Un IPR élevé indique un joueur qui, à chaque prise de balle, cherche régulièrement à déséquilibrer le jeu par une action ambitieuse. "
-            "À l’inverse, un IPR plus faible traduit un joueur plus sécurisé, privilégiant la continuité du jeu.\n\n"
+                "L’IPR est normalisé par l’« influence » du joueur (ballons reçus), ce qui permet de comparer des profils ayant des volumes de jeu différents. "
+                "Un IPR élevé indique un joueur qui, à chaque prise de balle, cherche régulièrement à déséquilibrer le jeu par une action ambitieuse. "
+                "À l’inverse, un IPR plus faible traduit un joueur plus sécurisé, privilégiant la continuité du jeu.\n\n"
 
-            "L’IPR Viseur mesure la part de **passes à forte intention offensive** (progression, pénétration, création) parmi les ballons joués par le joueur.\n\n"
+                "L’IPR Artilleur mesure la fréquence des **prises d’initiative au tir**, en évaluant la tendance d’un joueur à conclure les actions par une frappe.\n\n"
 
-            "L’IPR Perforateur évalue la fréquence des **prises de risque par la conduite de balle**, à travers les courses progressives et les accélérations.\n\n"
+                "L’IPR Viseur mesure la part de **passes à forte intention offensive** (progression, pénétration, création), traduisant sa volonté de faire avancer et déséquilibrer le bloc adverse.\n\n"
 
-            "L’IPR Duelliste quantifie la prise de risque en **1 contre 1**, en mesurant le recours au dribble par ballon touché.\n\n"
+                "L’IPR Centreur reflète la fréquence des **prises d’initiative par le jeu de côté**, en mettant en évidence la recherche de centres vers la surface.\n\n"
 
-            "Il est essentiel d’interpréter l’IPR en fonction du poste, du rôle et du style de jeu collectif, "
-            "un IPR élevé n’étant ni intrinsèquement positif ni négatif, mais révélateur d’un **profil décisionnel**."
+                "L’IPR Perforateur évalue les **prises de risque par la conduite de balle**, à travers les courses progressives et les accélérations qui cassent les lignes.\n\n"
+
+                "L’IPR Duelliste quantifie la prise de risque en **1 contre 1**, en illustrant la propension du joueur à défier directement son adversaire.\n\n"
+
+                "Il est essentiel d’interpréter l’IPR en fonction du poste, du rôle et du style de jeu collectif, "
+                "un IPR élevé n’étant ni intrinsèquement positif ni négatif, mais révélateur d’un **profil décisionnel**."
             )
 
         with tab7:
