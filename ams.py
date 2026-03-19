@@ -4292,7 +4292,11 @@ def streamlit_application(all_df_dict):
                     ["Proportion de passes vers l’arrière (%)", "Proportion de passes latérales (%)", "Proportion de passes vers l’avant (%)"]
                 ]
 
+                df_précision = df[df['Joueur + Information'] == joueur][['Passes arrières précises, %', 'Passes latérales précises, %', 'Passes en avant précises, %']]
+
                 st.dataframe(df_joueur, use_container_width=True, hide_index=True)
+                st.dataframe(df_précision, use_container_width=True, hide_index=True)
+
             else:
                 passes = df[['Joueur + Information', 'Passes courtes / moyennes par 90', 'Passes longues par 90']]
 
@@ -4308,7 +4312,10 @@ def streamlit_application(all_df_dict):
                     ["Proportion de passes courtes (%)", "Proportion de passes longues (%)"]
                 ]
 
+                df_précision = df[df['Joueur + Information'] == joueur][['Passes courtes / moyennes précises, %', 'Longues passes précises, %']]
+
                 st.dataframe(df_joueur, use_container_width=True, hide_index=True)
+                st.dataframe(df_précision, use_container_width=True, hide_index=True)
 
         with tab8:
             points_forts_clé, points_faibles_clé = points_forts_faibles(df, joueur, poste)
