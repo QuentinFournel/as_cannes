@@ -4458,27 +4458,97 @@ def streamlit_application(all_df_dict):
 
                 df_player_mean_on_selected_matches = df_player.mean(numeric_only=True).to_frame().T
 
-                df_player_mean_on_selected_matches = get_player_metrics_by_position(df_player_mean_on_selected_matches, nom_joueur, smart_goal, analyse_par_poste, st.session_state['saison'])
+                df_player_mean_on_selected_matches = get_player_metrics_by_position(
+                    df_player_mean_on_selected_matches, nom_joueur, smart_goal, analyse_par_poste, st.session_state['saison']
+                )
 
                 cols = list(df_player_mean_on_selected_matches.columns)
 
-                for i in range(0, len(cols), 3):
-                    row = st.columns(3)
+                import plotly.graph_objects as go
 
-                    for j, col_name in enumerate(cols[i:i + 3]):
+                for i in range(0, len(cols), 3):
+                    row_cols = st.columns(3)
+                    batch = cols[i:i + 3]
+
+                    for j, col_name in enumerate(batch):
                         value = df_player_mean_on_selected_matches[col_name].iloc[0]
                         mean_value = df_player_mean[col_name].iloc[0]
 
+                        # Normaliser les % en float
                         if isinstance(value, str) and "%" in value:
                             v = float(value.replace("%", ""))
                             m = float(mean_value.replace("%", ""))
-                            color = "#1aac14" if v > m else "#ac141a"
-                            bordered_metric(row[j], col_name, value, 225, color)
+                            display_value = f"{v:.1f}%"
+                            display_mean = f"{m:.1f}%"
                         else:
-                            color = "#1aac14" if value > mean_value else "#ac141a"
-                            bordered_metric(row[j], col_name, round(value, 1), 225, color)
+                            v = float(value)
+                            m = float(mean_value)
+                            display_value = f"{round(v, 1)}"
+                            display_mean = f"{round(m, 1)}"
 
-                    st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
+                        color = "#1aac14" if v >= m else "#ac141a"
+
+                        # Calcul de l'axe max pour laisser de la marge
+                        max_val = max(v, m) * 1.3 if max(v, m) > 0 else 1
+
+                        fig = go.Figure()
+
+                        # Barre de valeur du joueur
+                        fig.add_trace(go.Bar(
+                            x=[v],
+                            y=[""],
+                            orientation='h',
+                            marker=dict(color=color, opacity=0.85),
+                            showlegend=False,
+                            hovertemplate=f"Valeur : {display_value}<extra></extra>"
+                        ))
+
+                        # Ligne verticale pour la moyenne (shape)
+                        fig.add_shape(
+                            type="line",
+                            x0=m, x1=m,
+                            y0=-0.5, y1=0.5,
+                            line=dict(color="black", width=2.5, dash="solid")
+                        )
+
+                        # Annotation de la moyenne
+                        fig.add_annotation(
+                            x=m,
+                            y=0.5,
+                            text=f"moy: {display_mean}",
+                            showarrow=False,
+                            font=dict(size=10, color="black"),
+                            xanchor="center",
+                            yanchor="bottom",
+                            yshift=2
+                        )
+
+                        fig.update_layout(
+                            title=dict(text=f"<b>{col_name}</b>", font=dict(size=12), x=0, xanchor='left'),
+                            xaxis=dict(range=[0, max_val], showticklabels=True, showgrid=False, zeroline=False),
+                            yaxis=dict(showticklabels=False, showgrid=False),
+                            height=110,
+                            margin=dict(l=10, r=10, t=35, b=10),
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            bargap=0.3,
+                            annotations=[
+                                dict(
+                                    x=v,
+                                    y=0,
+                                    text=f"<b>{display_value}</b>",
+                                    showarrow=False,
+                                    font=dict(size=11, color="white"),
+                                    xanchor="right" if v > max_val * 0.15 else "left",
+                                    yanchor="middle",
+                                    xshift=-6 if v > max_val * 0.15 else 6
+                                )
+                            ]
+                        )
+
+                        row_cols[j].plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+                    st.markdown("<div style='margin-top: 4px'></div>", unsafe_allow_html=True)
 
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
