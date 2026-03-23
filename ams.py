@@ -4466,89 +4466,98 @@ def streamlit_application(all_df_dict):
 
                 import plotly.graph_objects as go
 
-                for i in range(0, len(cols), 3):
-                    row_cols = st.columns(3)
-                    batch = cols[i:i + 3]
+                metric_names = []
+                values = []
+                mean_values = []
+                colors = []
+                text_labels = []
 
-                    for j, col_name in enumerate(batch):
-                        value = df_player_mean_on_selected_matches[col_name].iloc[0]
-                        mean_value = df_player_mean[col_name].iloc[0]
+                for col_name in cols:
+                    value = df_player_mean_on_selected_matches[col_name].iloc[0]
+                    mean_value = df_player_mean[col_name].iloc[0]
 
-                        # Normaliser les % en float
-                        if isinstance(value, str) and "%" in value:
-                            v = float(value.replace("%", ""))
-                            m = float(mean_value.replace("%", ""))
-                            display_value = f"{v:.1f}%"
-                            display_mean = f"{m:.1f}%"
-                        else:
-                            v = float(value)
-                            m = float(mean_value)
-                            display_value = f"{round(v, 1)}"
-                            display_mean = f"{round(m, 1)}"
+                    if isinstance(value, str) and "%" in value:
+                        v = float(value.replace("%", ""))
+                        m = float(mean_value.replace("%", ""))
+                        label = f"{v:.1f}%"
+                    else:
+                        v = float(value)
+                        m = float(mean_value)
+                        label = f"{round(v, 1)}"
 
-                        color = "#1aac14" if v >= m else "#ac141a"
+                    metric_names.append(col_name)
+                    values.append(v)
+                    mean_values.append(m)
+                    colors.append("#1aac14" if v >= m else "#ac141a")
+                    text_labels.append(label)
 
-                        # Calcul de l'axe max pour laisser de la marge
-                        max_val = max(v, m) * 1.3 if max(v, m) > 0 else 1
+                n = len(metric_names)
+                height = max(300, n * 50 + 80)
 
-                        fig = go.Figure()
+                # Normaliser chaque métrique indépendamment entre 0 et 100
+                # La barre = position normalisée de la valeur joueur
+                # Le marqueur = position normalisée de la moyenne (sera toujours à 50 dans cette échelle)
+                # On prend max(v, m) * 1.3 comme référence pour chaque métrique
+                normalized_values = []
+                normalized_means = []
+                max_vals = []
 
-                        # Barre de valeur du joueur
-                        fig.add_trace(go.Bar(
-                            x=[v],
-                            y=[""],
-                            orientation='h',
-                            marker=dict(color=color, opacity=0.85),
-                            showlegend=False,
-                            hovertemplate=f"Valeur : {display_value}<extra></extra>"
-                        ))
+                for v, m in zip(values, mean_values):
+                    ref = max(v, m) * 1.3 if max(v, m) > 0 else 1
+                    max_vals.append(ref)
+                    normalized_values.append((v / ref) * 100)
+                    normalized_means.append((m / ref) * 100)
 
-                        # Ligne verticale pour la moyenne (shape)
-                        fig.add_shape(
-                            type="line",
-                            x0=m, x1=m,
-                            y0=-0.5, y1=0.5,
-                            line=dict(color="black", width=2.5, dash="solid")
-                        )
+                fig = go.Figure()
 
-                        # Annotation de la moyenne
-                        fig.add_annotation(
-                            x=m,
-                            y=0.5,
-                            text=f"moy: {display_mean}",
-                            showarrow=False,
-                            font=dict(size=10, color="black"),
-                            xanchor="center",
-                            yanchor="bottom",
-                            yshift=2
-                        )
+                # Barres du joueur (normalisées 0-100)
+                fig.add_trace(go.Bar(
+                    x=normalized_values,
+                    y=metric_names,
+                    orientation='h',
+                    marker=dict(color=colors, opacity=0.88),
+                    text=text_labels,
+                    textposition='outside',
+                    textfont=dict(size=11, color='white'),
+                    cliponaxis=False,
+                    showlegend=False,
+                    hovertemplate=[
+                        f"<b>{col}</b><br>Valeur : {lbl}<br>Moyenne : {round(m, 1)}<extra></extra>"
+                        for col, lbl, m in zip(metric_names, text_labels, mean_values)
+                    ]
+                ))
 
-                        fig.update_layout(
-                            title=dict(text=f"<b>{col_name}</b>", font=dict(size=12), x=0, xanchor='left'),
-                            xaxis=dict(range=[0, max_val], showticklabels=True, showgrid=False, zeroline=False),
-                            yaxis=dict(showticklabels=False, showgrid=False),
-                            height=110,
-                            margin=dict(l=10, r=10, t=35, b=10),
-                            plot_bgcolor="rgba(0,0,0,0)",
-                            paper_bgcolor="rgba(0,0,0,0)",
-                            bargap=0.3,
-                            annotations=[
-                                dict(
-                                    x=v,
-                                    y=0,
-                                    text=f"<b>{display_value}</b>",
-                                    showarrow=False,
-                                    font=dict(size=11, color="white"),
-                                    xanchor="right" if v > max_val * 0.15 else "left",
-                                    yanchor="middle",
-                                    xshift=-6 if v > max_val * 0.15 else 6
-                                )
-                            ]
-                        )
+                # Marqueur de moyenne pour chaque métrique : petit segment vertical sur la barre
+                for i, (norm_m, metric) in enumerate(zip(normalized_means, metric_names)):
+                    fig.add_shape(
+                        type="line",
+                        x0=norm_m, x1=norm_m,
+                        y0=i - 0.4, y1=i + 0.4,
+                        line=dict(color="black", width=3),
+                        layer="above"
+                    )
 
-                        row_cols[j].plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                fig.update_layout(
+                    height=height,
+                    margin=dict(l=20, r=80, t=30, b=20),
+                    plot_bgcolor="#1e1e2e",
+                    paper_bgcolor="#1e1e2e",
+                    xaxis=dict(
+                        range=[0, 125],
+                        showticklabels=False,
+                        showgrid=False,
+                        zeroline=False,
+                    ),
+                    yaxis=dict(
+                        showgrid=False,
+                        tickfont=dict(size=11, color="white"),
+                        automargin=True,
+                    ),
+                    bargap=0.35,
+                    font=dict(color="white"),
+                )
 
-                    st.markdown("<div style='margin-top: 4px'></div>", unsafe_allow_html=True)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
