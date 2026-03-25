@@ -543,9 +543,9 @@ metrics_by_position = [
 kpi_by_position = {
     "Buteur": {
         "Finition": {
-            "Buts - xG": 0.75,
-            "Tirs à la cible, %": 0.15,
-            "Taux de conversion but/tir": 0.1
+            "Buts - xG": 0.5,
+            "Tirs à la cible, %": 0.25,
+            "Taux de conversion but/tir": 0.25
         },
         "Apport offensif": {
             "xG par 90": 0.3,
@@ -590,9 +590,9 @@ kpi_by_position = {
 
     "Ailier": {
         "Finition": {
-            "Buts - xG": 0.75,
-            "Tirs à la cible, %": 0.15,
-            "Taux de conversion but/tir": 0.1
+            "Buts - xG": 0.5,
+            "Tirs à la cible, %": 0.25,
+            "Taux de conversion but/tir": 0.25
         },
         "Apport offensif": {
             "xG par 90": 0.3,
@@ -642,9 +642,9 @@ kpi_by_position = {
 
     "Milieu offensif": {
         "Finition": {
-            "Buts - xG": 0.75,
-            "Tirs à la cible, %": 0.15,
-            "Taux de conversion but/tir": 0.1
+            "Buts - xG": 0.5,
+            "Tirs à la cible, %": 0.25,
+            "Taux de conversion but/tir": 0.25
         },
         "Apport offensif": {
             "xG par 90": 0.3,
@@ -866,17 +866,17 @@ kpi_by_position = {
 
 kpi_coefficients_by_position = {
     "Buteur": {
-        "Finition": 5,
-        "Apport offensif": 4,
+        "Finition": 4,
+        "Apport offensif": 6,
         "Qualité de passe": 2,
         "Vision du jeu": 2,
         "Percussion": 1,
         "Jeu aérien": 1
     },
     "Ailier": {
-        "Finition": 3,
+        "Finition": 2,
         "Apport offensif": 4,
-        "Qualité de passe": 3,
+        "Qualité de passe": 2,
         "Vision du jeu": 5,
         "Percussion": 5,
         "Jeu défensif": 1
