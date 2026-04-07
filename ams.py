@@ -4627,8 +4627,13 @@ def streamlit_application(all_df_dict):
                 ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
                 ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
                 ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
-                ((recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
-                (recommended_players['Contrat expiration'].dt.year <= max_contrat))
+                (
+                    (
+                        (recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
+                        (recommended_players['Contrat expiration'].dt.year <= max_contrat)
+                    )
+                    | (recommended_players['Contrat expiration'].isna())
+                )
             ]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
@@ -4663,8 +4668,13 @@ def streamlit_application(all_df_dict):
                 ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
                 ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
                 ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
-                ((recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
-                (recommended_players['Contrat expiration'].dt.year <= max_contrat))
+                (
+                    (
+                        (recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
+                        (recommended_players['Contrat expiration'].dt.year <= max_contrat)
+                    )
+                    | (recommended_players['Contrat expiration'].isna())
+                )
             ]
             recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
 
