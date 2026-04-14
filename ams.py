@@ -412,10 +412,10 @@ metrics_by_position = [
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "xA": "xA par 90",
+            "Secondes\npasses décisives": "Secondes passes décisives par 90",
             "Passes\nclés": "Passes quasi décisives par 90",
             "Passes\njudicieuses": "Passes judicieuses par 90",
             "Passes\nvers la surface": "Passes vers la surface de réparation par 90",
-            "Passes\ndans le tiers adverse": "Passes dans tiers adverse par 90",
             "Passes\navant un tir": "Passes décisives avec tir par 90",
             "Passes\nprogressives": "Passes progressives par 90",
             "Centres": "Centres par 90",
@@ -435,10 +435,10 @@ metrics_by_position = [
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "xA": "xA par 90",
+            "Secondes\npasses décisives": "Secondes passes décisives par 90",
             "Passes\nclés": "Passes quasi décisives par 90",
             "Passes\njudicieuses": "Passes judicieuses par 90",
             "Passes\nvers la surface": "Passes vers la surface de réparation par 90",
-            "Passes\ndans le tiers adverse": "Passes dans tiers adverse par 90",
             "Passes\navant un tir": "Passes décisives avec tir par 90",
             "Passes\nprogressives": "Passes progressives par 90",
             "Courses\nprogressives": "Courses progressives par 90",
@@ -457,7 +457,7 @@ metrics_by_position = [
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "xA": "xA par 90",
-            "Passes\navant": "Passes avant par 90",
+            "Secondes\npasses décisives": "Secondes passes décisives par 90",
             "Passes\nclés": "Passes quasi décisives par 90",
             "Passes\ndans le tiers adverse": "Passes dans tiers adverse par 90",
             "Passes\nprogressives": "Passes progressives par 90",
@@ -480,7 +480,7 @@ metrics_by_position = [
             "Ballons\nreçus": "Passes réceptionnées par 90",
             "Précision\npasses": "Passes précises, %",
             "xA": "xA par 90",
-            "Passes\navant": "Passes avant par 90",
+            "Secondes\npasses décisives": "Secondes passes décisives par 90",
             "Passes\nvers la surface": "Passes vers la surface de réparation par 90",
             "Centres": "Centres par 90",
             "Centres\nréussis (%)": "Сentres précises, %",
@@ -566,15 +566,16 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA par 90": 0.25,
-            "Passes quasi décisives par 90": 0.2,
-            "Passes décisives avec tir par 90": 0.15,
-            "Passes judicieuses par 90": 0.15,
-            "Réalisations en profondeur par 90": 0.1,
+            "xA par 90": 0.2,
+            "Passes quasi décisives par 90": 0.175,
+            "Secondes passes décisives par 90": 0.175,
+            "Passes décisives avec tir par 90": 0.1,
+            "Passes judicieuses par 90": 0.1,
+            "Réalisations en profondeur par 90": 0.05,
             "Passes vers la surface de réparation par 90": 0.05,
-            "Passes dans tiers adverse par 90": 0.04,
-            "Passes progressives par 90": 0.03,
-            "Passes pénétrantes par 90": 0.03
+            "Passes dans tiers adverse par 90": 0.05,
+            "Passes progressives par 90": 0.05,
+            "Passes pénétrantes par 90": 0.05
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -614,15 +615,16 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.03
         },
         "Vision du jeu": {
-            "xA par 90": 0.25,
-            "Passes quasi décisives par 90": 0.2,
-            "Passes décisives avec tir par 90": 0.15,
-            "Passes judicieuses par 90": 0.15,
-            "Réalisations en profondeur par 90": 0.1,
+            "xA par 90": 0.2,
+            "Passes quasi décisives par 90": 0.175,
+            "Secondes passes décisives par 90": 0.175,
+            "Passes décisives avec tir par 90": 0.1,
+            "Passes judicieuses par 90": 0.1,
+            "Réalisations en profondeur par 90": 0.05,
             "Passes vers la surface de réparation par 90": 0.05,
-            "Passes dans tiers adverse par 90": 0.04,
-            "Passes progressives par 90": 0.03,
-            "Passes pénétrantes par 90": 0.03
+            "Passes dans tiers adverse par 90": 0.05,
+            "Passes progressives par 90": 0.05,
+            "Passes pénétrantes par 90": 0.05
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -665,15 +667,16 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA par 90": 0.25,
-            "Passes quasi décisives par 90": 0.2,
-            "Passes décisives avec tir par 90": 0.15,
-            "Passes judicieuses par 90": 0.15,
-            "Réalisations en profondeur par 90": 0.1,
+            "xA par 90": 0.2,
+            "Passes quasi décisives par 90": 0.175,
+            "Secondes passes décisives par 90": 0.175,
+            "Passes décisives avec tir par 90": 0.1,
+            "Passes judicieuses par 90": 0.1,
+            "Réalisations en profondeur par 90": 0.05,
             "Passes vers la surface de réparation par 90": 0.05,
-            "Passes dans tiers adverse par 90": 0.04,
-            "Passes progressives par 90": 0.03,
-            "Passes pénétrantes par 90": 0.03
+            "Passes dans tiers adverse par 90": 0.05,
+            "Passes progressives par 90": 0.05,
+            "Passes pénétrantes par 90": 0.05
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -711,15 +714,16 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA par 90": 0.25,
-            "Passes quasi décisives par 90": 0.2,
-            "Passes décisives avec tir par 90": 0.15,
-            "Passes judicieuses par 90": 0.15,
-            "Réalisations en profondeur par 90": 0.1,
+            "xA par 90": 0.2,
+            "Passes quasi décisives par 90": 0.175,
+            "Secondes passes décisives par 90": 0.175,
+            "Passes décisives avec tir par 90": 0.1,
+            "Passes judicieuses par 90": 0.1,
+            "Réalisations en profondeur par 90": 0.05,
             "Passes vers la surface de réparation par 90": 0.05,
-            "Passes dans tiers adverse par 90": 0.04,
-            "Passes progressives par 90": 0.03,
-            "Passes pénétrantes par 90": 0.03
+            "Passes dans tiers adverse par 90": 0.05,
+            "Passes progressives par 90": 0.05,
+            "Passes pénétrantes par 90": 0.05
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -762,15 +766,16 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.03
         },
         "Vision du jeu": {
-            "xA par 90": 0.25,
-            "Passes quasi décisives par 90": 0.2,
-            "Passes décisives avec tir par 90": 0.15,
-            "Passes judicieuses par 90": 0.15,
-            "Réalisations en profondeur par 90": 0.1,
+            "xA par 90": 0.2,
+            "Passes quasi décisives par 90": 0.175,
+            "Secondes passes décisives par 90": 0.175,
+            "Passes décisives avec tir par 90": 0.1,
+            "Passes judicieuses par 90": 0.1,
+            "Réalisations en profondeur par 90": 0.05,
             "Passes vers la surface de réparation par 90": 0.05,
-            "Passes dans tiers adverse par 90": 0.04,
-            "Passes progressives par 90": 0.03,
-            "Passes pénétrantes par 90": 0.03
+            "Passes dans tiers adverse par 90": 0.05,
+            "Passes progressives par 90": 0.05,
+            "Passes pénétrantes par 90": 0.05
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
@@ -808,15 +813,16 @@ kpi_by_position = {
             "Passes en profondeur précises, %": 0.06
         },
         "Vision du jeu": {
-            "xA par 90": 0.25,
-            "Passes quasi décisives par 90": 0.2,
-            "Passes décisives avec tir par 90": 0.15,
-            "Passes judicieuses par 90": 0.15,
-            "Réalisations en profondeur par 90": 0.1,
+            "xA par 90": 0.2,
+            "Passes quasi décisives par 90": 0.175,
+            "Secondes passes décisives par 90": 0.175,
+            "Passes décisives avec tir par 90": 0.1,
+            "Passes judicieuses par 90": 0.1,
+            "Réalisations en profondeur par 90": 0.05,
             "Passes vers la surface de réparation par 90": 0.05,
-            "Passes dans tiers adverse par 90": 0.04,
-            "Passes progressives par 90": 0.03,
-            "Passes pénétrantes par 90": 0.03
+            "Passes dans tiers adverse par 90": 0.05,
+            "Passes progressives par 90": 0.05,
+            "Passes pénétrantes par 90": 0.05
         },
         "Percussion": {
             "Courses progressives par 90": 0.3,
