@@ -2289,7 +2289,7 @@ def plot_team_metrics(df, x_metric, y_metric):
         "FC 93 Bobigny BG": "https://upload.wikimedia.org/wikipedia/fr/d/d7/Logo_Football_Club_93-2024.png",
         "Rousset-Ste Victoire": "https://upload.wikimedia.org/wikipedia/commons/6/62/Blason_de_la_ville_de_Rousset_%2813%29.svg",
         "Limonest": "https://upload.wikimedia.org/wikipedia/fr/7/7c/Logo_FC_Limonest_Dardilly_Saint_Didier_-_2021.svg",
-        "Créteil": "https://upload.wikimedia.org/wikipedia/fr/9/99/Logo_US_Cr%C3%A9teil_Lusitanos_2015.svg"
+        "Créteil": "https://upload.wikimedia.org/wikipedia/fr/a/ad/Logo_US_Cr%C3%A9teil_Football_-_2026.svg"
     }
 
     fig = go.Figure()
