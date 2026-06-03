@@ -532,7 +532,7 @@ metrics_by_position = [
             "xG\nconcédés": "xG contre par 90",
             "Buts\névités": "Buts évités par 90",
             "Tirs\nconcédés": "Tirs contre par 90",
-            "Arrêts": "Enregistrer, %",
+            "Arrêts (%)": "Enregistrer, %",
             "Sorties": "Sorties par 90",
             "Duels\naériens": "Duels aériens par 90",
             "Duels\naériens gagnés (%)": "Duels aériens gagnés, %"
