@@ -970,7 +970,7 @@ kpi_coefficients_by_role = {
             "Apport offensif": 4,
             "Qualité de passe": 2,
             "Vision du jeu": 3,
-            "Percussion": 5,
+            "Percussion": 6,
             "Jeu défensif": 1
         },
         "Ailier créateur": {
@@ -1021,7 +1021,7 @@ kpi_coefficients_by_role = {
             "Apport offensif": 4,
             "Qualité de passe": 2,
             "Vision du jeu": 2,
-            "Percussion": 5,
+            "Percussion": 6,
             "Jeu défensif": 4,
             "Jeu aérien": 1
         }
