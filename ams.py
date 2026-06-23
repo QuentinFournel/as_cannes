@@ -3242,14 +3242,14 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
     return df[selected_cols]
 
 @st.dialog("Fiche joueur", width="large")
-def afficher_fiche(df, joueur, poste, joueur_scores, kpis):
+def afficher_fiche(df, scores_df, joueur, poste, joueur_scores, kpis):
     col_radar, col_bars = st.columns(2)
     with col_radar:
         fig1 = create_individual_radar(df, joueur, poste)
         st.pyplot(fig1)
         plt.close(fig1)
     with col_bars:
-        fig2 = plot_rating_bars_panel(df, joueur_scores, kpis)
+        fig2 = plot_rating_bars_panel(scores_df, joueur_scores, kpis)
         st.pyplot(fig2)
         plt.close(fig2)
 
@@ -4733,7 +4733,7 @@ def streamlit_application(all_df_dict):
                 joueur = df_affichage.iloc[idx]['Joueur + Information']
                 joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
-                afficher_fiche(df, joueur, poste, joueur_scores, kpis_panel)
+                afficher_fiche(df, scores_df, joueur, poste, joueur_scores, kpis_panel)
 
         elif metric_or_kpi == "KPI":
             scores_df = calcul_scores_par_kpi(df, "", poste)
@@ -4787,7 +4787,7 @@ def streamlit_application(all_df_dict):
                 joueur = df_affichage.iloc[idx]['Joueur + Information']
                 joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
-                afficher_fiche(df, joueur, poste, joueur_scores, kpis_panel)
+                afficher_fiche(df, scores_df, joueur, poste, joueur_scores, kpis_panel)
 
 if __name__ == '__main__':
     st.set_page_config(
