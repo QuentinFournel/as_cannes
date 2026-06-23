@@ -4680,6 +4680,8 @@ def streamlit_application(all_df_dict):
         with col1:
             metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
 
+        scores_df = calcul_scores_par_kpi(df, "", poste)
+
         if metric_or_kpi == "Métrique":
             colonnes_à_exclure = [
                 'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
@@ -4736,8 +4738,6 @@ def streamlit_application(all_df_dict):
                 afficher_fiche(df, scores_df, joueur, poste, joueur_scores, kpis_panel)
 
         elif metric_or_kpi == "KPI":
-            scores_df = calcul_scores_par_kpi(df, "", poste)
-
             colonnes_à_exclure = [
                 'Minutes jouées', 'Âge', 'Taille'
             ]
