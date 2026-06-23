@@ -3241,7 +3241,7 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
 
     return df[selected_cols]
 
-@st.dialog("Fiche joueur")
+@st.dialog("Radar")
 def afficher_fiche(df, joueur, poste):
     fig = create_individual_radar(df, joueur, poste)
     st.pyplot(fig)
