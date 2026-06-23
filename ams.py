@@ -4732,7 +4732,6 @@ def streamlit_application(all_df_dict):
                 idx = event.selection.rows[0]
                 joueur = df_affichage.iloc[idx]['Joueur + Information']
                 joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
-                joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
                 afficher_fiche(df, joueur, poste, joueur_scores, kpis_panel)
 
@@ -4786,7 +4785,6 @@ def streamlit_application(all_df_dict):
             if event.selection.rows:
                 idx = event.selection.rows[0]
                 joueur = df_affichage.iloc[idx]['Joueur + Information']
-                joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
                 joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
                 afficher_fiche(df, joueur, poste, joueur_scores, kpis_panel)
