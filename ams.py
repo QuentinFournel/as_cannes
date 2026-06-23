@@ -3241,6 +3241,20 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
 
     return df[selected_cols]
 
+@st.dialog("Fiche joueur")
+def afficher_fiche(joueur):
+    col_photo, col_infos = st.columns([1, 2])
+    with col_photo:
+        # Photo par défaut pour le moment — à remplacer plus tard
+        st.image("https://placehold.co/300x400?text=Photo", use_container_width=True)
+    with col_infos:
+        st.subheader(str(joueur.get('Joueur', '—')))   # adapte 'Joueur' au nom réel de ta colonne
+        st.write(f"**Classement :** {joueur.get('Classement', '—')}")
+        st.write(f"**Âge :** {joueur.get('Âge', '—')}")
+        st.write(f"**Taille :** {joueur.get('Taille', '—')} cm")
+        st.write(f"**Minutes jouées :** {joueur.get('Minutes jouées', '—')}")
+        st.write(f"**Contrat :** {joueur.get('Contrat expiration', '—')}")
+
 def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
@@ -4708,7 +4722,17 @@ def streamlit_application(all_df_dict):
             df_affichage = recommended_players.copy()
             df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
 
-            st.dataframe(df_affichage, use_container_width=True, hide_index=True)
+            event = st.dataframe(
+                df_affichage,
+                use_container_width=True,
+                hide_index=True,
+                on_select="rerun",
+                selection_mode="single-row",
+            )
+
+            if event.selection.rows:
+                idx = event.selection.rows[0]
+                afficher_fiche(df_affichage.iloc[idx])
 
         elif metric_or_kpi == "KPI":
             scores_df = calcul_scores_par_kpi(df, "", poste)
@@ -4749,7 +4773,17 @@ def streamlit_application(all_df_dict):
             df_affichage = recommended_players.copy()
             df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
 
-            st.dataframe(df_affichage, use_container_width=True, hide_index=True)
+            event = st.dataframe(
+                df_affichage,
+                use_container_width=True,
+                hide_index=True,
+                on_select="rerun",
+                selection_mode="single-row",
+            )
+
+            if event.selection.rows:
+                idx = event.selection.rows[0]
+                afficher_fiche(df_affichage.iloc[idx])
 
 if __name__ == '__main__':
     st.set_page_config(
