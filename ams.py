@@ -4714,12 +4714,17 @@ def streamlit_application(all_df_dict):
             df_affichage = recommended_players.copy()
             df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
 
+            df_affichage.insert(0, "Radar", "📊")   # ou "◻️", "👁️", etc.
+
             event = st.dataframe(
                 df_affichage,
                 use_container_width=True,
                 hide_index=True,
                 on_select="rerun",
                 selection_mode="single-row",
+                column_config={
+                    "Radar": st.column_config.TextColumn("Radar", width="small")
+                },
             )
 
             if event.selection.rows:
@@ -4766,12 +4771,17 @@ def streamlit_application(all_df_dict):
             df_affichage = recommended_players.copy()
             df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
 
+            df_affichage.insert(0, "Radar", "📊")   # ou "◻️", "👁️", etc.
+
             event = st.dataframe(
                 df_affichage,
                 use_container_width=True,
                 hide_index=True,
                 on_select="rerun",
                 selection_mode="single-row",
+                column_config={
+                    "Radar": st.column_config.TextColumn("Radar", width="small")
+                },
             )
 
             if event.selection.rows:
