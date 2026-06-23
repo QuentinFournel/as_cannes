@@ -3241,11 +3241,17 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
 
     return df[selected_cols]
 
-@st.dialog("Radar")
-def afficher_fiche(df, joueur, poste):
-    fig = create_individual_radar(df, joueur, poste)
-    st.pyplot(fig)
-    plt.close(fig)
+@st.dialog("Fiche joueur")
+def afficher_fiche(df, joueur, poste, joueur_scores, kpis):
+    col_radar, col_bars = st.columns(2)
+    with col_radar:
+        fig1 = create_individual_radar(df, joueur, poste)
+        st.pyplot(fig1)
+        plt.close(fig1)
+    with col_bars:
+        fig2 = plot_rating_bars_panel(df, joueur_scores, kpis)
+        st.pyplot(fig2)
+        plt.close(fig2)
 
 def streamlit_application(all_df_dict):
     with st.sidebar:
