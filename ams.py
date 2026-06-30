@@ -4252,7 +4252,11 @@ def streamlit_application(all_df_dict):
             df_filtré = df[df['Équipe dans la période sélectionnée'] == team]
 
         with col2:
-            joueur = st.selectbox("Sélectionnez un joueur", df_filtré['Joueur + Information'].unique())
+            joueur = st.selectbox(
+                "Sélectionnez un joueur",
+                df_filtré['Joueur + Information'].unique(),
+                format_func=lambda x: x.split(' - ')[0]
+            )
 
         poste_du_joueur = df_filtré[df_filtré['Joueur + Information'] == joueur]['Poste'].iloc[0]
 
@@ -4628,7 +4632,12 @@ def streamlit_application(all_df_dict):
                 team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1')
 
             df_filtré_1 = df[df['Équipe dans la période sélectionnée'] == team_1]
-            joueur_1 = st.selectbox("Sélectionnez un joueur", df_filtré_1['Joueur + Information'].unique(), key='joueur 1')
+            joueur_1 = st.selectbox(
+                "Sélectionnez un joueur",
+                df_filtré_1['Joueur + Information'].unique(),
+                format_func=lambda x: x.split(' - ')[0],
+                key='joueur 1'
+            )
 
         with col2:
             if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de National 1" and sélection_dataframe != "Autre":
@@ -4637,7 +4646,12 @@ def streamlit_application(all_df_dict):
                 team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2')
 
             df_filtré_2 = df[df['Équipe dans la période sélectionnée'] == team_2]
-            joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
+            joueur_2 = st.selectbox(
+                "Sélectionnez un joueur",
+                df_filtré_2['Joueur + Information'].unique(),
+                format_func=lambda x: x.split(' - ')[0],
+                key='joueur 2'
+            )
 
         poste_1 = df_filtré_1[df_filtré_1['Joueur + Information'] == joueur_1]['Poste'].iloc[0]
         poste_2 = df_filtré_2[df_filtré_2['Joueur + Information'] == joueur_2]['Poste'].iloc[0]
