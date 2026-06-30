@@ -4232,7 +4232,7 @@ def streamlit_application(all_df_dict):
             if sélection_dataframe != "Joueur du top 5 européen":
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
+                team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique())
             
             df_filtré = df[df['Équipe dans la période sélectionnée'] == team]
 
@@ -4604,7 +4604,7 @@ def streamlit_application(all_df_dict):
             if sélection_dataframe != "Joueur du top 5 européen":
                 team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
+                team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1')
 
             df_filtré_1 = df[df['Équipe dans la période sélectionnée'] == team_1]
             joueur_1 = st.selectbox("Sélectionnez un joueur", df_filtré_1['Joueur + Information'].unique(), key='joueur 1')
@@ -4613,7 +4613,7 @@ def streamlit_application(all_df_dict):
             if sélection_dataframe != "Joueur du top 5 européen":
                 team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Real Madrid"))
+                team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2')
 
             df_filtré_2 = df[df['Équipe dans la période sélectionnée'] == team_2]
             joueur_2 = st.selectbox("Sélectionnez un joueur", df_filtré_2['Joueur + Information'].unique(), key='joueur 2')
