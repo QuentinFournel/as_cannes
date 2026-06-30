@@ -1835,7 +1835,7 @@ def calcul_scores_par_kpi(df, joueur, poste):
     df_ranked = rank_columns(df_filtré)
 
     # Initialisation du DataFrame des scores
-    df_scores = df_ranked[['Joueur + Information', 'Poste', 'Âge', 'Taille', 'Minutes jouées', 'Contrat expiration']].copy()
+    df_scores = df_ranked[['Joueur + Information', 'Poste', 'Âge', 'Taille', 'Passeport pays', 'Pied', 'Minutes jouées', 'Contrat expiration']].copy()
 
     # Récupération des KPI spécifiques au poste
     kpi_metrics = kpi_by_position[poste]
