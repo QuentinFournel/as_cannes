@@ -1590,7 +1590,7 @@ def add_new_columns(all_df):
     return all_df
 
 @st.cache_data
-def collect_individual_data():
+def collect_data():
     load_all_files_from_drive()
 
     saisons = ["24-25", "25-26"]
@@ -4853,5 +4853,5 @@ if __name__ == '__main__':
         if "saison" not in st.session_state:
             st.session_state["saison"] = "25-26"
 
-        all_df_dict = collect_individual_data()
+        all_df_dict = collect_data()
         streamlit_application(all_df_dict)
