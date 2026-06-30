@@ -95,7 +95,13 @@ def load_all_files_from_drive():
 
         # Téléchargement fichier par fichier dans le dossier correspondant
         for file in files:
-            download_file(service, file['id'], file['name'], output_folder=local_dir)
+            filename = file['name']
+
+            # Ignorer les fichiers vidéo
+            if filename.lower().endswith(('.mp4', '.mov')):
+                continue
+
+            download_file(service, file['id'], filename, output_folder=local_dir)
 
 league_rating = {
     "Ligue 1": 82.9,
@@ -1630,6 +1636,10 @@ def collect_individual_data():
                     df["Contrat expiration"] = pd.to_datetime(df["Contrat expiration"], errors="coerce").dt.date
 
         all_df = {
+            'Joueur de Ligue 1': dfs["Ligue 1"],
+            'Joueur de Ligue 2': dfs["Ligue 2"],
+            'Joueur de National 1': dfs["National 1"],
+            'Joueur de National 2': dfs["National 2"],
             'Joueur du championnat de France': df_championnat_de_france,
             'Joueur de National 1 et National 2': df_n1_n2,
             'Joueur français': df_français,
@@ -2939,7 +2949,7 @@ def create_player_data(nom_joueur, sélection_dataframe):
     # Renommer les colonnes
     df_player.columns = colonnes
 
-    if sélection_dataframe == 'Joueur du championnat de France' or sélection_dataframe == 'Joueur de National 1 et National 2':
+    if sélection_dataframe == 'Joueur du championnat de France' or sélection_dataframe == 'Joueur de National 1 et National 2' or sélection_dataframe == 'Joueur de National 2':
         df_player = df_player[df_player['Competition'] == 'France. National 2']
 
     return df_player
