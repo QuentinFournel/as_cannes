@@ -2067,8 +2067,7 @@ def plot_stat_comparison(df, joueur_1, joueur_2, poste):
 
     # --- colonnes numériques brutes ---
     exclude = {
-        'Joueur + Information','Poste','Minutes jouées','Âge','Valeur sur le marché',
-        'Matchs joués','Taille','Poids'
+        'Joueur + Information', 'Poste', 'Minutes jouées', 'Âge', 'Passeport pays', 'Pied', 'Valeur sur le marché', 'Matchs joués','Taille','Poids'
     }
     numeric_cols = [
         c for c in df_filtré.columns
@@ -3064,7 +3063,7 @@ def plot_player_ranking(df, joueur, poste):
     row_raw  = df_filtré.loc[df_filtré['Joueur + Information'] == joueur].iloc[0]
 
     # --- colonnes numériques ---
-    exclude = {'Joueur + Information','Poste','Minutes jouées','Âge','Valeur sur le marché','Matchs joués','Taille','Poids'}
+    exclude = {'Joueur + Information', 'Poste', 'Minutes jouées', 'Âge', 'Passeport pays', 'Pied', 'Valeur sur le marché', 'Matchs joués', 'Taille', 'Poids'}
     numeric_cols = [c for c in df_ranked.columns if c not in exclude and pd.api.types.is_numeric_dtype(df_ranked[c])]
 
     # --- items ---
