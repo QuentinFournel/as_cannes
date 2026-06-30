@@ -1614,25 +1614,21 @@ def collect_data():
                 dfs[comp][pos] = df = read_with_competition(str(Path(fichier)))
 
         # Concat selon tes regroupements
-        df_l1 = safe_concat(dfs["Ligue 1"].values())
-        df_l2 = safe_concat(dfs["Ligue 2"].values())
-        df_n1 = safe_concat(dfs["National 1"].values())
-        df_n2 = safe_concat(dfs["National 2"].values())
         df_championnat_de_france = safe_concat(
             [*dfs["Ligue 1"].values(),
              *dfs["Ligue 2"].values(),
              *dfs["National 1"].values(),
              *dfs["National 2"].values()]
         )
-        df_n1_n2 = safe_concat(
-            [*dfs["National 1"].values(),
-             *dfs["National 2"].values()]
-        )
+        df_l1 = safe_concat(dfs["Ligue 1"].values())
+        df_l2 = safe_concat(dfs["Ligue 2"].values())
+        df_n1 = safe_concat(dfs["National 1"].values())
+        df_n2 = safe_concat(dfs["National 2"].values())
         df_français = safe_concat(dfs["Francais"].values())
         df_top5européen = safe_concat(dfs["Top 5 Europeen"].values())
 
         # Nettoyage
-        for df in (df_championnat_de_france, df_n1_n2, df_français, df_top5européen):
+        for df in (df_championnat_de_france, df_l1, df_l2, df_n1, df_n2, df_français, df_top5européen):
             if not df.empty:
                 df.columns = df.columns.str.strip()
                 df.rename(columns={"Buts hors penaltyButs hors penalty": "Buts hors penalty"}, inplace=True)
@@ -1640,12 +1636,11 @@ def collect_data():
                     df["Contrat expiration"] = pd.to_datetime(df["Contrat expiration"], errors="coerce").dt.date
 
         all_df = {
+            'Joueur du championnat de France': df_championnat_de_france,
             'Joueur de Ligue 1': df_l1,
             'Joueur de Ligue 2': df_l2,
             'Joueur de National 1': df_n1,
             'Joueur de National 2': df_n2,
-            'Joueur du championnat de France': df_championnat_de_france,
-            'Joueur de National 1 et National 2': df_n1_n2,
             'Joueur français': df_français,
             'Joueur du top 5 européen': df_top5européen
         }
