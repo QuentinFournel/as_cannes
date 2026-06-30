@@ -4230,10 +4230,8 @@ def streamlit_application(all_df_dict):
 
         with col1:
             if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de National 1":
-                st.write("A")
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
-                st.write("B")
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique())
             
             df_filtré = df[df['Équipe dans la période sélectionnée'] == team]
