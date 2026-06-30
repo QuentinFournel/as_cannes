@@ -1506,6 +1506,20 @@ def read_with_competition(filepath):
 
     return df
 
+def read_uploaded_file(uploaded_file):
+    if ' - ' in uploaded_file.name:
+        competition, poste = uploaded_file.name.rsplit('.', 1)[0].split(' - ', 1)
+    else:
+        competition, poste = None, None
+    df = pd.read_excel(uploaded_file)
+    df.columns = df.columns.str.strip()
+    df.insert(3, 'Compétition', competition)
+    df.insert(4, 'Poste', poste)
+    df.insert(1, 'Joueur + Information',
+              df['Joueur'] + ' - ' + df['Équipe dans la période sélectionnée'] + ' (' + df['Compétition'].astype(str) + ')')
+    df['Buts - xG'] = df['Buts par 90'] - df['xG par 90']
+    return df
+
 def collect_collective_data(équipe):
     # Chargement des données
     df_collective = pd.read_excel(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx")
@@ -4218,8 +4232,14 @@ def streamlit_application(all_df_dict):
     elif page == "Analyse individuelle":
         st.header("Analyse individuelle")
 
-        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", all_df.keys())
-        df = all_df[sélection_dataframe]
+        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", list(all_df.keys()) + ["Autre"])
+        if sélection_dataframe == "Autre":
+            f = st.file_uploader("Importez un fichier", type=["xlsx"])
+            if f is None:
+                st.stop()
+            df = read_uploaded_file(f)
+        else:
+            df = all_df[sélection_dataframe]
 
         col1, col2 = st.columns(2)
 
@@ -4590,8 +4610,14 @@ def streamlit_application(all_df_dict):
     elif page == "Analyse comparative":
         st.header("Analyse comparative")
 
-        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", all_df.keys())
-        df = all_df[sélection_dataframe]
+        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", list(all_df.keys()) + ["Autre"])
+        if sélection_dataframe == "Autre":
+            f = st.file_uploader("Importez un fichier", type=["xlsx"])
+            if f is None:
+                st.stop()
+            df = read_uploaded_file(f)
+        else:
+            df = all_df[sélection_dataframe]
 
         col1, col2 = st.columns(2)
 
@@ -4648,8 +4674,14 @@ def streamlit_application(all_df_dict):
     elif page == "Scouting":
         st.header("Scouting")
 
-        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", all_df.keys())
-        df = all_df[sélection_dataframe]
+        sélection_dataframe = st.selectbox("Sélectionnez la base de données que vous souhaitez analyser", list(all_df.keys()) + ["Autre"])
+        if sélection_dataframe == "Autre":
+            f = st.file_uploader("Importez un fichier", type=["xlsx"])
+            if f is None:
+                st.stop()
+            df = read_uploaded_file(f)
+        else:
+            df = all_df[sélection_dataframe]
 
         poste = st.selectbox("Sélectionnez le poste qui vous intéresse", list(kpi_by_position.keys()))
 
