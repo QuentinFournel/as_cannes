@@ -104,11 +104,11 @@ def load_all_files_from_drive():
             download_file(service, file['id'], filename, output_folder=local_dir)
 
 league_rating = {
-    "Ligue 1": 82.9,
-    "Ligue 2": 73.1,
-    "National 1": 67.5,
-    "National 2": 62.9,
-    "National 3": 57.8
+    "Ligue 1": 85,
+    "Ligue 2": 75.4,
+    "National 1": 69.6,
+    "National 2": 63.8,
+    "National 3": 59.3
 }
 
 smart_goal = {
@@ -1614,6 +1614,10 @@ def collect_data():
                 dfs[comp][pos] = df = read_with_competition(str(Path(fichier)))
 
         # Concat selon tes regroupements
+        df_l1 = safe_concat(dfs["Ligue 1"].values())
+        df_l2 = safe_concat(dfs["Ligue 2"].values())
+        df_n1 = safe_concat(dfs["National 1"].values())
+        df_n2 = safe_concat(dfs["National 2"].values())
         df_championnat_de_france = safe_concat(
             [*dfs["Ligue 1"].values(),
              *dfs["Ligue 2"].values(),
@@ -1636,10 +1640,10 @@ def collect_data():
                     df["Contrat expiration"] = pd.to_datetime(df["Contrat expiration"], errors="coerce").dt.date
 
         all_df = {
-            'Joueur de Ligue 1': dfs["Ligue 1"],
-            'Joueur de Ligue 2': dfs["Ligue 2"],
-            'Joueur de National 1': dfs["National 1"],
-            'Joueur de National 2': dfs["National 2"],
+            'Joueur de Ligue 1': df_l1,
+            'Joueur de Ligue 2': df_l2,
+            'Joueur de National 1': df_n1,
+            'Joueur de National 2': df_n2,
             'Joueur du championnat de France': df_championnat_de_france,
             'Joueur de National 1 et National 2': df_n1_n2,
             'Joueur français': df_français,
