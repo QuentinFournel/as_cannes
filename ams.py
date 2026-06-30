@@ -2381,7 +2381,7 @@ def search_recommended_players(df, poste, thresholds):
 
     df_ranked = rank_columns(df_filtré)
 
-    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Taille', 'Minutes jouées', 'Contrat expiration'   ] + list(thresholds.keys())].copy()
+    df_scores = df_ranked[['Joueur + Information', 'Âge', 'Taille', 'Passeport pays', 'Pied', 'Minutes jouées', 'Contrat expiration'] + list(thresholds.keys())].copy()
 
     for métrique, seuil in thresholds.items():
         df_scores = df_scores[df_scores[métrique] >= seuil]
