@@ -4457,12 +4457,7 @@ def streamlit_application(all_df_dict):
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
         with tab2:
-            vue = st.segmented_control(
-                "Vue", ["Technique", "Physique"],
-                default="Technique",
-                label_visibility="collapsed",
-                key=f"radar_{joueur}",
-            )
+            vue = st.segmented_control("Vue", ["Technique", "Physique"])
 
             fig = create_individual_radar(df, joueur, poste) if vue == "Technique" \
                 else create_physical_radar(df, joueur, poste)
