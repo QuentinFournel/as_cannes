@@ -1490,20 +1490,36 @@ métriques_par_catégorie = {
         "Corners par 90", "Penalties pris", "Transformation des penalties, %"
     ],
     "Physique": [
-        "Vitesse maximale (km/h)",
-        "Distance totale par 90",
-        "Distance de course par 90 (15-20 km/h)",
-        "Distance de course à haute intensité (20-25 km/h) par 90",
-        "Distance de course à haute intensité (+20 km/h) par 90",
-        "Distance de sprint par 90 (+25 km/h)",
-        "Nombre d'efforts à haute intensité (20-25 km/h) par 90",
-        "Nombre d'efforts à haute intensité (+20 km/h) par 90",
-        "Nombre de sprints par 90 (+25 km/h)",
-        "Nombre d'accélérations moyennes par 90 (1.5 à 3 m/s²)",
-        "Nombre de fortes accélérations par 90 (+3 m/s²)",
-        "Nombre de décélérations moyennes par 90 (-1.5 à -3 m/s²)",
-        "Nombre de fortes décélérations par 90 (-3 m/s²)"
+        "Max Speed (km/h)",
+        "Total Distance per 90",
+        "Running Distance per 90 (15-20 km/h)",
+        "HSR Distance per 90 (20-25 km/h)",
+        "HI Distance per 90 (+20 km/h)",
+        "Sprinting Distance per 90 (+25 km/h)",
+        "Count HSR per 90 (20-25 km/h)",
+        "Count HI per 90 (+20 km/h)",
+        "Count Sprint per 90 (+25 km/h)",
+        "Count Medium Acceleration per 90 (1.5 m/s² to 3 m/s²)",
+        "Count High Acceleration per 90 (+3 m/s²)",
+        "Count Medium Deceleration per 90 (-1.5 m/s² to -3 m/s²)",
+        "Count High Deceleration per 90 (-3 m/s²)"
     ]
+}
+
+label_fr = {
+    "Max Speed (km/h)": "Vitesse maximale (km/h)",
+    "Total Distance per 90": "Distance totale par 90",
+    "Running Distance per 90 (15-20 km/h)": "Distance de course par 90 (15-20 km/h)",
+    "HSR Distance per 90 (20-25 km/h)": "Distance de course à haute intensité (20-25 km/h) par 90",
+    "HI Distance per 90 (+20 km/h)": "Distance de course à haute intensité (+20 km/h) par 90",
+    "Sprinting Distance per 90 (+25 km/h)": "Distance de sprint par 90 (+25 km/h)",
+    "Count HSR per 90 (20-25 km/h)": "Nombre d'efforts à haute intensité (20-25 km/h) par 90",
+    "Count HI per 90 (+20 km/h)": "Nombre d'efforts à haute intensité (+20 km/h) par 90",
+    "Count Sprint per 90 (+25 km/h)": "Nombre de sprints par 90 (+25 km/h)",
+    "Count Medium Acceleration per 90 (1.5 m/s² to 3 m/s²)": "Nombre d'accélérations moyennes par 90 (1.5 à 3 m/s²)",
+    "Count High Acceleration per 90 (+3 m/s²)": "Nombre de fortes accélérations par 90 (+3 m/s²)",
+    "Count Medium Deceleration per 90 (-1.5 m/s² to -3 m/s²)": "Nombre de décélérations moyennes par 90 (-1.5 à -3 m/s²)",
+    "Count High Deceleration per 90 (-3 m/s²)": "Nombre de fortes décélérations par 90 (-3 m/s²)"
 }
 
 def read_with_competition(filepath):
@@ -3168,9 +3184,9 @@ def plot_player_ranking(df, joueur, poste):
     # --- layout ---
     bg, ink, mute, rail = "#f4f3ed", "#3d3a2a", "#3d3a2a", "#f4f3ed"
     bar_len   = 55
-    val_gap   = 0.6
+    val_gap   = 0.5
     val_strip = 6.0
-    category_gap = 1.6
+    category_gap = 1.5
     line_gap = 0.75
 
     # positions Y
@@ -3187,7 +3203,7 @@ def plot_player_ranking(df, joueur, poste):
     n_metrics = sum(1 for t,*_ in items if t == "metric")
     n_spacers = sum(1 for t,*_ in items if t == "spacer")
     fig_h = max(6.5, min(28, 0.37*n_metrics + 1.0*n_spacers*category_gap + 2.2))
-    fig_w = 11.5
+    fig_w = 12.5
 
     fig = plt.figure(figsize=(fig_w, fig_h))
     fig.patch.set_facecolor(bg)
@@ -3210,7 +3226,7 @@ def plot_player_ranking(df, joueur, poste):
             axL.text(0.02, yi, it[1], ha="left", va="center",
                      fontsize=12.5, fontweight="bold", color=ink, transform=axL.transData)
         elif it[0] == "metric":
-            axL.text(0.02, yi, it[1], ha="left", va="center",
+            axL.text(0.02, yi, label_fr.get(it[1], it[1]), ha="left", va="center",
                      fontsize=10.5, color=ink, transform=axL.transData)
 
     # --- droite : barres + valeurs
