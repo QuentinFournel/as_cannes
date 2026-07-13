@@ -4460,6 +4460,7 @@ def streamlit_application(all_df_dict):
             technical_or_physical = st.segmented_control(
                 "Technique ou physique", ["Technique", "Physique"],
                 label_visibility="collapsed",
+                default="Technique"
             )
 
             fig = create_individual_radar(df, joueur, poste) if technical_or_physical == "Technique" \
