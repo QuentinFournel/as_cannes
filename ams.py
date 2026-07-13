@@ -546,6 +546,22 @@ metrics_by_position = [
     }
 ]
 
+physical_metrics = {
+    "Distance\ntotale": "Total Distance per 90",
+    "Distance\n(15-20 km/h)": "Running Distance per 90 (15-20 km/h)",
+    "Distance\n(20-25 km/h)": "HSR Distance per 90 (20-25 km/h)",
+    "Distance\n(+20 km/h)": "HI Distance per 90 (+20 km/h)",
+    "Distance\n(+25 km/h)": "Sprinting Distance per 90 (+25 km/h)",
+    "Accélérations\nmoyennes": "Count Medium Acceleration per 90 (1.5 m/s² to 3 m/s²)",
+    "Fortes\naccélérations": "Count High Acceleration per 90 (+3 m/s²)",
+    "Décélérations\nmoyennes": "Count Medium Deceleration per 90 (-1.5 m/s² to -3 m/s²)",
+    "Fortes\ndécélérations": "Count High Deceleration per 90 (-3 m/s²)",
+    "Courses\n(20-25 km/h)": "Count HSR per 90 (20-25 km/h)",
+    "Courses\n(+20 km/h)": "Count HI per 90 (+20 km/h)",
+    "Courses\n(+25 km/h)": "Count Sprint per 90 (+25 km/h)",
+    "Vitesse maximale\n(km/h)": "Max Speed (km/h)"
+}
+
 kpi_by_position = {
     "Buteur": {
         "Finition": {
@@ -1888,6 +1904,58 @@ def create_individual_radar(df, joueur, poste):
 
     pizza = PyPizza(
         params=metrics,
+        background_color="#f4f3ed",
+        straight_line_color="#3d3a2a",
+        straight_line_lw=1,
+        last_circle_lw=2,
+        last_circle_color="#3d3a2a",
+        other_circle_lw=0,
+        inner_circle_size=20
+    )
+
+    fig, _ = pizza.make_pizza(
+        values,
+        figsize=(8, 8),
+        color_blank_space="same",
+        slice_colors=slice_colors,
+        value_bck_colors=slice_colors,
+        blank_alpha=0.4,
+        kwargs_slices=dict(edgecolor="#3d3a2a", zorder=2, linewidth=1),
+        kwargs_params=dict(
+            color="#3d3a2a", fontsize=9, va="center"
+        ),
+        kwargs_values=dict(
+            color="#f4f3ed", fontsize=9, zorder=3,
+            bbox=dict(
+                edgecolor="#3d3a2a", facecolor="cornflowerblue",
+                boxstyle="round,pad=0.2", lw=1
+            )
+        )
+    )
+
+    fig.set_facecolor('#f4f3ed')
+
+    return fig
+
+def create_physical_radar(df, joueur, poste):
+    joueur_infos = df[df['Joueur + Information'] == joueur]
+
+    if len(joueur_infos) > 1:
+        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
+    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+
+    df_ranked = rank_columns(df_filtré)
+
+    player = df_ranked[df_ranked["Joueur + Information"] == joueur].iloc[0]
+    values = [player[physical_metrics[abbr]] for abbr in physical_metrics]
+
+    slice_colors = [assign_color(player[col]) for col in physical_metrics.values()]
+
+    pizza = PyPizza(
+        params=physical_metrics,
         background_color="#f4f3ed",
         straight_line_color="#3d3a2a",
         straight_line_lw=1,
@@ -4358,8 +4426,15 @@ def streamlit_application(all_df_dict):
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
         with tab2:
-            fig = create_individual_radar(df, joueur, poste)
-            st.pyplot(fig, use_container_width=True)
+            tab1, tab2 = st.tabs(['Radar technique', 'Radar physique'])
+
+            with tab1:
+                fig = create_individual_radar(df, joueur, poste)
+                st.pyplot(fig, use_container_width=True)
+
+            with tab2:
+                fig = create_physical_radar(df, joueur, poste)
+                st.pyplot(fig, use_container_width=True)
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
