@@ -4457,7 +4457,7 @@ def streamlit_application(all_df_dict):
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
         with tab2:
-            tab1, tab2 = st.tabs(['Radar technique', 'Radar physique'])
+            tab1, tab2 = st.tabs(['Technique', 'Physique'])
 
             with tab1:
                 fig = create_individual_radar(df, joueur, poste)
