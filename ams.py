@@ -4457,15 +4457,17 @@ def streamlit_application(all_df_dict):
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
 
         with tab2:
-            tab1, tab2 = st.tabs(['Technique', 'Physique'])
+            vue = st.segmented_control(
+                "Vue", ["Technique", "Physique"],
+                default="Technique",
+                label_visibility="collapsed",
+                key=f"radar_{joueur}",
+            )
 
-            with tab1:
-                fig = create_individual_radar(df, joueur, poste)
-                st.pyplot(fig, use_container_width=True)
-
-            with tab2:
-                fig = create_physical_radar(df, joueur, poste)
-                st.pyplot(fig, use_container_width=True)
+            fig = create_individual_radar(df, joueur, poste) if vue == "Technique" \
+                else create_physical_radar(df, joueur, poste)
+            
+            st.pyplot(fig, use_container_width=True)
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
