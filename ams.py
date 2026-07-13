@@ -547,19 +547,19 @@ metrics_by_position = [
 ]
 
 physical_metrics = {
+    "Vitesse maximale\n(km/h)": "Max Speed (km/h)",
     "Distance\ntotale": "Total Distance per 90",
     "Distance\n(15-20 km/h)": "Running Distance per 90 (15-20 km/h)",
     "Distance\n(20-25 km/h)": "HSR Distance per 90 (20-25 km/h)",
     "Distance\n(+20 km/h)": "HI Distance per 90 (+20 km/h)",
     "Distance\n(+25 km/h)": "Sprinting Distance per 90 (+25 km/h)",
-    "Accélérations\nmoyennes": "Count Medium Acceleration per 90 (1.5 m/s² to 3 m/s²)",
-    "Fortes\naccélérations": "Count High Acceleration per 90 (+3 m/s²)",
-    "Décélérations\nmoyennes": "Count Medium Deceleration per 90 (-1.5 m/s² to -3 m/s²)",
-    "Fortes\ndécélérations": "Count High Deceleration per 90 (-3 m/s²)",
     "Courses\n(20-25 km/h)": "Count HSR per 90 (20-25 km/h)",
     "Courses\n(+20 km/h)": "Count HI per 90 (+20 km/h)",
     "Courses\n(+25 km/h)": "Count Sprint per 90 (+25 km/h)",
-    "Vitesse maximale\n(km/h)": "Max Speed (km/h)"
+    "Accélérations\nmoyennes": "Count Medium Acceleration per 90 (1.5 m/s² to 3 m/s²)",
+    "Fortes\naccélérations": "Count High Acceleration per 90 (+3 m/s²)",
+    "Décélérations\nmoyennes": "Count Medium Deceleration per 90 (-1.5 m/s² to -3 m/s²)",
+    "Fortes\ndécélérations": "Count High Deceleration per 90 (-3 m/s²)"
 }
 
 kpi_by_position = {
@@ -1488,6 +1488,21 @@ métriques_par_catégorie = {
     "CPA": [
         "Coups francs par 90", "Coups francs directs par 90", "Coups francs directs à la cible, %",
         "Corners par 90", "Penalties pris", "Transformation des penalties, %"
+    ],
+    "Physique": [
+        "Vitesse maximale (km/h)",
+        "Distance totale par 90",
+        "Distance de course par 90 (15-20 km/h)",
+        "Distance de course à haute intensité (20-25 km/h) par 90",
+        "Distance de course à haute intensité (+20 km/h) par 90",
+        "Distance de sprint par 90 (+25 km/h)",
+        "Nombre d'efforts à haute intensité (20-25 km/h) par 90",
+        "Nombre d'efforts à haute intensité (+20 km/h) par 90",
+        "Nombre de sprints par 90 (+25 km/h)",
+        "Nombre d'accélérations moyennes par 90 (1.5 à 3 m/s²)",
+        "Nombre de fortes accélérations par 90 (+3 m/s²)",
+        "Nombre de décélérations moyennes par 90 (-1.5 à -3 m/s²)",
+        "Nombre de fortes décélérations par 90 (-3 m/s²)"
     ]
 }
 
