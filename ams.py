@@ -4838,9 +4838,6 @@ def streamlit_application(all_df_dict):
                                         value=(int(df['Minutes jouées'].min(skipna=True)), int(df['Minutes jouées'].max(skipna=True))), 
                                         step=50)
 
-        with col1:
-            metric_or_kpi = st.radio("Sélectionnez le type de critère pour la recommandation", ["Métrique", "KPI"])
-
         scores_df = calcul_scores_par_kpi(df, "", poste)
 
         colonnes_exclues_metriques = [
@@ -4870,11 +4867,10 @@ def streamlit_application(all_df_dict):
             label = f"{col} (KPI)" if col in noms_communs else col
             catalogue[label] = ("kpi", col)
 
-        with col2:
-            selection = st.multiselect(
-                "Sélectionnez des métriques et/ou des KPIs",
-                list(catalogue.keys())
-            )
+        selection = st.multiselect(
+            "Sélectionnez des métriques et/ou des KPIs",
+            list(catalogue.keys())
+        )
 
         if not selection:
             st.info("Sélectionnez au moins une métrique ou un KPI pour lancer la recherche.")
