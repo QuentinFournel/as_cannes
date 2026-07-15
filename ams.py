@@ -4843,108 +4843,95 @@ def streamlit_application(all_df_dict):
 
         scores_df = calcul_scores_par_kpi(df, "", poste)
 
-        if metric_or_kpi == "Métrique":
-            colonnes_à_exclure = [
-                'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
-                'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
-                'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
-                'Tir', 'Buts de la tête'
-            ]
+        colonnes_exclues_metriques = [
+            'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
+            'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
+            'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
+            'Tir', 'Buts de la tête'
+        ]
+        colonnes_exclues_kpi = ['Minutes jouées', 'Âge', 'Taille']
 
-            colonnes_filtrées = [
-                col for col in df.select_dtypes(include='number').columns
-                if col not in colonnes_à_exclure
-            ]
-            
-            with col2:
-                métriques_selectionnées = st.multiselect("Sélectionnez des métriques", colonnes_filtrées)
+        colonnes_metriques = [
+            col for col in df.select_dtypes(include='number').columns
+            if col not in colonnes_exclues_metriques
+        ]
+        colonnes_kpi = [
+            col for col in scores_df.select_dtypes(include='number').columns
+            if col not in colonnes_exclues_kpi
+        ]
 
-            thresholds = {}
-            for métrique in métriques_selectionnées:
-                thresholds[métrique] = st.slider(f"Sélectionnez le top % pour la métrique : {métrique}", min_value=0, max_value=100, value=50, step=5, key=métrique)
+        noms_communs = set(colonnes_metriques) & set(colonnes_kpi)
 
-            recommended_players = search_recommended_players(df, poste, thresholds)
-            recommended_players = recommended_players[
-                ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
-                ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
-                (
-                    (
-                        (recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
-                        (recommended_players['Contrat expiration'].dt.year <= max_contrat)
-                    )
-                    | (recommended_players['Contrat expiration'].isna())
-                )
-            ]
-            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
+        catalogue = {}
+        for col in colonnes_metriques:
+            label = f"{col} (métrique)" if col in noms_communs else col
+            catalogue[label] = ("metrique", col)
+        for col in colonnes_kpi:
+            label = f"{col} (KPI)" if col in noms_communs else col
+            catalogue[label] = ("kpi", col)
 
-            recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
-
-            df_affichage = recommended_players.copy()
-            df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
-
-            event = st.dataframe(
-                df_affichage,
-                use_container_width=True,
-                hide_index=True,
-                on_select="rerun",
-                selection_mode="single-row",
+        with col2:
+            selection = st.multiselect(
+                "Sélectionnez des métriques et/ou des KPIs",
+                list(catalogue.keys())
             )
 
-            if event.selection.rows:
-                idx = event.selection.rows[0]
-                joueur = df_affichage.iloc[idx]['Joueur + Information']
-                afficher_fiche(df, joueur, poste)
+        if not selection:
+            st.info("Sélectionnez au moins une métrique ou un KPI pour lancer la recherche.")
+            st.stop()
 
-        elif metric_or_kpi == "KPI":
-            colonnes_à_exclure = [
-                'Minutes jouées', 'Âge', 'Taille'
-            ]
-
-            colonnes_filtrées = [
-                col for col in scores_df.select_dtypes(include='number').columns
-                if col not in colonnes_à_exclure
-            ]
-
-            with col2:
-                kpis_sélectionnées = st.multiselect("Sélectionnez des KPIs", colonnes_filtrées)
-
-            thresholds = {}
-            for kpi in kpis_sélectionnées:
-                thresholds[kpi] = st.slider(f"Sélectionnez le top % pour le KPI : {kpi}", min_value=0, max_value=100, value=50, step=5, key=kpi)
-
-            recommended_players = search_recommended_players(scores_df, poste, thresholds)
-            recommended_players = recommended_players[
-                ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
-                ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
-                ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
-                (
-                    (
-                        (recommended_players['Contrat expiration'].dt.year >= min_contrat) & 
-                        (recommended_players['Contrat expiration'].dt.year <= max_contrat)
-                    )
-                    | (recommended_players['Contrat expiration'].isna())
-                )
-            ]
-            recommended_players = recommended_players.sort_values(by=list(thresholds.keys()), ascending=[False] * len(list(thresholds.keys())))
-
-            recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
-
-            df_affichage = recommended_players.copy()
-            df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
-
-            event = st.dataframe(
-                df_affichage,
-                use_container_width=True,
-                hide_index=True,
-                on_select="rerun",
-                selection_mode="single-row",
+        thresholds = {}
+        for label in selection:
+            thresholds[label] = st.slider(
+                f"Sélectionnez le top % pour : {label}",
+                min_value=0, max_value=100, value=50, step=5, key=label
             )
 
-            if event.selection.rows:
-                idx = event.selection.rows[0]
-                joueur = df_affichage.iloc[idx]['Joueur + Information']
-                afficher_fiche(df, joueur, poste)
+        df_travail = df.copy()
+        scores_indexe = scores_df.set_index('Joueur + Information')
+
+        for label in selection:
+            source, col = catalogue[label]
+            if source == "metrique":
+                if label != col:
+                    df_travail[label] = df[col]
+            else:
+                df_travail[label] = df_travail['Joueur + Information'].map(scores_indexe[col])
+
+        recommended_players = search_recommended_players(df_travail, poste, thresholds)
+        recommended_players = recommended_players[
+            ((recommended_players['Âge'] >= min_age) & (recommended_players['Âge'] <= max_age)) &
+            ((recommended_players['Taille'] >= min_taille) & (recommended_players['Taille'] <= max_taille) | (recommended_players['Taille'] == 0)) &
+            ((recommended_players['Minutes jouées'] >= min_minutes) & (recommended_players['Minutes jouées'] <= max_minutes)) &
+            (
+                (
+                    (recommended_players['Contrat expiration'].dt.year >= min_contrat) &
+                    (recommended_players['Contrat expiration'].dt.year <= max_contrat)
+                )
+                | (recommended_players['Contrat expiration'].isna())
+            )
+        ]
+        recommended_players = recommended_players.sort_values(
+            by=list(thresholds.keys()),
+            ascending=[False] * len(thresholds)
+        )
+        recommended_players.insert(0, "Classement", range(1, len(recommended_players) + 1))
+
+        df_affichage = recommended_players.copy()
+        df_affichage['Contrat expiration'] = df_affichage['Contrat expiration'].dt.strftime('%d/%m/%Y')
+
+        event = st.dataframe(
+            df_affichage,
+            use_container_width=True,
+            hide_index=True,
+            on_select="rerun",
+            selection_mode="single-row",
+        )
+
+        if event.selection.rows:
+            idx = event.selection.rows[0]
+            joueur = df_affichage.iloc[idx]['Joueur + Information']
+            afficher_fiche(df, joueur, poste)
 
 if __name__ == '__main__':
     st.set_page_config(
