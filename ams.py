@@ -4884,7 +4884,7 @@ def streamlit_application(all_df_dict):
             )
 
         df_travail = df.copy()
-        scores_indexe = scores_df.set_index('Joueur + Information')
+        scores_indexe = scores_df.drop_duplicates(subset='Joueur + Information').set_index('Joueur + Information')
 
         for label in selection:
             source, col = catalogue[label]
