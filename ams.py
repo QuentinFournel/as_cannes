@@ -3600,14 +3600,14 @@ def _echelle_html(kpi):
         atteint = (i == kpi["palier_idx"])
         meilleur = (i < kpi["palier_idx"])   # paliers à viser (au-dessus)
         if atteint:
-            style = (f"background:{coul};color:#ECEBE3;border:1px solid {coul};"
+            style = (f"background:{coul};color:#F4F3ED;border:1px solid {coul};"
                      f"font-weight:700;")
             tag = "palier atteint"
         elif meilleur:
             style = (f"background:#ECEBE3;color:{coul};border:1px dashed {coul};")
             tag = "à viser"
         else:
-            style = "background:#f2f3f5;color:#9aa0a6;border:1px solid #e6e8eb;"
+            style = "background:#F4F3ED;color:#9aa0a6;border:1px solid #e6e8eb;"
             tag = ""
         chips.append(
             f'<div style="flex:1;min-width:0;border-radius:6px;padding:5px 6px;'
@@ -3640,7 +3640,7 @@ def _dimension_html(res, dim):
     coul = COULEURS_DIM[dim]
     kpis = [k for k in res["kpis"] if k["dimension"] == dim]
     entete = (
-        f'<div style="background:{coul};color:#ECEBE3;border-radius:10px 10px 0 0;'
+        f'<div style="background:{coul};color:#F4F3ED;border-radius:10px 10px 0 0;'
         f'padding:14px 18px;display:flex;align-items:baseline;justify-content:space-between;">'
         f'  <div style="font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">'
         f'    Dimension {dim} — {d["nom"]}</div>'
@@ -3648,7 +3648,7 @@ def _dimension_html(res, dim):
         f'    <span style="font-size:13px;font-weight:600;opacity:.85;">/ {d["max"]}</span></div>'
         f'</div>'
     )
-    corps = ('<div style="background:#ECEBE3;border:1px solid #eef0f2;border-top:none;'
+    corps = ('<div style="background:#F4F3ED;border:1px solid #eef0f2;border-top:none;'
              'border-radius:0 0 10px 10px;padding:4px 18px 14px;">'
              + "".join(_kpi_html(k) for k in kpis) + "</div>")
     return f'<div style="margin-bottom:16px;">{entete}{corps}</div>'
@@ -3656,7 +3656,7 @@ def _dimension_html(res, dim):
 def _bandeau_score_html(res):
     coul = "#ac141a"
     return (
-        f'<div style="background:{coul};color:#ECEBE3;border-radius:12px;padding:18px 26px;'
+        f'<div style="background:{coul};color:#F4F3ED;border-radius:12px;padding:18px 26px;'
         f'margin-bottom:16px;display:flex;align-items:center;gap:22px;'
         f'flex-wrap:wrap;box-sizing:border-box;">'
         f'  <div style="flex:1;min-width:120px;text-align:left;">'
@@ -3669,7 +3669,7 @@ def _bandeau_score_html(res):
         f'      <span style="font-size:20px;font-weight:600;opacity:.8;">/ 100</span></div>'
         f'  </div>'
         f'  <div style="flex:1;min-width:120px;text-align:right;">'
-        f'    <span style="display:inline-block;background:#ECEBE3;color:{coul};border-radius:22px;'
+        f'    <span style="display:inline-block;background:#F4F3ED;color:{coul};border-radius:22px;'
         f'      padding:11px 24px;font-size:16px;font-weight:800;letter-spacing:.5px;white-space:nowrap;">{res["verdict"]}</span>'
         f'  </div>'
         f'</div>'
