@@ -3381,236 +3381,316 @@ def afficher_fiche(df, joueur, poste):
         st.pyplot(fig2)
         plt.close(fig2)
 
-def score_rythme(valeur):
-    """Rythme du match : ≥ 18 → 8 | 17-18 → 5 | 15-17 → 2 | < 15 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur >= 18:
-        return 8
-    elif valeur >= 17:
-        return 5
-    elif valeur >= 15:
-        return 2
-    return 0
-
-def score_possession(valeur):
-    """Possession % : ≥ 55 → 8 | 52-55 → 5 | 50-52 → 2 | < 50 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur >= 55:
-        return 8
-    elif valeur >= 52:
-        return 5
-    elif valeur >= 50:
-        return 2
-    return 0
-
-def score_ppda(valeur):
-    """PPDA (plus bas = mieux) : < 8 → 8 | 8-11 → 5 | 11-13 → 2 | > 13 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur < 8:
-        return 8
-    elif valeur <= 11:
-        return 5
-    elif valeur <= 13:
-        return 2
-    return 0
-
-def score_contre_attaque(nb_contre_att_avec_tir, nb_contre_att_total):
-    """Contre-attaque avec tir : ≥ 2 → 8 | 1 → 5 | 0 tir mais ≥ 1 c-att → 2 | 0 c-att → 0"""
-    if pd.isna(nb_contre_att_avec_tir):
-        nb_contre_att_avec_tir = 0
-    if pd.isna(nb_contre_att_total):
-        nb_contre_att_total = 0
-    if nb_contre_att_avec_tir >= 2:
-        return 8
-    elif nb_contre_att_avec_tir >= 1:
-        return 5
-    elif nb_contre_att_total >= 1:
-        return 2
-    return 0
-
-def score_passes_avant(passes_avant, passes_totales):
-    """% passes vers l'avant : ≥ 40 → 8 | 35-40 → 5 | 32-35 → 2 | < 32 → 0"""
-    if pd.isna(passes_avant) or pd.isna(passes_totales) or passes_totales == 0:
-        return 0
-    pct = passes_avant / passes_totales * 100
-    if pct >= 40:
-        return 8
-    elif pct >= 35:
-        return 5
-    elif pct >= 32:
-        return 2
-    return 0
-
-def score_xg(valeur):
-    """xG créé : ≥ 1.7 → 10 | 1.5-1.7 → 6 | 1.3-1.5 → 3 | < 1.3 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur >= 1.7:
-        return 10
-    elif valeur >= 1.5:
-        return 6
-    elif valeur >= 1.3:
-        return 3
-    return 0
-
-def score_tirs_cadres(valeur):
-    """Tirs cadrés : ≥ 5 → 8 | 3-4 → 5 | 1-2 → 2 | 0 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur >= 5:
-        return 8
-    elif valeur >= 3:
-        return 5
-    elif valeur >= 1:
-        return 2
-    return 0
-
-def score_touches_surface(valeur):
-    """Touches surface adv. : ≥ 20 → 6 | 15-19 → 4 | 10-14 → 2 | < 10 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur >= 20:
-        return 6
-    elif valeur >= 15:
-        return 4
-    elif valeur >= 10:
-        return 2
-    return 0
-
-def score_corners(nb_corners, nb_corners_avec_tirs):
-    """Corners + conversion : ≥ 5 et ≥ 30 % → 6 | un des deux → 4 | 3-4 corners → 2 | < 3 → 0"""
-    if pd.isna(nb_corners):
-        return 0
-    if pd.isna(nb_corners_avec_tirs):
-        nb_corners_avec_tirs = 0
-    volume_ok = nb_corners >= 5
-    conv_ok = (nb_corners_avec_tirs / nb_corners * 100) >= 30 if nb_corners > 0 else False
-    if volume_ok and conv_ok:
-        return 6
-    elif volume_ok or conv_ok:
-        return 4
-    elif nb_corners >= 3:
-        return 2
-    return 0
-
-def score_buts_encaisses(valeur):
-    """Buts encaissés : 0 → 10 | 1 → 6 | 2 → 2 | ≥ 3 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur == 0:
-        return 10
-    elif valeur == 1:
-        return 6
-    elif valeur == 2:
-        return 2
-    return 0
-
-def score_tirs_cadres_concedes(valeur):
-    """Tirs cadrés concédés : ≤ 3 → 8 | 4 → 5 | 5 → 2 | ≥ 6 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur <= 3:
-        return 8
-    elif valeur == 4:
-        return 5
-    elif valeur == 5:
-        return 2
-    return 0
-
-def score_duels_defensifs(valeur):
-    """% duels défensifs gagnés : ≥ 65 → 6 | 63-65 → 4 | 58-63 → 2 | < 58 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur >= 65:
-        return 6
-    elif valeur >= 63:
-        return 4
-    elif valeur >= 58:
-        return 2
-    return 0
-
-def score_xg_concede(valeur):
-    """xG concédé (plus bas = mieux) : ≤ 0.85 → 6 | 0.85-1.1 → 3 | 1.1-1.5 → 1 | > 1.5 → 0"""
-    if pd.isna(valeur):
-        return 0
-    if valeur <= 0.85:
-        return 6
-    elif valeur <= 1.1:
-        return 3
-    elif valeur <= 1.5:
-        return 1
-    return 0
-
 COL = {
-    'date':                       1,
-    'match':                      2,
-    'championnat':                3,
-    'equipe':                     5,
-    'buts':                       7,
-    'xg':                         8,
-    'tirs':                       9,
-    'tirs_cadres':               10,
-    'passes':                    12,
-    'possession':                15,
-    'contre_attaques':           33,
-    'contre_att_avec_tirs':      34,
-    'corners':                   39,
-    'corners_avec_tirs':         40,
-    'touches_surface':           56,
-    'buts_concedes':             61,
-    'tirs_contre':               62,
-    'tirs_contre_cadres':        63,
-    'duels_def_pct':             67,
-    'passes_avant':              79,
-    'rythme':                   104,
-    'ppda':                     109,
+    'date': 1, 'match': 2, 'championnat': 3, 'equipe': 5, 'buts': 7, 'xg': 8,
+    'tirs': 9, 'tirs_cadres': 10, 'passes': 12, 'possession': 15,
+    'contre_attaques': 33, 'contre_att_avec_tirs': 34, 'corners': 39,
+    'corners_avec_tirs': 40, 'touches_surface': 56, 'buts_concedes': 61,
+    'tirs_contre': 62, 'tirs_contre_cadres': 63, 'duels_def_pct': 67,
+    'passes_avant': 79, 'rythme': 104, 'ppda': 109,
 }
 
-def scorer_un_match(df_filtré, equipe_ref):
-    ref = df_filtré[df_filtré['Équipe'] == equipe_ref].iloc[0]
-    adv = df_filtré[df_filtré['Équipe'] != equipe_ref].iloc[0]
-    equipe     = {k: ref.iloc[v - 1] for k, v in COL.items()}
-    adversaire = {k: adv.iloc[v - 1] for k, v in COL.items()}
+COULEURS_DIM = {1: "#ac141a", 2: "#1D3A5F", 3: "#2A7F5E"}
 
-    # ---------- Dimension 1 : Fidélité au style (/40) ----------
-    d1 = {
-        'rythme':        score_rythme(equipe['rythme']),
-        'possession':    score_possession(equipe['possession']),
-        'ppda':          score_ppda(equipe['ppda']),
-        'contre_att':    score_contre_attaque(equipe['contre_att_avec_tirs'], equipe['contre_attaques']),
-        'passes_avant':  score_passes_avant(equipe['passes_avant'], equipe['passes']),
-    }
-    total_d1 = sum(d1.values())
+def _isna(v):
+    return v is None or (isinstance(v, float) and pd.isna(v))
 
-    # ---------- Dimension 2 : Efficacité offensive (/30) ----------
-    d2 = {
-        'xg':            score_xg(equipe['xg']),
-        'tirs_cadres':   score_tirs_cadres(equipe['tirs_cadres']),
-        'touches_surf':  score_touches_surface(equipe['touches_surface']),
-        'corners':       score_corners(equipe['corners'], equipe['corners_avec_tirs']),
-    }
-    total_d2 = sum(d2.values())
+def _c_rythme(eq, adv):
+    v = eq['rythme']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v >= 18 else 1 if v >= 17 else 2 if v >= 15 else 3
+    return (f"{v:.2f}", idx)
 
-    # ---------- Dimension 3 : Solidité défensive (/30) ----------
-    d3 = {
-        'buts_enc':      score_buts_encaisses(equipe['buts_concedes']),
-        'tirs_c_conc':   score_tirs_cadres_concedes(equipe['tirs_contre_cadres']),
-        'duels_def':     score_duels_defensifs(equipe['duels_def_pct']),
-        'xg_conc':       score_xg_concede(adversaire['xg']),
-    }
-    total_d3 = sum(d3.values())
+def _c_possession(eq, adv):
+    v = eq['possession']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v >= 55 else 1 if v >= 52 else 2 if v >= 50 else 3
+    return (f"{v:.2f} %", idx)
+
+def _c_ppda(eq, adv):
+    v = eq['ppda']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v < 8 else 1 if v <= 11 else 2 if v <= 13 else 3
+    return (f"{v:.2f}", idx)
+
+def _c_contre(eq, adv):
+    tir = eq['contre_att_avec_tirs']
+    tot = eq['contre_attaques']
+    tir = 0 if _isna(tir) else tir
+    tot = 0 if _isna(tot) else tot
+    idx = 0 if tir >= 2 else 1 if tir >= 1 else 2 if tot >= 1 else 3
+    return (f"{int(tir)}", idx)
+
+def _c_passes_avant(eq, adv):
+    pa, pt = eq['passes_avant'], eq['passes']
+    if _isna(pa) or _isna(pt) or pt == 0:
+        return ("n/d", 3)
+    pct = pa / pt * 100
+    idx = 0 if pct >= 40 else 1 if pct >= 35 else 2 if pct >= 32 else 3
+    return (f"{pct:.2f} %", idx)
+
+def _c_xg(eq, adv):
+    v = eq['xg']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v >= 1.7 else 1 if v >= 1.5 else 2 if v >= 1.3 else 3
+    return (f"{v:.2f}", idx)
+
+def _c_tirs_cadres(eq, adv):
+    v = eq['tirs_cadres']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v >= 5 else 1 if v >= 3 else 2 if v >= 1 else 3
+    return (f"{int(v)}", idx)
+
+def _c_touches(eq, adv):
+    v = eq['touches_surface']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v >= 20 else 1 if v >= 15 else 2 if v >= 10 else 3
+    return (f"{int(v)}", idx)
+
+def _c_corners(eq, adv):
+    nb = eq['corners']
+    nb_tir = eq['corners_avec_tirs']
+    if _isna(nb):
+        return ("n/d", 3)
+    nb_tir = 0 if _isna(nb_tir) else nb_tir
+    conv = (nb_tir / nb * 100) if nb > 0 else 0
+    volume_ok = nb >= 5
+    conv_ok = conv >= 30 and nb > 0
+    idx = 0 if (volume_ok and conv_ok) else 1 if (volume_ok or conv_ok) else 2 if nb >= 3 else 3
+    return (f"{int(nb)} / {conv:.0f} %", idx)
+
+def _c_buts_encaisses(eq, adv):
+    v = eq['buts_concedes']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v == 0 else 1 if v == 1 else 2 if v == 2 else 3
+    return (f"{int(v)}", idx)
+
+def _c_tirs_c_concedes(eq, adv):
+    v = eq['tirs_contre_cadres']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v <= 3 else 1 if v == 4 else 2 if v == 5 else 3
+    return (f"{int(v)}", idx)
+
+def _c_duels_def(eq, adv):
+    v = eq['duels_def_pct']
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v >= 65 else 1 if v >= 63 else 2 if v >= 58 else 3
+    return (f"{v:.2f} %", idx)
+
+def _c_xg_concede(eq, adv):
+    v = adv['xg']  # xG concédé = xG de l'adversaire
+    if _isna(v):
+        return ("n/d", 3)
+    idx = 0 if v <= 0.85 else 1 if v <= 1.1 else 2 if v <= 1.5 else 3
+    return (f"{v:.2f}", idx)
+
+KPIS = [
+    # ---- Dimension 1 : Fidélité au style (/40) ----
+    {"nom": "Rythme du match",        "dimension": 1, "calc": _c_rythme,
+     "paliers": [("≥ 18", 8), ("17 – 18", 5), ("15 – 17", 2), ("< 15", 0)]},
+    {"nom": "Possession",             "dimension": 1, "calc": _c_possession,
+     "paliers": [("≥ 55 %", 8), ("52 – 55 %", 5), ("50 – 52 %", 2), ("< 50 %", 0)]},
+    {"nom": "PPDA",                   "dimension": 1, "calc": _c_ppda,
+     "paliers": [("< 8", 8), ("8 – 11", 5), ("11 – 13", 2), ("> 13", 0)]},
+    {"nom": "Contre-att. avec tir",   "dimension": 1, "calc": _c_contre,
+     "paliers": [("≥ 2", 8), ("1", 5), ("0 tir, ≥ 1 c-att", 2), ("aucune", 0)]},
+    {"nom": "% passes vers l'avant",  "dimension": 1, "calc": _c_passes_avant,
+     "paliers": [("≥ 40 %", 8), ("35 – 40 %", 5), ("32 – 35 %", 2), ("< 32 %", 0)]},
+
+    # ---- Dimension 2 : Efficacité offensive (/30) ----
+    {"nom": "xG créé",                "dimension": 2, "calc": _c_xg,
+     "paliers": [("≥ 1.7", 10), ("1.5 – 1.7", 6), ("1.3 – 1.5", 3), ("< 1.3", 0)]},
+    {"nom": "Tirs cadrés",            "dimension": 2, "calc": _c_tirs_cadres,
+     "paliers": [("≥ 5", 8), ("3 – 4", 5), ("1 – 2", 2), ("0", 0)]},
+    {"nom": "Touches surface adv.",   "dimension": 2, "calc": _c_touches,
+     "paliers": [("≥ 20", 6), ("15 – 19", 4), ("10 – 14", 2), ("< 10", 0)]},
+    {"nom": "Corners + conversion",   "dimension": 2, "calc": _c_corners,
+     "paliers": [("≥ 5 & ≥ 30 %", 6), ("un des deux", 4), ("3 – 4 corners", 2), ("< 3", 0)]},
+
+    # ---- Dimension 3 : Solidité défensive (/30) ----
+    {"nom": "Buts encaissés",         "dimension": 3, "calc": _c_buts_encaisses,
+     "paliers": [("0 (parfait)", 10), ("1", 6), ("2", 2), ("≥ 3", 0)]},
+    {"nom": "Tirs cadrés concédés",   "dimension": 3, "calc": _c_tirs_c_concedes,
+     "paliers": [("≤ 3", 8), ("4", 5), ("5", 2), ("≥ 6", 0)]},
+    {"nom": "% duels défensifs gagnés","dimension": 3, "calc": _c_duels_def,
+     "paliers": [("≥ 65 %", 6), ("63 – 65 %", 4), ("58 – 63 %", 2), ("< 58 %", 0)]},
+    {"nom": "xG concédé",             "dimension": 3, "calc": _c_xg_concede,
+     "paliers": [("≤ 0.85", 6), ("0.85 – 1.1", 3), ("1.1 – 1.5", 1), ("> 1.5", 0)]},
+]
+
+DIMENSIONS = {
+    1: {"nom": "Fidélité au style",  "max": 40},
+    2: {"nom": "Efficacité offensive", "max": 30},
+    3: {"nom": "Solidité défensive", "max": 30},
+}
+
+VERDICTS = [
+    (85, "MATCH RÉFÉRENCE"),
+    (70, "BON MATCH"),
+    (55, "MATCH CORRECT"),
+    (40, "MATCH EN DEÇÀ"),
+    (0,  "MATCH INSUFFISANT"),
+]
+
+def _lignes_match(df_filtré, equipe_ref="Cannes"):
+    if len(df_filtré) < 2:
+        raise ValueError("df_filtré doit contenir 2 lignes (équipe + adversaire).")
+    ref = df_filtré[df_filtré["Équipe"] == equipe_ref].iloc[0]
+    adv = df_filtré[df_filtré["Équipe"] != equipe_ref].iloc[0]
+    eq  = {k: ref.iloc[v - 1] for k, v in COL.items()}
+    ad  = {k: adv.iloc[v - 1] for k, v in COL.items()}
+    return eq, ad
+
+def evaluer_match(df_filtré, equipe_ref="Cannes"):
+    eq, ad = _lignes_match(df_filtré, equipe_ref)
+
+    kpis = []
+    totaux = {1: 0, 2: 0, 3: 0}
+    for cfg in KPIS:
+        valeur, idx = cfg["calc"](eq, ad)
+        points = cfg["paliers"][idx][1]
+        points_max = cfg["paliers"][0][1]
+        totaux[cfg["dimension"]] += points
+        kpis.append({
+            "nom": cfg["nom"],
+            "dimension": cfg["dimension"],
+            "valeur": valeur,
+            "points": points,
+            "points_max": points_max,
+            "palier_idx": idx,
+            "paliers": cfg["paliers"],  # échelle complète
+        })
+
+    total = sum(totaux.values())
+    verdict = next(lib for seuil, lib in VERDICTS if total >= seuil)
 
     return {
-        'date':        equipe['date'],
-        'match':       equipe['match'],
-        'D1_fidelite': total_d1,
-        'D2_efficacite': total_d2,
-        'D3_solidite': total_d3,
-        'score_total': total_d1 + total_d2 + total_d3,
+        "equipe": eq["equipe"], "adversaire": ad["equipe"],
+        "match": eq["match"],
+        "buts_pour": int(eq["buts"]) if not _isna(eq["buts"]) else 0,
+        "buts_contre": int(eq["buts_concedes"]) if not _isna(eq["buts_concedes"]) else 0,
+        "total": total, "verdict": verdict,
+        "dimensions": {d: {"nom": DIMENSIONS[d]["nom"], "max": DIMENSIONS[d]["max"],
+                           "points": totaux[d]} for d in (1, 2, 3)},
+        "kpis": kpis,
     }
+
+def _symbole(points, points_max):
+    if points_max == 0:
+        return "•", "#8a8f98"
+    r = points / points_max
+    if r >= 1:      return "✓", "#1e8f4e"   # palier max atteint
+    if r > 0:       return "≈", "#d98a00"   # palier intermédiaire
+    return "✗", "#ac141a"                   # zéro
+
+def _echelle_html(kpi):
+    """Rend l'échelle complète des paliers, palier atteint mis en avant."""
+    coul = COULEURS_DIM[kpi["dimension"]]
+    chips = []
+    for i, (cible, pts) in enumerate(kpi["paliers"]):
+        atteint = (i == kpi["palier_idx"])
+        meilleur = (i < kpi["palier_idx"])   # paliers à viser (au-dessus)
+        if atteint:
+            style = (f"background:{coul};color:#fff;border:1px solid {coul};"
+                     f"font-weight:700;")
+            tag = "palier atteint"
+        elif meilleur:
+            style = (f"background:#fff;color:{coul};border:1px dashed {coul};")
+            tag = "à viser"
+        else:
+            style = "background:#f2f3f5;color:#9aa0a6;border:1px solid #e6e8eb;"
+            tag = ""
+        chips.append(
+            f'<div style="flex:1;min-width:0;border-radius:6px;padding:5px 6px;'
+            f'text-align:center;{style}">'
+            f'<div style="font-size:13px;font-weight:700;line-height:1;">{pts} pts</div>'
+            f'<div style="font-size:10.5px;margin-top:2px;opacity:.9;">{cible}</div>'
+            f'{f"<div style=\'font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;opacity:.75;\'>{tag}</div>" if tag else ""}'
+            f'</div>'
+        )
+    # meilleur palier à droite : on affiche du plus mauvais (gauche) au meilleur (droite)
+    return (f'<div style="display:flex;gap:5px;margin-top:6px;">' + "".join(reversed(chips)) + "</div>")
+
+def _kpi_html(kpi):
+    coul = COULEURS_DIM[kpi["dimension"]]
+    sym, sym_coul = _symbole(kpi["points"], kpi["points_max"])
+    return (
+        f'<div style="padding:12px 0;border-top:1px solid #eef0f2;">'
+        f'  <div style="display:flex;align-items:center;gap:10px;">'
+        f'    <div style="flex:1;font-size:14px;font-weight:600;color:#20242a;">{kpi["nom"]}</div>'
+        f'    <div style="font-size:14px;font-weight:700;color:{sym_coul};white-space:nowrap;">{sym} {kpi["valeur"]}</div>'
+        f'    <div style="font-size:15px;font-weight:800;color:{coul};min-width:52px;text-align:right;">'
+        f'      {kpi["points"]}<span style="font-size:11px;color:#9aa0a6;font-weight:600;">/{kpi["points_max"]}</span></div>'
+        f'  </div>'
+        f'  {_echelle_html(kpi)}'
+        f'</div>'
+    )
+
+def _dimension_html(res, dim):
+    d = res["dimensions"][dim]
+    coul = COULEURS_DIM[dim]
+    kpis = [k for k in res["kpis"] if k["dimension"] == dim]
+    entete = (
+        f'<div style="background:{coul};color:#fff;border-radius:10px 10px 0 0;'
+        f'padding:14px 18px;display:flex;align-items:baseline;justify-content:space-between;">'
+        f'  <div style="font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">'
+        f'    Dimension {dim} — {d["nom"]}</div>'
+        f'  <div style="font-size:26px;font-weight:800;">{d["points"]}'
+        f'    <span style="font-size:13px;font-weight:600;opacity:.85;">/ {d["max"]}</span></div>'
+        f'</div>'
+    )
+    corps = ('<div style="background:#fff;border:1px solid #eef0f2;border-top:none;'
+             'border-radius:0 0 10px 10px;padding:4px 18px 14px;">'
+             + "".join(_kpi_html(k) for k in kpis) + "</div>")
+    return f'<div style="margin-bottom:16px;">{entete}{corps}</div>'
+
+def _bandeau_score_html(res):
+    coul = "#ac141a"
+    return (
+        f'<div style="background:{coul};color:#fff;border-radius:12px;padding:18px 26px;'
+        f'margin-bottom:16px;display:flex;align-items:center;gap:22px;'
+        f'flex-wrap:wrap;box-sizing:border-box;">'
+        f'  <div style="flex:1;min-width:120px;text-align:left;">'
+        f'    <div style="font-size:11px;letter-spacing:1px;font-weight:700;opacity:.85;">RÉSULTAT</div>'
+        f'    <div style="font-size:30px;font-weight:800;line-height:1.1;">{res["buts_pour"]} – {res["buts_contre"]}</div>'
+        f'  </div>'
+        f'  <div style="flex:1;min-width:180px;text-align:center;">'
+        f'    <div style="font-size:12px;font-weight:600;letter-spacing:.5px;opacity:.85;margin-bottom:2px;">SCORE GLOBAL DU MATCH</div>'
+        f'    <div style="font-size:54px;font-weight:800;line-height:1;">{res["total"]}'
+        f'      <span style="font-size:20px;font-weight:600;opacity:.8;">/ 100</span></div>'
+        f'  </div>'
+        f'  <div style="flex:1;min-width:120px;text-align:right;">'
+        f'    <span style="display:inline-block;background:#fff;color:{coul};border-radius:22px;'
+        f'      padding:11px 24px;font-size:16px;font-weight:800;letter-spacing:.5px;white-space:nowrap;">{res["verdict"]}</span>'
+        f'  </div>'
+        f'</div>'
+    )
+
+def construire_html(res):
+    """Renvoie le HTML complet de la fiche (str), sans dépendance à Streamlit."""
+    dims = "".join(_dimension_html(res, d) for d in (1, 2, 3))
+    return (
+        f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;">'
+        f'  {_bandeau_score_html(res)}'
+        f'  {dims}'
+        f'</div>'
+    )
+
+def afficher_rapport(df_filtré, equipe_ref="Cannes"):
+    """À appeler dans l'app Streamlit."""
+    import streamlit as st
+    res = evaluer_match(df_filtré, equipe_ref)
+    st.html(construire_html(res))
+    return res
 
 def streamlit_application(all_df_dict):
     with st.sidebar:
@@ -4419,15 +4499,7 @@ def streamlit_application(all_df_dict):
                     tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
                     with tab5:
-                        scores_match = scorer_un_match(df_filtré, team)
-                        df_scores = pd.DataFrame([{
-                            "Dimension 1 - Fidélité au style": scores_match["D1_fidelite"],
-                            "Dimension 2 - Efficacité offensive": scores_match["D2_efficacite"],
-                            "Dimension 3 - Solidité défensive": scores_match["D3_solidite"],
-                            "Score de performance": scores_match["score_total"]
-                        }])
-
-                        st.dataframe(df_scores, use_container_width=True, hide_index=True)
+                        _ = evaluer_match(df_filtré, team)
 
                     with tab6:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
