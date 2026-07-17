@@ -4538,7 +4538,8 @@ def streamlit_application(all_df_dict):
                         tab_score, tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
                         with tab_score:
-                            afficher_rapport_moyenne(df_filtré, team)
+                            df_score_moy = df_collective[df_collective["Compétition"] == "France. National 2"]
+                            afficher_rapport_moyenne(df_score_moy, team)
 
                         with tab_general:
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
