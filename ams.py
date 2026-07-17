@@ -3648,7 +3648,7 @@ def _dimension_html(res, dim):
         f'    <span style="font-size:13px;font-weight:600;opacity:.85;">/ {d["max"]}</span></div>'
         f'</div>'
     )
-    corps = ('<div style="background:#F4F3ED;border:1px solid #eef0f2;border-top:none;'
+    corps = ('<div style="background:#ECEBE3;border:1px solid #eef0f2;border-top:none;'
              'border-radius:0 0 10px 10px;padding:4px 18px 14px;">'
              + "".join(_kpi_html(k) for k in kpis) + "</div>")
     return f'<div style="margin-bottom:16px;">{entete}{corps}</div>'
