@@ -3395,6 +3395,10 @@ COULEURS_DIM = {1: "#ac141a", 2: "#1D3A5F", 3: "#2A7F5E"}
 def _isna(v):
     return v is None or (isinstance(v, float) and pd.isna(v))
 
+def _fmt(v):
+    """Entier si valeur entière, sinon 1 décimale (utile pour les moyennes)."""
+    return f"{int(v)}" if float(v) % 1 == 0 else f"{v:.1f}"
+
 def _c_rythme(eq, adv):
     v = eq['rythme']
     if _isna(v):
@@ -3422,7 +3426,7 @@ def _c_contre(eq, adv):
     tir = 0 if _isna(tir) else tir
     tot = 0 if _isna(tot) else tot
     idx = 0 if tir >= 2 else 1 if tir >= 1 else 2 if tot >= 1 else 3
-    return (f"{int(tir)}", idx)
+    return (_fmt(tir), idx)
 
 def _c_passes_avant(eq, adv):
     pa, pt = eq['passes_avant'], eq['passes']
@@ -3444,14 +3448,14 @@ def _c_tirs_cadres(eq, adv):
     if _isna(v):
         return ("n/d", 3)
     idx = 0 if v >= 5 else 1 if v >= 3 else 2 if v >= 1 else 3
-    return (f"{int(v)}", idx)
+    return (_fmt(v), idx)
 
 def _c_touches(eq, adv):
     v = eq['touches_surface']
     if _isna(v):
         return ("n/d", 3)
     idx = 0 if v >= 20 else 1 if v >= 15 else 2 if v >= 10 else 3
-    return (f"{int(v)}", idx)
+    return (_fmt(v), idx)
 
 def _c_corners(eq, adv):
     nb = eq['corners']
@@ -3463,21 +3467,21 @@ def _c_corners(eq, adv):
     volume_ok = nb >= 5
     conv_ok = conv >= 30 and nb > 0
     idx = 0 if (volume_ok and conv_ok) else 1 if (volume_ok or conv_ok) else 2 if nb >= 3 else 3
-    return (f"{int(nb)} / {conv:.0f} %", idx)
+    return (f"{_fmt(nb)} / {conv:.0f} %", idx)
 
 def _c_buts_encaisses(eq, adv):
     v = eq['buts_concedes']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v == 0 else 1 if v == 1 else 2 if v == 2 else 3
-    return (f"{int(v)}", idx)
+    idx = 0 if v < 0.5 else 1 if v < 1.5 else 2 if v < 2.5 else 3
+    return (_fmt(v), idx)
 
 def _c_tirs_c_concedes(eq, adv):
     v = eq['tirs_contre_cadres']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v <= 3 else 1 if v == 4 else 2 if v == 5 else 3
-    return (f"{int(v)}", idx)
+    idx = 0 if v < 3.5 else 1 if v < 4.5 else 2 if v < 5.5 else 3
+    return (_fmt(v), idx)
 
 def _c_duels_def(eq, adv):
     v = eq['duels_def_pct']
@@ -3550,7 +3554,7 @@ def _lignes_match(df_filtré, equipe_ref="Cannes"):
     ad  = {k: adv.iloc[v - 1] for k, v in COL.items()}
     return eq, ad
 
-def evaluer_match(df_filtré, equipe_ref="Cannes"):
+def evaluer_match(df_filtré, equipe_ref="Cannes", moyenne=False, nb_matchs=None):
     eq, ad = _lignes_match(df_filtré, equipe_ref)
 
     kpis = []
@@ -3576,8 +3580,9 @@ def evaluer_match(df_filtré, equipe_ref="Cannes"):
     return {
         "equipe": eq["equipe"], "adversaire": ad["equipe"],
         "match": eq["match"],
-        "buts_pour": int(eq["buts"]) if not _isna(eq["buts"]) else 0,
-        "buts_contre": int(eq["buts_concedes"]) if not _isna(eq["buts_concedes"]) else 0,
+        "buts_pour": 0.0 if _isna(eq["buts"]) else float(eq["buts"]),
+        "buts_contre": 0.0 if _isna(eq["buts_concedes"]) else float(eq["buts_concedes"]),
+        "moyenne": moyenne, "nb_matchs": nb_matchs,
         "total": total, "verdict": verdict,
         "dimensions": {d: {"nom": DIMENSIONS[d]["nom"], "max": DIMENSIONS[d]["max"],
                            "points": totaux[d]} for d in (1, 2, 3)},
@@ -3655,16 +3660,25 @@ def _dimension_html(res, dim):
 
 def _bandeau_score_html(res):
     coul = "#ac141a"
+    if res.get("moyenne"):
+        label = "MOYENNE / MATCH"
+        score_line = f'{res["buts_pour"]:.1f} – {res["buts_contre"]:.1f}'
+        n = res.get("nb_matchs")
+        titre = f'SCORE MOYEN{f" ({n} matchs)" if n else ""}'
+    else:
+        label = "RÉSULTAT"
+        score_line = f'{res["buts_pour"]:.0f} – {res["buts_contre"]:.0f}'
+        titre = "SCORE GLOBAL DU MATCH"
     return (
         f'<div style="background:{coul};color:#F4F3ED;border-radius:12px;padding:18px 26px;'
         f'margin-bottom:16px;display:flex;align-items:center;gap:22px;'
         f'flex-wrap:wrap;box-sizing:border-box;">'
         f'  <div style="flex:1;min-width:120px;text-align:left;">'
-        f'    <div style="font-size:11px;letter-spacing:1px;font-weight:700;opacity:.85;">RÉSULTAT</div>'
-        f'    <div style="font-size:30px;font-weight:800;line-height:1.1;">{res["buts_pour"]} – {res["buts_contre"]}</div>'
+        f'    <div style="font-size:11px;letter-spacing:1px;font-weight:700;opacity:.85;">{label}</div>'
+        f'    <div style="font-size:30px;font-weight:800;line-height:1.1;">{score_line}</div>'
         f'  </div>'
         f'  <div style="flex:1;min-width:180px;text-align:center;">'
-        f'    <div style="font-size:12px;font-weight:600;letter-spacing:.5px;opacity:.85;margin-bottom:2px;">SCORE GLOBAL DU MATCH</div>'
+        f'    <div style="font-size:12px;font-weight:600;letter-spacing:.5px;opacity:.85;margin-bottom:2px;">{titre}</div>'
         f'    <div style="font-size:54px;font-weight:800;line-height:1;">{res["total"]}'
         f'      <span style="font-size:20px;font-weight:600;opacity:.8;">/ 100</span></div>'
         f'  </div>'
@@ -3689,6 +3703,38 @@ def afficher_rapport(df_filtré, equipe_ref="Cannes"):
     """À appeler dans l'app Streamlit."""
     import streamlit as st
     res = evaluer_match(df_filtré, equipe_ref)
+    st.html(construire_html(res))
+    return res
+
+def construire_df_moyenne(df, equipe_ref="Cannes", label_adv="Adversaires (moy.)"):
+    """Construit un df à 2 lignes (moyenne équipe + moyenne adversaires) à partir
+    d'un df contenant plusieurs matchs, en conservant l'ordre des colonnes du
+    fichier d'origine pour que le scoring positionnel reste valide.
+    Retour : (df_2_lignes, nb_matchs).
+    """
+    eq_rows = df[df["Équipe"] == equipe_ref]
+    adv_rows = df[df["Équipe"] != equipe_ref]
+    if len(eq_rows) == 0 or len(adv_rows) == 0:
+        raise ValueError("Pas assez de données pour calculer une moyenne.")
+
+    def _moy(rows, label):
+        ligne = rows.iloc[[0]].copy()                        # garde toutes les colonnes/ordre
+        num = rows.select_dtypes(include="number").columns   # moyenne des colonnes numériques
+        ligne[num] = rows[num].mean().values
+        ligne["Équipe"] = label
+        return ligne
+
+    df2 = pd.concat([_moy(eq_rows, equipe_ref), _moy(adv_rows, label_adv)],
+                    ignore_index=True)
+    return df2, len(eq_rows)
+
+def afficher_rapport_moyenne(df, equipe_ref="Cannes"):
+    """À appeler dans l'app Streamlit (fiche moyenne sur plusieurs matchs).
+    df : df d'une équipe (structure 'Team Stats'), déjà restreint aux matchs voulus.
+    """
+    import streamlit as st
+    df2, nb = construire_df_moyenne(df, equipe_ref)
+    res = evaluer_match(df2, equipe_ref, moyenne=True, nb_matchs=nb)
     st.html(construire_html(res))
     return res
 
@@ -4489,7 +4535,10 @@ def streamlit_application(all_df_dict):
                         équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
                         équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
 
-                        tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
+                        tab_score, tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
+
+                        with tab_score:
+                            afficher_rapport_moyenne(df_filtré, team)
 
                         with tab_general:
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
