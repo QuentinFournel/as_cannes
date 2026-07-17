@@ -4499,7 +4499,7 @@ def streamlit_application(all_df_dict):
                     tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
                     with tab5:
-                        _ = evaluer_match(df_filtré, team)
+                        afficher_rapport(df_filtré, team)
 
                     with tab6:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
