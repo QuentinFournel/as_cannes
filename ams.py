@@ -106,9 +106,9 @@ def load_all_files_from_drive():
 league_rating = {
     "Ligue 1": 85,
     "Ligue 2": 75.4,
-    "National 1": 69.6,
-    "National 2": 63.8,
-    "National 3": 59.3
+    "Ligue 3": 69.6,
+    "National 1": 63.8,
+    "National 2": 59.3
 }
 
 smart_goal = {
@@ -1655,7 +1655,7 @@ def collect_data():
     load_all_files_from_drive()
 
     saisons = ["24-25", "25-26"]
-    competitions = ["Ligue 1", "Ligue 2", "National 1", "National 2", "Francais", "Top 5 Europeen"]
+    competitions = ["Ligue 1", "Ligue 2", "Ligue 3", "National 1", "Francais", "Top 5 Europeen"]
     positions = ["Ailier", "Buteur", "Defenseur central", "Lateral", "Milieu", "Milieu offensif", "Gardien"]
 
     all_df_dict = {}
@@ -1678,13 +1678,13 @@ def collect_data():
         df_championnat_de_france = safe_concat(
             [*dfs["Ligue 1"].values(),
              *dfs["Ligue 2"].values(),
-             *dfs["National 1"].values(),
-             *dfs["National 2"].values()]
+             *dfs["Ligue 3"].values(),
+             *dfs["National 1"].values()]
         )
         df_l1 = safe_concat(dfs["Ligue 1"].values())
         df_l2 = safe_concat(dfs["Ligue 2"].values())
-        df_n1 = safe_concat(dfs["National 1"].values())
-        df_n2 = safe_concat(dfs["National 2"].values())
+        df_n1 = safe_concat(dfs["Ligue 3"].values())
+        df_n2 = safe_concat(dfs["National 1"].values())
         df_français = safe_concat(dfs["Francais"].values())
         df_top5européen = safe_concat(dfs["Top 5 Europeen"].values())
 
@@ -1700,8 +1700,8 @@ def collect_data():
             'Joueur du championnat de France': df_championnat_de_france,
             'Joueur de Ligue 1': df_l1,
             'Joueur de Ligue 2': df_l2,
-            'Joueur de National 1': df_n1,
-            'Joueur de National 2': df_n2,
+            'Joueur de Ligue 3': df_n1,
+            'Joueur de National 1': df_n2,
             'Joueur français': df_français,
             'Joueur du top 5 européen': df_top5européen
         }
@@ -3060,8 +3060,8 @@ def create_player_data(nom_joueur, sélection_dataframe):
     # Renommer les colonnes
     df_player.columns = colonnes
 
-    if sélection_dataframe == 'Joueur du championnat de France' or sélection_dataframe == 'Joueur de National 1 et National 2' or sélection_dataframe == 'Joueur de National 2':
-        df_player = df_player[df_player['Competition'] == 'France. National 2']
+    if sélection_dataframe == 'Joueur du championnat de France' or sélection_dataframe == 'Joueur de Ligue 3 et National 1' or sélection_dataframe == 'Joueur de National 1':
+        df_player = df_player[df_player['Competition'] == 'France. National 1']
 
     return df_player
 
@@ -3426,7 +3426,7 @@ def streamlit_application(all_df_dict):
 
             Vainqueur de la Coupe de France en 1932, l'AS Cannes intègre cette année-là le championnat de France professionnel. Après de nombreuses saisons en deuxième division (1950-1987), le club connaît son apogée sportif entre 1988 et 1998 en participant au Championnat de France de football (première division française de football) et en se qualifiant à deux reprises pour la Coupe UEFA. 
 
-            À l'été 2014, le club azuréen est exclu par la Fédération française de football des championnats nationaux en raison de problèmes financiers. Reparti du 7e échelon du football français, le club évolue actuellement dans le Championnat de France de football de National 2.
+            À l'été 2014, le club azuréen est exclu par la Fédération française de football des championnats nationaux en raison de problèmes financiers. Reparti du 7e échelon du football français, le club évolue actuellement dans le Championnat de France de football de Ligue 3.
 
             Le club a formé Zinédine Zidane, Patrick Vieira, Johan Micoud ou encore Sébastien Frey. En juillet 2019, le bureau exécutif de la Ligue de Football Amateur a décerné au club le “Label Jeunes Élite”, plus haute distinction de formation française de jeunes. 
 
@@ -3437,10 +3437,10 @@ def streamlit_application(all_df_dict):
         col1, col2 = st.columns(2)
 
         with col1:
-            championnat = st.selectbox("Sélectionnez un championnat", ['National 2', 'National 3'])
+            championnat = st.selectbox("Sélectionnez un championnat", ['National 1', 'National 2'])
 
         with col2:
-            if championnat == 'National 2':
+            if championnat == 'National 1':
                 groupe = st.selectbox("Sélectionnez un groupe", ['Groupe A', 'Groupe B', 'Groupe C'])
             else:
                 groupe = st.selectbox("Sélectionnez un groupe", ['Groupe A', 'Groupe B', 'Groupe C', 'Groupe D', 'Groupe E', 'Groupe F', 'Groupe G', 'Groupe H'])
@@ -3464,12 +3464,12 @@ def streamlit_application(all_df_dict):
             else:
                 division = {
                     "24-25": {
-                        "National 2": {
+                        "National 1": {
                             "Groupe A": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe B": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe C": f"https://www.foot-national.com/data/2024-2025-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                         },
-                        "National 3": {
+                        "National 2": {
                             "Groupe A": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe B": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe C": f"https://www.foot-national.com/data/2024-2025-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
@@ -3481,12 +3481,12 @@ def streamlit_application(all_df_dict):
                         }
                     },
                     "25-26": {
-                        "National 2": {
+                        "National 1": {
                             "Groupe A": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe B": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe C": f"https://www.foot-national.com/data/2025-2026-classement-national2-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html"
                         },
-                        "National 3": {
+                        "National 2": {
                             "Groupe A": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-a-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe B": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-b-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
                             "Groupe C": f"https://www.foot-national.com/data/2025-2026-classement-national3-groupe-c-type-{unicodedata.normalize('NFKD', type_classement).encode('ASCII', 'ignore').decode('utf-8').lower()}-journees-{journée_début}-{journée_fin}.html",
@@ -4342,7 +4342,7 @@ def streamlit_application(all_df_dict):
         col1, col2 = st.columns(2)
 
         with col1:
-            if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de National 1" and sélection_dataframe != "Autre":
+            if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de Ligue 3" and sélection_dataframe != "Autre":
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
                 team = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique())
@@ -4732,7 +4732,7 @@ def streamlit_application(all_df_dict):
         col1, col2 = st.columns(2)
 
         with col1:
-            if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de National 1" and sélection_dataframe != "Autre":
+            if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de Ligue 3" and sélection_dataframe != "Autre":
                 team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
                 team_1 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 1')
@@ -4746,7 +4746,7 @@ def streamlit_application(all_df_dict):
             )
 
         with col2:
-            if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de National 1" and sélection_dataframe != "Autre":
+            if sélection_dataframe != "Joueur du top 5 européen" and sélection_dataframe != "Joueur de Ligue 1" and sélection_dataframe != "Joueur de Ligue 2" and sélection_dataframe != "Joueur de Ligue 3" and sélection_dataframe != "Autre":
                 team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2', index=list(df['Équipe dans la période sélectionnée'].unique()).index("Cannes"))
             else:
                 team_2 = st.selectbox("Sélectionnez une équipe", df['Équipe dans la période sélectionnée'].unique(), key='team 2')
