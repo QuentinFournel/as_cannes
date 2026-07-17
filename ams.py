@@ -21,6 +21,7 @@ import seaborn as sns
 from scipy import stats
 from pathlib import Path
 from bs4 import BeautifulSoup
+import openpyxl
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -3380,6 +3381,237 @@ def afficher_fiche(df, joueur, poste):
         st.pyplot(fig2)
         plt.close(fig2)
 
+def score_rythme(valeur):
+    """Rythme du match : ≥ 18 → 8 | 17-18 → 5 | 15-17 → 2 | < 15 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur >= 18:
+        return 8
+    elif valeur >= 17:
+        return 5
+    elif valeur >= 15:
+        return 2
+    return 0
+
+def score_possession(valeur):
+    """Possession % : ≥ 55 → 8 | 52-55 → 5 | 50-52 → 2 | < 50 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur >= 55:
+        return 8
+    elif valeur >= 52:
+        return 5
+    elif valeur >= 50:
+        return 2
+    return 0
+
+def score_ppda(valeur):
+    """PPDA (plus bas = mieux) : < 8 → 8 | 8-11 → 5 | 11-13 → 2 | > 13 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur < 8:
+        return 8
+    elif valeur <= 11:
+        return 5
+    elif valeur <= 13:
+        return 2
+    return 0
+
+def score_contre_attaque(nb_contre_att_avec_tir, nb_contre_att_total):
+    """Contre-attaque avec tir : ≥ 2 → 8 | 1 → 5 | 0 tir mais ≥ 1 c-att → 2 | 0 c-att → 0"""
+    if pd.isna(nb_contre_att_avec_tir):
+        nb_contre_att_avec_tir = 0
+    if pd.isna(nb_contre_att_total):
+        nb_contre_att_total = 0
+    if nb_contre_att_avec_tir >= 2:
+        return 8
+    elif nb_contre_att_avec_tir >= 1:
+        return 5
+    elif nb_contre_att_total >= 1:
+        return 2
+    return 0
+
+def score_passes_avant(passes_avant, passes_totales):
+    """% passes vers l'avant : ≥ 40 → 8 | 35-40 → 5 | 32-35 → 2 | < 32 → 0"""
+    if pd.isna(passes_avant) or pd.isna(passes_totales) or passes_totales == 0:
+        return 0
+    pct = passes_avant / passes_totales * 100
+    if pct >= 40:
+        return 8
+    elif pct >= 35:
+        return 5
+    elif pct >= 32:
+        return 2
+    return 0
+
+def score_xg(valeur):
+    """xG créé : ≥ 1.7 → 10 | 1.5-1.7 → 6 | 1.3-1.5 → 3 | < 1.3 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur >= 1.7:
+        return 10
+    elif valeur >= 1.5:
+        return 6
+    elif valeur >= 1.3:
+        return 3
+    return 0
+
+def score_tirs_cadres(valeur):
+    """Tirs cadrés : ≥ 5 → 8 | 3-4 → 5 | 1-2 → 2 | 0 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur >= 5:
+        return 8
+    elif valeur >= 3:
+        return 5
+    elif valeur >= 1:
+        return 2
+    return 0
+
+def score_touches_surface(valeur):
+    """Touches surface adv. : ≥ 20 → 6 | 15-19 → 4 | 10-14 → 2 | < 10 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur >= 20:
+        return 6
+    elif valeur >= 15:
+        return 4
+    elif valeur >= 10:
+        return 2
+    return 0
+
+def score_corners(nb_corners, nb_corners_avec_tirs):
+    """Corners + conversion : ≥ 5 et ≥ 30 % → 6 | un des deux → 4 | 3-4 corners → 2 | < 3 → 0"""
+    if pd.isna(nb_corners):
+        return 0
+    if pd.isna(nb_corners_avec_tirs):
+        nb_corners_avec_tirs = 0
+    volume_ok = nb_corners >= 5
+    conv_ok = (nb_corners_avec_tirs / nb_corners * 100) >= 30 if nb_corners > 0 else False
+    if volume_ok and conv_ok:
+        return 6
+    elif volume_ok or conv_ok:
+        return 4
+    elif nb_corners >= 3:
+        return 2
+    return 0
+
+def score_buts_encaisses(valeur):
+    """Buts encaissés : 0 → 10 | 1 → 6 | 2 → 2 | ≥ 3 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur == 0:
+        return 10
+    elif valeur == 1:
+        return 6
+    elif valeur == 2:
+        return 2
+    return 0
+
+def score_tirs_cadres_concedes(valeur):
+    """Tirs cadrés concédés : ≤ 3 → 8 | 4 → 5 | 5 → 2 | ≥ 6 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur <= 3:
+        return 8
+    elif valeur == 4:
+        return 5
+    elif valeur == 5:
+        return 2
+    return 0
+
+def score_duels_defensifs(valeur):
+    """% duels défensifs gagnés : ≥ 65 → 6 | 63-65 → 4 | 58-63 → 2 | < 58 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur >= 65:
+        return 6
+    elif valeur >= 63:
+        return 4
+    elif valeur >= 58:
+        return 2
+    return 0
+
+def score_xg_concede(valeur):
+    """xG concédé (plus bas = mieux) : ≤ 0.85 → 6 | 0.85-1.1 → 3 | 1.1-1.5 → 1 | > 1.5 → 0"""
+    if pd.isna(valeur):
+        return 0
+    if valeur <= 0.85:
+        return 6
+    elif valeur <= 1.1:
+        return 3
+    elif valeur <= 1.5:
+        return 1
+    return 0
+
+COL = {
+    'date':                       1,
+    'match':                      2,
+    'championnat':                3,
+    'equipe':                     5,
+    'buts':                       7,
+    'xg':                         8,
+    'tirs':                       9,
+    'tirs_cadres':               10,
+    'passes':                    12,
+    'possession':                15,
+    'contre_attaques':           33,
+    'contre_att_avec_tirs':      34,
+    'corners':                   39,
+    'corners_avec_tirs':         40,
+    'touches_surface':           56,
+    'buts_concedes':             61,
+    'tirs_contre':               62,
+    'tirs_contre_cadres':        63,
+    'duels_def_pct':             67,
+    'passes_avant':              79,
+    'rythme':                   104,
+    'ppda':                     109,
+}
+
+def scorer_un_match(df_filtré, equipe_ref):
+    ref = df_filtré[df_filtré['Équipe'] == equipe_ref].iloc[0]
+    adv = df_filtré[df_filtré['Équipe'] != equipe_ref].iloc[0]
+    equipe     = {k: ref.iloc[v - 1] for k, v in COL.items()}
+    adversaire = {k: adv.iloc[v - 1] for k, v in COL.items()}
+
+    # ---------- Dimension 1 : Fidélité au style (/40) ----------
+    d1 = {
+        'rythme':        score_rythme(equipe['rythme']),
+        'possession':    score_possession(equipe['possession']),
+        'ppda':          score_ppda(equipe['ppda']),
+        'contre_att':    score_contre_attaque(equipe['contre_att_avec_tirs'], equipe['contre_attaques']),
+        'passes_avant':  score_passes_avant(equipe['passes_avant'], equipe['passes']),
+    }
+    total_d1 = sum(d1.values())
+
+    # ---------- Dimension 2 : Efficacité offensive (/30) ----------
+    d2 = {
+        'xg':            score_xg(equipe['xg']),
+        'tirs_cadres':   score_tirs_cadres(equipe['tirs_cadres']),
+        'touches_surf':  score_touches_surface(equipe['touches_surface']),
+        'corners':       score_corners(equipe['corners'], equipe['corners_avec_tirs']),
+    }
+    total_d2 = sum(d2.values())
+
+    # ---------- Dimension 3 : Solidité défensive (/30) ----------
+    d3 = {
+        'buts_enc':      score_buts_encaisses(equipe['buts_concedes']),
+        'tirs_c_conc':   score_tirs_cadres_concedes(equipe['tirs_contre_cadres']),
+        'duels_def':     score_duels_defensifs(equipe['duels_def_pct']),
+        'xg_conc':       score_xg_concede(adversaire['xg']),
+    }
+    total_d3 = sum(d3.values())
+
+    return {
+        'date':        equipe['date'],
+        'match':       equipe['match'],
+        'D1_fidelite': total_d1,
+        'D2_efficacite': total_d2,
+        'D3_solidite': total_d3,
+        'score_total': total_d1 + total_d2 + total_d3,
+    }
+
 def streamlit_application(all_df_dict):
     with st.sidebar:
         st.selectbox(
@@ -4184,37 +4416,48 @@ def streamlit_application(all_df_dict):
                     équipe_analysée = df_filtré[df_filtré["Équipe"] == team]
                     adversaire = df_filtré[df_filtré["Équipe"] != team]
 
-                    tab5, tab6, tab7, tab8, tab9 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
+                    tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
                     with tab5:
+                        scores_match = scorer_un_match(df_filtré, team)
+                        df_scores = pd.DataFrame([{
+                            "Dimension 1 - Fidélité au style": scores_match["D1_fidelite"],
+                            "Dimension 2 - Efficacité offensive": scores_match["D2_efficacite"],
+                            "Dimension 3 - Solidité défensive": scores_match["D3_solidite"],
+                            "Score de performance": scores_match["score_total"]
+                        }])
+
+                        st.dataframe(df_scores, use_container_width=True, hide_index=True)
+
+                    with tab6:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
 
                         fig = create_plot_stats(indicateurs_general, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab6:
+                    with tab7:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
 
                         fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab7:
+                    with tab8:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
 
                         fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab8:
+                    with tab9:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
 
                         fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab9:
+                    with tab10:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
 
