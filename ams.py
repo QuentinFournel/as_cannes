@@ -3664,7 +3664,7 @@ def _bandeau_score_html(res):
         label = "MOYENNE / MATCH"
         score_line = f'{res["buts_pour"]:.1f} – {res["buts_contre"]:.1f}'
         n = res.get("nb_matchs")
-        titre = f'SCORE MOYEN{f" ({n} matchs)" if n else ""}'
+        titre = f'SCORE MOYEN{f" ({n} matchs)" if n > 1 else f" ({n} match)"}'
     else:
         label = "RÉSULTAT"
         score_line = f'{res["buts_pour"]:.0f} – {res["buts_contre"]:.0f}'
