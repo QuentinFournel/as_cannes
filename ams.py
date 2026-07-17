@@ -4299,7 +4299,7 @@ def streamlit_application(all_df_dict):
     elif page == "Analyse collective":
         st.header("Analyse collective")
 
-        tab1, tab2 = st.tabs(['Statistiques globales', 'Statistiques par équipe'])
+        tab1, tab2, tab3 = st.tabs(['Statistiques des matchs', 'Statistiques des équipes', 'Statistiques des joueurs'])
 
         équipes = {
             "24-25": [
@@ -4368,107 +4368,8 @@ def streamlit_application(all_df_dict):
             'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
             'Cartons jaunes', 'Cartons rouges', 'PPDA', 'Distance moyenne de tir'
         }
-        
+
         with tab1:
-            tab3, tab4 = st.tabs(['Statistiques joueurs', 'Statistiques équipes'])
-
-            with tab3:
-                df = all_df['Joueur du championnat de France']
-
-                df_filtré = df[df['Équipe dans la période sélectionnée'].isin(équipes[st.session_state['saison']])]
-
-                colonnes_à_exclure = [
-                    'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
-                    'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
-                    'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
-                    'Tir', 'Buts de la tête'
-                ]
-
-                colonnes_filtrées = [
-                    col for col in df_filtré.select_dtypes(include='number').columns
-                    if col not in colonnes_à_exclure
-                ]
-
-                # Création des DataFrames avec classement par colonne sélectionnée
-                dfs = {}
-
-                for col in colonnes_filtrées:
-                    df_temp = df_filtré[['Joueur', 'Équipe dans la période sélectionnée', 'Matchs joués', col]].copy()
-
-                    # Classement sans supprimer les NaN
-                    ranked = df_temp[col].rank(ascending=False, method='min')
-
-                    # On place les NaN à la fin
-                    df_temp['Classement'] = ranked.fillna(len(df_temp) + 1).astype(int)
-
-                    # Ajout conditionnel de (par 90)
-                    if "par 90" or "%" in col.lower():
-                        display_col = col
-                    else:
-                        display_col = f"{col} (par 90)"
-
-                    # Renommage des colonnes pour affichage uniquement
-                    df_temp.rename(columns={
-                        col: display_col,
-                        'Équipe dans la période sélectionnée': 'Équipe',
-                        'Matchs joués': 'Matchs analysés'
-                    }, inplace=True)
-
-                    # Réorganisation des colonnes
-                    cols_order = ['Classement', 'Joueur', 'Équipe', 'Matchs analysés', display_col]
-                    df_temp = df_temp[cols_order]
-
-                    # Tri final
-                    df_temp = df_temp.sort_values(by=['Classement', 'Joueur'])
-
-                    dfs[col] = df_temp
-
-                metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
-
-                st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
-
-            with tab4:
-                tab5, tab6 = st.tabs(['Classement', 'Nuage de points'])
-
-                with tab5:
-                    dfs = {}
-
-                    base_cols = ['Équipe', 'Matchs analysés']
-                    other_cols = [col for col in df_stats_moyennes.columns if col not in base_cols]
-
-                    for col in other_cols:
-                        df_temp = df_stats_moyennes[base_cols + [col]].copy()
-                        ascending = True if col in colonnes_bas_mieux else False
-                        df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
-
-                        display_col = f"{col} (par 90)"
-                        df_temp.rename(columns={col: display_col}, inplace=True)
-
-                        cols_order = ['Classement'] + base_cols + [display_col]
-                        df_temp = df_temp[cols_order]
-                        df_temp = df_temp.sort_values(by=display_col, ascending=ascending)
-
-                        dfs[col] = df_temp
-
-                    metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
-
-                    st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
-
-                with tab6:
-                    metrics = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
-
-                    col1, col2 = st.columns(2)
-
-                    with col1:
-                        x_metric = st.selectbox("Sélectionnez la métrique X", metrics)
-
-                    with col2:
-                        y_metric = st.selectbox("Sélectionnez la métrique Y", metrics)
-
-                    fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric)
-                    st.plotly_chart(fig, use_container_width=True)
-
-        with tab2:
             team = st.selectbox("Sélectionnez une équipe", équipes[st.session_state['saison']], index=équipes[st.session_state['saison']].index("Cannes"))
 
             if st.session_state['saison'] != "24-25":
@@ -4482,9 +4383,9 @@ def streamlit_application(all_df_dict):
             else:
                 df_collective = collect_collective_data(normalized_team)
 
-                tab3, tab4 = st.tabs(['Statistiques par match', 'Statistiques moyennes'])
+                tab_stats_par_match, tab_stats_moyennes = st.tabs(['Statistiques par match', 'Statistiques moyennes'])
 
-                with tab3:
+                with tab_stats_par_match:
                     compétition = st.selectbox("Sélectionnez une compétition", df_collective["Compétition"].unique())
 
                     df_filtré = df_collective[df_collective["Compétition"] == compétition]
@@ -4496,47 +4397,47 @@ def streamlit_application(all_df_dict):
                     équipe_analysée = df_filtré[df_filtré["Équipe"] == team]
                     adversaire = df_filtré[df_filtré["Équipe"] != team]
 
-                    tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
+                    tab_score, tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
-                    with tab5:
+                    with tab_score:
                         afficher_rapport(df_filtré, team)
 
-                    with tab6:
+                    with tab_general:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
 
                         fig = create_plot_stats(indicateurs_general, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab7:
+                    with tab_attaques:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
 
                         fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab8:
+                    with tab_defense:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
 
                         fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab9:
+                    with tab_passes:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
 
                         fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab10:
+                    with tab_pressing:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
                         adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
 
                         fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
                         st.pyplot(fig, use_container_width=True)
 
-                with tab4:
+                with tab_stats_moyennes:
                     match_options = df_collective["Match"].dropna().unique().tolist()
 
                     ALL_MATCHES_LABEL = "Tous les matchs"
@@ -4611,42 +4512,138 @@ def streamlit_application(all_df_dict):
                     équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
                     équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
 
-                    tab5, tab6, tab7, tab8, tab9 = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
+                    tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Général", "Attaque", "Défense", "Passe", "Pressing"])
 
-                    with tab5:
+                    with tab_general:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
 
                         fig = create_plot_stats(indicateurs_general_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab6:
+                    with tab_attaques:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
 
                         fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab7:
+                    with tab_defense:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
 
                         fig = create_plot_stats(indicateurs_defense_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab8:
+                    with tab_passes:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
 
                         fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
-                    with tab9:
+                    with tab_pressing:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
 
                         fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
+
+        with tab2:
+            tab_classement, tab_nuage_de_points = st.tabs(['Classement', 'Nuage de points'])
+
+            with tab_classement:
+                dfs = {}
+
+                base_cols = ['Équipe', 'Matchs analysés']
+                other_cols = [col for col in df_stats_moyennes.columns if col not in base_cols]
+
+                for col in other_cols:
+                    df_temp = df_stats_moyennes[base_cols + [col]].copy()
+                    ascending = True if col in colonnes_bas_mieux else False
+                    df_temp['Classement'] = df_temp[col].rank(ascending=ascending, method='min').astype(int)
+
+                    display_col = f"{col} (par 90)"
+                    df_temp.rename(columns={col: display_col}, inplace=True)
+
+                    cols_order = ['Classement'] + base_cols + [display_col]
+                    df_temp = df_temp[cols_order]
+                    df_temp = df_temp.sort_values(by=display_col, ascending=ascending)
+
+                    dfs[col] = df_temp
+
+                metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
+
+                st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
+
+            with tab_nuage_de_points:
+                metrics = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    x_metric = st.selectbox("Sélectionnez la métrique X", metrics)
+
+                with col2:
+                    y_metric = st.selectbox("Sélectionnez la métrique Y", metrics)
+
+                fig = plot_team_metrics(df_stats_moyennes, x_metric, y_metric)
+                st.plotly_chart(fig, use_container_width=True)
+
+        with tab3:
+            df = all_df['Joueur du championnat de France']
+
+            df_filtré = df[df['Équipe dans la période sélectionnée'].isin(équipes[st.session_state['saison']])]
+
+            colonnes_à_exclure = [
+                'Minutes jouées', 'Âge', 'Taille', 'Poids', 'Valeur marchande',
+                'Matchs joués', 'xG', 'xA', 'Buts', 'Passes décisives',
+                'Cartons jaunes', 'Cartons rouges', 'Buts hors penalty',
+                'Tir', 'Buts de la tête'
+            ]
+
+            colonnes_filtrées = [
+                col for col in df_filtré.select_dtypes(include='number').columns
+                if col not in colonnes_à_exclure
+            ]
+
+            # Création des DataFrames avec classement par colonne sélectionnée
+            dfs = {}
+
+            for col in colonnes_filtrées:
+                df_temp = df_filtré[['Joueur', 'Équipe dans la période sélectionnée', 'Matchs joués', col]].copy()
+
+                # Classement sans supprimer les NaN
+                ranked = df_temp[col].rank(ascending=False, method='min')
+
+                # On place les NaN à la fin
+                df_temp['Classement'] = ranked.fillna(len(df_temp) + 1).astype(int)
+
+                # Ajout conditionnel de (par 90)
+                if "par 90" or "%" in col.lower():
+                    display_col = col
+                else:
+                    display_col = f"{col} (par 90)"
+
+                # Renommage des colonnes pour affichage uniquement
+                df_temp.rename(columns={
+                    col: display_col,
+                    'Équipe dans la période sélectionnée': 'Équipe',
+                    'Matchs joués': 'Matchs analysés'
+                }, inplace=True)
+
+                # Réorganisation des colonnes
+                cols_order = ['Classement', 'Joueur', 'Équipe', 'Matchs analysés', display_col]
+                df_temp = df_temp[cols_order]
+
+                # Tri final
+                df_temp = df_temp.sort_values(by=['Classement', 'Joueur'])
+
+                dfs[col] = df_temp
+
+            metric = st.selectbox("Sélectionnez une métrique", list(dfs.keys()))
+
+            st.dataframe(dfs[metric], use_container_width=True, hide_index=True)
 
     elif page == "Analyse individuelle":
         st.header("Analyse individuelle")
