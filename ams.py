@@ -4340,29 +4340,6 @@ def streamlit_application(all_df_dict):
             ]
         }
 
-        df_stats_moyennes = pd.DataFrame()
-
-        for équipe in équipes[st.session_state['saison']]:
-            if st.session_state['saison'] != "24-25":
-                équipe_normalisée = unicodedata.normalize("NFD", équipe)
-            else:
-                équipe_normalisée = équipe
-            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
-                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
-                continue
-            df_filtré = collect_collective_data(équipe_normalisée)
-            df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
-            df_stats = df_filtré[df_filtré['Équipe'] == équipe]
-            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
-            df_stats['Équipe'] = équipe
-            df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
-            df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
-
-        df_stats_moyennes = df_stats_moyennes.drop(['Championnat'], axis=1)
-
-        cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
-        df_stats_moyennes = df_stats_moyennes[cols]
-
         colonnes_bas_mieux = {
             'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
             'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
@@ -4548,6 +4525,29 @@ def streamlit_application(all_df_dict):
 
                         fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
+
+        df_stats_moyennes = pd.DataFrame()
+
+        for équipe in équipes[st.session_state['saison']]:
+            if st.session_state['saison'] != "24-25":
+                équipe_normalisée = unicodedata.normalize("NFD", équipe)
+            else:
+                équipe_normalisée = équipe
+            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
+                st.warning(f"⚠️ Les statistiques de l'équipe {équipe} ne sont pas encore disponibles.")
+                continue
+            df_filtré = collect_collective_data(équipe_normalisée)
+            df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
+            df_stats = df_filtré[df_filtré['Équipe'] == équipe]
+            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
+            df_stats['Équipe'] = équipe
+            df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
+            df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
+
+        df_stats_moyennes = df_stats_moyennes.drop(['Championnat'], axis=1)
+
+        cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+        df_stats_moyennes = df_stats_moyennes[cols]
 
         with tab2:
             tab_classement, tab_nuage_de_points = st.tabs(['Classement', 'Nuage de points'])
