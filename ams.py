@@ -113,17 +113,20 @@ league_rating = {
 
 smart_goal = {
     "24-25": {
-        "Gardien": [
+        "Gardien": 
+        [
             "J. Aymes",
             "F. Vanni"
         ],
-        "Défenseur central": [
+        "Défenseur central": 
+        [
             "J. Smith",
             "H. Abderrahmane",
             "G. Pineau",
             "M. Mamadou Kamissoko"
         ],
-        "Latéral": [
+        "Latéral": 
+        [
             "M. Fischer",
             "L. Vinci"
         ],
@@ -154,16 +157,19 @@ smart_goal = {
         ]
     },
     "25-26": {
-        "Gardien": [
+        "Gardien": 
+        [
             "J. Aymes",
             "F. Vanni"
         ],
-        "Défenseur central": [
+        "Défenseur central": 
+        [
             "J. Smith",
             "L. Gueho",
             "G. Pineau"
         ],
-        "Latéral": [
+        "Latéral": 
+        [
             "H. Abderrahmane",
             "S. Corchia",
             "R. Sylva",
@@ -1683,13 +1689,13 @@ def collect_data():
         )
         df_l1 = safe_concat(dfs["Ligue 1"].values())
         df_l2 = safe_concat(dfs["Ligue 2"].values())
-        df_n1 = safe_concat(dfs["Ligue 3"].values())
-        df_n2 = safe_concat(dfs["National 1"].values())
+        df_l3 = safe_concat(dfs["Ligue 3"].values())
+        df_n1 = safe_concat(dfs["National 1"].values())
         df_français = safe_concat(dfs["Francais"].values())
         df_top5européen = safe_concat(dfs["Top 5 Europeen"].values())
 
         # Nettoyage
-        for df in (df_championnat_de_france, df_l1, df_l2, df_n1, df_n2, df_français, df_top5européen):
+        for df in (df_championnat_de_france, df_l1, df_l2, df_l3, df_n1, df_français, df_top5européen):
             if not df.empty:
                 df.columns = df.columns.str.strip()
                 df.rename(columns={"Buts hors penaltyButs hors penalty": "Buts hors penalty"}, inplace=True)
@@ -1700,8 +1706,8 @@ def collect_data():
             'Joueur du championnat de France': df_championnat_de_france,
             'Joueur de Ligue 1': df_l1,
             'Joueur de Ligue 2': df_l2,
-            'Joueur de Ligue 3': df_n1,
-            'Joueur de National 1': df_n2,
+            'Joueur de Ligue 3': df_l3,
+            'Joueur de National 1': df_n1,
             'Joueur français': df_français,
             'Joueur du top 5 européen': df_top5européen
         }
@@ -3516,7 +3522,7 @@ def streamlit_application(all_df_dict):
                 st.dataframe(classement, use_container_width=True, hide_index=True)
             
         with tab2:
-            df = pd.read_excel(f"data/Data {st.session_state['saison']}/buteurs_n2_n3.xlsx")
+            df = pd.read_excel(f"data/Data {st.session_state['saison']}/buteurs_n1_n2.xlsx")
 
             df = df[df['Championnat'] == championnat]
             df = df[df['Groupe'] == groupe]
@@ -3526,7 +3532,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(df, use_container_width=True, hide_index=True)
 
         with tab3:
-            df = pd.read_excel(f"data/Data {st.session_state['saison']}/passeurs_n2_n3.xlsx")
+            df = pd.read_excel(f"data/Data {st.session_state['saison']}/passeurs_n1_n2.xlsx")
 
             df = df[df['Championnat'] == championnat]
             df = df[df['Groupe'] == groupe]
@@ -3536,7 +3542,7 @@ def streamlit_application(all_df_dict):
             st.dataframe(df, use_container_width=True, hide_index=True)
 
         with tab4:
-            df = pd.read_excel(f"data/Data {st.session_state['saison']}/buteurs_passeurs_n2_n3.xlsx")
+            df = pd.read_excel(f"data/Data {st.session_state['saison']}/buteurs_passeurs_n1_n2.xlsx")
 
             df = df[df['Championnat'] == championnat]
             df = df[df['Groupe'] == groupe]
