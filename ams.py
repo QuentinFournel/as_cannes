@@ -3473,14 +3473,14 @@ def _c_buts_encaisses(eq, adv):
     v = eq['buts_concedes']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v < 0.5 else 1 if v < 1.5 else 2 if v < 2.5 else 3
+    idx = 0 if v < 1 else 1 if v < 2 else 2 if v < 3 else 3
     return (_fmt(v), idx)
 
 def _c_tirs_c_concedes(eq, adv):
     v = eq['tirs_contre_cadres']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v < 3.5 else 1 if v < 4.5 else 2 if v < 5.5 else 3
+    idx = 0 if v < 3 else 1 if v < 4 else 2 if v < 5 else 3
     return (_fmt(v), idx)
 
 def _c_duels_def(eq, adv):
