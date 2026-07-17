@@ -3068,7 +3068,7 @@ def create_player_data(nom_joueur, sélection_dataframe):
     df_player.columns = colonnes
 
     if sélection_dataframe == 'Joueur du championnat de France' or sélection_dataframe == 'Joueur de Ligue 3 et National 1' or sélection_dataframe == 'Joueur de National 1':
-        df_player = df_player[df_player['Competition'] == 'France. National 1']
+        df_player = df_player[df_player['Competition'] == 'France. National 2']
 
     return df_player
 
