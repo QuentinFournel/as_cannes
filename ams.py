@@ -3473,14 +3473,14 @@ def _c_buts_encaisses(eq, adv):
     v = eq['buts_concedes']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v < 1 else 1 if v < 2 else 2 if v < 3 else 3
+    idx = 0 if v == 0 else 1 if v <= 1 else 2 if v <= 2 else 3
     return (_fmt(v), idx)
 
 def _c_tirs_c_concedes(eq, adv):
     v = eq['tirs_contre_cadres']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v < 3 else 1 if v < 4 else 2 if v < 5 else 3
+    idx = 0 if v <= 3 else 1 if v <= 4 else 2 if v <= 5 else 3
     return (_fmt(v), idx)
 
 def _c_duels_def(eq, adv):
@@ -3522,9 +3522,9 @@ KPIS = [
 
     # ---- Dimension 3 : Solidité défensive (/30) ----
     {"nom": "Buts encaissés",         "dimension": 3, "calc": _c_buts_encaisses,
-     "paliers": [("0 (parfait)", 10), ("1", 6), ("2", 2), ("≥ 3", 0)]},
+     "paliers": [("0", 10), ("0 – 1", 6), ("1 – 2", 2), ("> 2", 0)]},
     {"nom": "Tirs cadrés concédés",   "dimension": 3, "calc": _c_tirs_c_concedes,
-     "paliers": [("≤ 3", 8), ("4", 5), ("5", 2), ("≥ 6", 0)]},
+     "paliers": [("≤ 3", 8), ("3 – 4", 5), ("4 – 5", 2), ("> 5", 0)]},
     {"nom": "% duels défensifs gagnés","dimension": 3, "calc": _c_duels_def,
      "paliers": [("≥ 65 %", 6), ("63 – 65 %", 4), ("58 – 63 %", 2), ("< 58 %", 0)]},
     {"nom": "xG concédé",             "dimension": 3, "calc": _c_xg_concede,
