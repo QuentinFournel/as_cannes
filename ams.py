@@ -3417,7 +3417,7 @@ def _c_ppda(eq, adv):
     v = eq['ppda']
     if _isna(v):
         return ("n/d", 3)
-    idx = 0 if v < 8 else 1 if v <= 11 else 2 if v <= 13 else 3
+    idx = 0 if v < 8 else 1 if v < 11 else 2 if v < 13 else 3
     return (f"{v:.2f}", idx)
 
 def _c_contre(eq, adv):
@@ -3506,7 +3506,7 @@ KPIS = [
     {"nom": "PPDA",                   "dimension": 1, "calc": _c_ppda,
      "paliers": [("< 8", 8), ("8 – 11", 5), ("11 – 13", 2), ("> 13", 0)]},
     {"nom": "Contre-att. avec tir",   "dimension": 1, "calc": _c_contre,
-     "paliers": [("≥ 2", 8), ("1", 5), ("0 tir, ≥ 1 c-att", 2), ("aucune", 0)]},
+     "paliers": [("≥ 2", 8), ("1 – 2", 5), ("0 tir, ≥ 1 c-att", 2), ("aucune", 0)]},
     {"nom": "% passes vers l'avant",  "dimension": 1, "calc": _c_passes_avant,
      "paliers": [("≥ 40 %", 8), ("35 – 40 %", 5), ("32 – 35 %", 2), ("< 32 %", 0)]},
 
@@ -3514,11 +3514,11 @@ KPIS = [
     {"nom": "xG créé",                "dimension": 2, "calc": _c_xg,
      "paliers": [("≥ 1.7", 10), ("1.5 – 1.7", 6), ("1.3 – 1.5", 3), ("< 1.3", 0)]},
     {"nom": "Tirs cadrés",            "dimension": 2, "calc": _c_tirs_cadres,
-     "paliers": [("≥ 5", 8), ("3 – 4", 5), ("1 – 2", 2), ("0", 0)]},
+     "paliers": [("≥ 5", 8), ("3 – 5", 5), ("1 – 3", 2), ("< 1", 0)]},
     {"nom": "Touches surface adv.",   "dimension": 2, "calc": _c_touches,
-     "paliers": [("≥ 20", 6), ("15 – 19", 4), ("10 – 14", 2), ("< 10", 0)]},
+     "paliers": [("≥ 20", 6), ("15 – 20", 4), ("10 – 15", 2), ("< 10", 0)]},
     {"nom": "Corners + conversion",   "dimension": 2, "calc": _c_corners,
-     "paliers": [("≥ 5 & ≥ 30 %", 6), ("un des deux", 4), ("3 – 4 corners", 2), ("< 3", 0)]},
+     "paliers": [("≥ 5 & ≥ 30 %", 6), ("un des deux", 4), ("3 – 5 corners", 2), ("< 3", 0)]},
 
     # ---- Dimension 3 : Solidité défensive (/30) ----
     {"nom": "Buts encaissés",         "dimension": 3, "calc": _c_buts_encaisses,
