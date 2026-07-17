@@ -3690,7 +3690,6 @@ def _bandeau_score_html(res):
     )
 
 def construire_html(res):
-    """Renvoie le HTML complet de la fiche (str), sans dépendance à Streamlit."""
     dims = "".join(_dimension_html(res, d) for d in (1, 2, 3))
     return (
         f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;">'
@@ -3699,19 +3698,7 @@ def construire_html(res):
         f'</div>'
     )
 
-def afficher_rapport(df_filtré, equipe_ref="Cannes"):
-    """À appeler dans l'app Streamlit."""
-    import streamlit as st
-    res = evaluer_match(df_filtré, equipe_ref)
-    st.html(construire_html(res))
-    return res
-
 def construire_df_moyenne(df, equipe_ref="Cannes", label_adv="Adversaires (moy.)"):
-    """Construit un df à 2 lignes (moyenne équipe + moyenne adversaires) à partir
-    d'un df contenant plusieurs matchs, en conservant l'ordre des colonnes du
-    fichier d'origine pour que le scoring positionnel reste valide.
-    Retour : (df_2_lignes, nb_matchs).
-    """
     eq_rows = df[df["Équipe"] == equipe_ref]
     adv_rows = df[df["Équipe"] != equipe_ref]
     if len(eq_rows) == 0 or len(adv_rows) == 0:
@@ -3729,10 +3716,6 @@ def construire_df_moyenne(df, equipe_ref="Cannes", label_adv="Adversaires (moy.)
     return df2, len(eq_rows)
 
 def afficher_rapport_moyenne(df, equipe_ref="Cannes"):
-    """À appeler dans l'app Streamlit (fiche moyenne sur plusieurs matchs).
-    df : df d'une équipe (structure 'Team Stats'), déjà restreint aux matchs voulus.
-    """
-    import streamlit as st
     df2, nb = construire_df_moyenne(df, equipe_ref)
     res = evaluer_match(df2, equipe_ref, moyenne=True, nb_matchs=nb)
     st.html(construire_html(res))
@@ -4406,175 +4389,120 @@ def streamlit_application(all_df_dict):
             else:
                 df_collective = collect_collective_data(normalized_team)
 
-                tab_stats_par_match, tab_stats_moyennes = st.tabs(['Statistiques par match', 'Statistiques moyennes'])
+                match_options = df_collective["Match"].dropna().unique().tolist()
 
-                with tab_stats_par_match:
-                    compétition = st.selectbox("Sélectionnez une compétition", df_collective["Compétition"].unique())
+                ALL_MATCHES_LABEL = "Tous les matchs"
+                match_options_with_all = [ALL_MATCHES_LABEL] + match_options
 
-                    df_filtré = df_collective[df_collective["Compétition"] == compétition]
+                st.session_state["selected_matches"] = [
+                    m for m in st.session_state.get("selected_matches", [])
+                    if m in match_options_with_all
+                ]
 
-                    match = st.selectbox("Sélectionnez un match", df_filtré["Match"].unique())
+                matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options_with_all, key="selected_matches")
+            
+                if not matches:
+                    st.info("Sélectionne au moins un match.")
 
-                    df_filtré = df_filtré[df_filtré["Match"] == match]
+                else:
+                    if ALL_MATCHES_LABEL in matches:
+                        selected_matches = match_options
+                    else:
+                        selected_matches = matches
 
-                    équipe_analysée = df_filtré[df_filtré["Équipe"] == team]
-                    adversaire = df_filtré[df_filtré["Équipe"] != team]
+                    df_collective = df_collective[df_collective["Match"].isin(selected_matches)]
+
+                    df_stats_moyennes = pd.DataFrame()
+
+                    for équipe in équipes[st.session_state['saison']]:
+                        if st.session_state['saison'] != "24-25":
+                            équipe_normalisée = unicodedata.normalize("NFD", équipe)
+                        else:
+                            équipe_normalisée = équipe
+                        if équipe != team:
+                            if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
+                                continue
+                            df_filtré = collect_collective_data(équipe_normalisée)
+                            df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
+                            df_stats = df_filtré[df_filtré['Équipe'] == équipe]
+                            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
+                            df_stats['Équipe'] = équipe
+                            df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
+                            df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
+                        else:
+                            df_filtré = df_collective[df_collective['Compétition'] == 'France. National 2']
+                            df_stats = df_filtré[df_filtré['Équipe'] == équipe]
+                            df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
+                            df_stats['Équipe'] = équipe
+                            df_stats['Matchs analysés'] = len(selected_matches)
+                            df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
+
+                    df_stats_moyennes = df_stats_moyennes.drop(['Championnat'], axis=1)
+
+                    cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+                    df_stats_moyennes = df_stats_moyennes[cols]
+
+                    colonnes_a_ranker = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
+
+                    df_stats_ranks = df_stats_moyennes.copy()
+
+                    for col in colonnes_a_ranker:
+                        if col in colonnes_bas_mieux:
+                            # Plus c'est bas, mieux c'est
+                            df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=True, method='min')
+                        else:
+                            # Plus c'est haut, mieux c'est
+                            df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=False, method='min')
+
+                    # Colonnes non numériques inchangées
+                    df_stats_ranks['Équipe'] = df_stats_moyennes['Équipe']
+                    df_stats_ranks['Matchs analysés'] = df_stats_moyennes['Matchs analysés']
+                    df_stats_ranks = df_stats_ranks[cols]
+                    df_stats_ranks = df_stats_ranks.astype({col: int for col in colonnes_a_ranker})
+
+                    équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
+                    équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
 
                     tab_score, tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
                     with tab_score:
-                        afficher_rapport(df_filtré, team)
+                        df_score_moy = df_collective[df_collective["Compétition"] == "France. National 2"]
+                        afficher_rapport_moyenne(df_score_moy, team)
 
                     with tab_general:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general].values.flatten())
-                        adversaire_values = clean_values(adversaire[indicateurs_general].values.flatten())
+                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
+                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_general, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                        fig = create_plot_stats(indicateurs_general_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
                     with tab_attaques:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
-                        adversaire_values = clean_values(adversaire[indicateurs_attaques].values.flatten())
+                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                        fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
                     with tab_defense:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense].values.flatten())
-                        adversaire_values = clean_values(adversaire[indicateurs_defense].values.flatten())
+                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
+                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_defense, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                        fig = create_plot_stats(indicateurs_defense_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
                     with tab_passes:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
-                        adversaire_values = clean_values(adversaire[indicateurs_passes].values.flatten())
+                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                        fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
 
                     with tab_pressing:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
-                        adversaire_values = clean_values(adversaire[indicateurs_pressing].values.flatten())
+                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, adversaire_values, adversaire['Équipe'].iloc[0])
+                        fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
                         st.pyplot(fig, use_container_width=True)
-
-                with tab_stats_moyennes:
-                    match_options = df_collective["Match"].dropna().unique().tolist()
-
-                    ALL_MATCHES_LABEL = "Tous les matchs"
-                    match_options_with_all = [ALL_MATCHES_LABEL] + match_options
-
-                    st.session_state["selected_matches"] = [
-                        m for m in st.session_state.get("selected_matches", [])
-                        if m in match_options_with_all
-                    ]
-
-                    matches = st.multiselect("Sélectionnez le(s) match(s) à analyser", options=match_options_with_all, key="selected_matches")
-                
-                    if not matches:
-                        st.info("Sélectionne au moins un match.")
-
-                    else:
-                        if ALL_MATCHES_LABEL in matches:
-                            selected_matches = match_options
-                        else:
-                            selected_matches = matches
-
-                        df_collective = df_collective[df_collective["Match"].isin(selected_matches)]
-
-                        df_stats_moyennes = pd.DataFrame()
-
-                        for équipe in équipes[st.session_state['saison']]:
-                            if st.session_state['saison'] != "24-25":
-                                équipe_normalisée = unicodedata.normalize("NFD", équipe)
-                            else:
-                                équipe_normalisée = équipe
-                            if équipe != team:
-                                if not os.path.exists(f"data/Data {st.session_state['saison']}/Team Stats {équipe_normalisée}.xlsx"):
-                                    continue
-                                df_filtré = collect_collective_data(équipe_normalisée)
-                                df_filtré = df_filtré[df_filtré['Compétition'] == 'France. National 2']
-                                df_stats = df_filtré[df_filtré['Équipe'] == équipe]
-                                df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
-                                df_stats['Équipe'] = équipe
-                                df_stats['Matchs analysés'] = len(df_filtré[df_filtré['Équipe'] == équipe])
-                                df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
-                            else:
-                                df_filtré = df_collective[df_collective['Compétition'] == 'France. National 2']
-                                df_stats = df_filtré[df_filtré['Équipe'] == équipe]
-                                df_stats = df_stats.mean(numeric_only=True).to_frame().T.round(2)
-                                df_stats['Équipe'] = équipe
-                                df_stats['Matchs analysés'] = len(selected_matches)
-                                df_stats_moyennes = pd.concat([df_stats_moyennes, df_stats], ignore_index=True)
-
-                        df_stats_moyennes = df_stats_moyennes.drop(['Championnat'], axis=1)
-
-                        cols = ['Équipe', 'Matchs analysés'] + [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
-                        df_stats_moyennes = df_stats_moyennes[cols]
-
-                        colonnes_a_ranker = [col for col in df_stats_moyennes.columns if col not in ['Équipe', 'Matchs analysés']]
-
-                        df_stats_ranks = df_stats_moyennes.copy()
-
-                        for col in colonnes_a_ranker:
-                            if col in colonnes_bas_mieux:
-                                # Plus c'est bas, mieux c'est
-                                df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=True, method='min')
-                            else:
-                                # Plus c'est haut, mieux c'est
-                                df_stats_ranks[col] = df_stats_moyennes[col].rank(ascending=False, method='min')
-
-                        # Colonnes non numériques inchangées
-                        df_stats_ranks['Équipe'] = df_stats_moyennes['Équipe']
-                        df_stats_ranks['Matchs analysés'] = df_stats_moyennes['Matchs analysés']
-                        df_stats_ranks = df_stats_ranks[cols]
-                        df_stats_ranks = df_stats_ranks.astype({col: int for col in colonnes_a_ranker})
-
-                        équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
-                        équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
-
-                        tab_score, tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
-
-                        with tab_score:
-                            df_score_moy = df_collective[df_collective["Compétition"] == "France. National 2"]
-                            afficher_rapport_moyenne(df_score_moy, team)
-
-                        with tab_general:
-                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
-                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
-
-                            fig = create_plot_stats(indicateurs_general_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                            st.pyplot(fig, use_container_width=True)
-
-                        with tab_attaques:
-                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
-                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
-
-                            fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                            st.pyplot(fig, use_container_width=True)
-
-                        with tab_defense:
-                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
-                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
-
-                            fig = create_plot_stats(indicateurs_defense_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                            st.pyplot(fig, use_container_width=True)
-
-                        with tab_passes:
-                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
-                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
-
-                            fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                            st.pyplot(fig, use_container_width=True)
-
-                        with tab_pressing:
-                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
-                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
-
-                            fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                            st.pyplot(fig, use_container_width=True)
 
         df_stats_moyennes = pd.DataFrame()
 
