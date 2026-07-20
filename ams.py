@@ -1744,7 +1744,7 @@ def clean_values(values):
 
 def assign_color(value):
     if value <= 25:
-        return '#AC141A'
+        return 'red'
     elif value <= 50:
         return 'orange'
     elif value <= 75:
