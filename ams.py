@@ -2145,162 +2145,193 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
 
     return fig
 
-def plot_stat_comparison(df, joueur_1, joueur_2, poste):
-    # même palette que ta fonction précédente
-    bg, ink = "#f4f3ed", "#3d3a2a"
+C_J1   = "#1440AC"   # joueur 1
+C_J2   = "#AC141A"   # joueur 2
+C_INK  = "#3d3a2a"
+C_BG   = "#F4F3ED"
+C_BAND = "#ECEBE3"
 
-    # --- sélection du joueur 1 ---
-    joueur1_infos = df[df['Joueur + Information'] == joueur_1]
-    if len(joueur1_infos) > 1:
-        joueur1_infos = compute_weighted_stats_by_minutes(joueur1_infos)
+def _fmt_val(v):
+    """Formatage compact d'une valeur brute."""
+    if pd.isna(v):
+        return "—"
+    v = float(v)
+    if v == int(v) and abs(v) < 10000:
+        return f"{int(v)}"
+    return f"{v:.2f}"
 
-    # --- sélection du joueur 2 ---
-    joueur2_infos = df[df['Joueur + Information'] == joueur_2]
-    if len(joueur2_infos) > 1:
-        joueur2_infos = compute_weighted_stats_by_minutes(joueur2_infos)
-
-    # --- pool de comparaison (même poste, minutes >= 500) ---
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)].copy()
-
-    # On enlève les versions brutes des deux joueurs pour éviter les doublons
-    df_filtré = df_filtré[
-        (df_filtré['Joueur + Information'] != joueur_1) &
-        (df_filtré['Joueur + Information'] != joueur_2)
-    ]
-
-    # On ajoute les versions consolidées des deux joueurs
-    df_filtré = pd.concat([df_filtré, joueur1_infos, joueur2_infos], ignore_index=True)
-
-    # --- colonnes numériques brutes ---
-    exclude = {
-        'Joueur + Information', 'Poste', 'Minutes jouées', 'Âge', 'Passeport pays', 'Pied', 'Valeur sur le marché', 'Matchs joués','Taille','Poids'
-    }
-    numeric_cols = [
-        c for c in df_filtré.columns
-        if c not in exclude and pd.api.types.is_numeric_dtype(df_filtré[c])
-    ]
-
-    # Stats brutes des deux joueurs
-    p1_raw = df_filtré[df_filtré["Joueur + Information"] == joueur_1].iloc[0]
-    p2_raw = df_filtré[df_filtré["Joueur + Information"] == joueur_2].iloc[0]
-
-    # ordre des catégories : "Général" en premier
-    ordered_keys = list(métriques_par_catégorie.keys())
-    if "Général" in ordered_keys:
-        ordered_keys = ["Général"] + [k for k in ordered_keys if k != "Général"]
-
-    table_data = []
-    header_rows_idx = []   # indices (dans table_data) des lignes de catégorie
-    metric_rows_info = []  # (row_idx, metric_name) pour colorer ensuite
-
-    # 1) Ligne "header" avec juste les noms (sans bordure ensuite)
-    table_data.append(["", joueur_1, joueur_2])
-    row_idx = 1  # les catégories commencent à la ligne 1
-
-    # 2) Catégories + métriques
-    for catégorie in ordered_keys:
-        metrics_list = métriques_par_catégorie[catégorie]
-
-        métriques_valides = []
-        for m in metrics_list:
-            if m in numeric_cols:
-                v1 = p1_raw.get(m, np.nan)
-                v2 = p2_raw.get(m, np.nan)
-                if not (pd.isna(v1) and pd.isna(v2)):  # garder seulement si au moins une valeur non NaN
-                    métriques_valides.append((m, v1, v2))
-
-        if not métriques_valides:
-            continue
-
-        # Ligne de catégorie
-        table_data.append([catégorie, "", ""])
-        header_rows_idx.append(row_idx)
-        row_idx += 1
-
-        # Lignes de métriques
-        for m, v1, v2 in métriques_valides:
-            table_data.append([m, f"{v1:.2f}", f"{v2:.2f}"])
-            metric_rows_info.append((row_idx, m))
-            row_idx += 1
-
-    fig, ax = plt.subplots(figsize=(11, 2 + len(table_data) * 0.25))
-    fig.patch.set_facecolor(bg)
-    ax.set_facecolor(bg)
-    ax.axis("off")
-
-    # Tableau (sans colLabels)
-    table = ax.table(
-        cellText=table_data,
-        loc="center",
-        cellLoc="center"
+def _barre(pct, couleur, sens):
+    """Barre horizontale partant du centre. sens='gauche' ou 'droite'."""
+    pct = 0 if pd.isna(pct) else max(0, min(100, float(pct)))
+    justify = "flex-end" if sens == "gauche" else "flex-start"
+    radius = "4px 0 0 4px" if sens == "gauche" else "0 4px 4px 0"
+    return (
+        f'<div style="flex:1;display:flex;justify-content:{justify};'
+        f'align-items:center;min-width:0;">'
+        f'  <div style="width:{pct:.1f}%;height:12px;background:{couleur};'
+        f'    border-radius:{radius};opacity:.9;"></div>'
+        f'</div>'
     )
 
-    table.auto_set_font_size(False)
-    table.set_fontsize(9)
-    table.scale(1, 1.2)
+def _ligne_metrique(nom, v1, v2, p1, p2, gagnant):
+    """Une ligne : valeur J1 | barre J1 | nom | barre J2 | valeur J2."""
+    poids1 = "800" if gagnant == 1 else "500"
+    poids2 = "800" if gagnant == 2 else "500"
+    coul1 = C_J1 if gagnant == 1 else "#8a8578"
+    coul2 = C_J2 if gagnant == 2 else "#8a8578"
+    return (
+        f'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;'
+        f'border-bottom:1px solid rgba(61,58,42,.08);">'
+        f'  <div style="width:52px;text-align:right;font-size:12.5px;'
+        f'    font-weight:{poids1};color:{coul1};flex-shrink:0;">{_fmt_val(v1)}</div>'
+        f'  {_barre(p1, C_J1, "gauche")}'
+        f'  <div style="width:210px;flex-shrink:0;text-align:center;font-size:11.5px;'
+        f'    color:{C_INK};line-height:1.25;">{nom}</div>'
+        f'  {_barre(p2, C_J2, "droite")}'
+        f'  <div style="width:52px;text-align:left;font-size:12.5px;'
+        f'    font-weight:{poids2};color:{coul2};flex-shrink:0;">{_fmt_val(v2)}</div>'
+        f'</div>'
+    )
 
-    # Styling de base
-    for (r, c), cell in table.get_celld().items():
-        cell.set_facecolor(bg)
-        cell.set_edgecolor("#3d3a2a")
-        cell.get_text().set_color(ink)
+def _entete_categorie(nom):
+    return (
+        f'<div style="background:{C_BAND};border-radius:6px;padding:7px 14px;'
+        f'margin:16px 0 6px;font-size:12px;font-weight:700;letter-spacing:.6px;'
+        f'text-transform:uppercase;color:{C_INK};">{nom}</div>'
+    )
 
-    # 1) LIGNE DES NOMS : pas de bordure → visuellement "en dehors" du tableau
-    name_row = 0
-    for col in range(3):
-        cell = table[name_row, col]
-        cell.set_edgecolor(bg)       # même couleur que le fond → bordure invisible
-        cell.set_linewidth(0.0)
-        if col == 0:
-            cell.get_text().set_text("")  # pas de texte en colonne catégorie
-        else:
-            cell.get_text().set_fontweight("bold")
+def _bandeau_joueurs(nom1, sous1, nom2, sous2, gagnes1, gagnes2, total):
+    """Bandeau supérieur : les deux joueurs et le décompte des métriques dominées."""
+    part1 = (gagnes1 / total * 100) if total else 50
+    part2 = (gagnes2 / total * 100) if total else 50
+    return (
+        f'<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:6px;">'
+        f'  <div style="flex:1;background:{C_J1};color:{C_BG};border-radius:10px;'
+        f'    padding:14px 18px;min-width:0;">'
+        f'    <div style="font-size:19px;font-weight:800;line-height:1.15;'
+        f'      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{nom1}</div>'
+        f'    <div style="font-size:11.5px;opacity:.85;margin-top:3px;">{sous1}</div>'
+        f'    <div style="font-size:11px;opacity:.9;margin-top:8px;font-weight:700;">'
+        f'      {gagnes1} métriques dominées</div>'
+        f'  </div>'
+        f'  <div style="flex:1;background:{C_J2};color:{C_BG};border-radius:10px;'
+        f'    padding:14px 18px;min-width:0;text-align:right;">'
+        f'    <div style="font-size:19px;font-weight:800;line-height:1.15;'
+        f'      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{nom2}</div>'
+        f'    <div style="font-size:11.5px;opacity:.85;margin-top:3px;">{sous2}</div>'
+        f'    <div style="font-size:11px;opacity:.9;margin-top:8px;font-weight:700;">'
+        f'      {gagnes2} métriques dominées</div>'
+        f'  </div>'
+        f'</div>'
+        # jauge de domination globale
+        f'<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;'
+        f'margin-bottom:4px;background:{C_BAND};">'
+        f'  <div style="width:{part1:.1f}%;background:{C_J1};"></div>'
+        f'  <div style="width:{part2:.1f}%;background:{C_J2};"></div>'
+        f'</div>'
+        f'<div style="text-align:center;font-size:10.5px;color:#8a8578;'
+        f'margin-bottom:4px;">Longueur des barres = percentile au poste '
+        f'(0 – 100) · {total} métriques comparées</div>'
+    )
 
-    # 2) Lignes de catégories (fond gris + gras)
-    cat_bg = "#ecebe3"
-    for row_i in header_rows_idx:
-        for col_i in range(3):
-            cell = table[row_i, col_i]
-            cell.set_facecolor(cat_bg)
-            cell.get_text().set_fontweight("bold")
+def construire_comparaison_html(df, joueur_1, joueur_2, poste,
+                                metriques_par_categorie, labels_fr=None,
+                                fn_ponderation=None, fn_rank=None):
+    """Renvoie le HTML de la comparaison entre deux joueurs.
 
-    lower_is_better = {
-        "Fautes par 90", "Cartons jaunes", "Cartons jaunes par 90",
-        "Cartons rouges", "Cartons rouges par 90"
-    }
+    metriques_par_categorie : dict {catégorie: [métriques]}
+    labels_fr               : dict optionnel de renommage d'affichage
+    fn_ponderation          : compute_weighted_stats_by_minutes
+    fn_rank                 : rank_columns
+    """
+    labels_fr = labels_fr or {}
 
-    couleur_meilleur = "#d4edda"   # vert clair
-    couleur_moins_bon = "#f8d7da"  # rouge clair
+    # --- consolidation des deux joueurs (multi-lignes -> pondéré par minutes)
+    j1 = df[df['Joueur + Information'] == joueur_1]
+    if len(j1) > 1 and fn_ponderation:
+        j1 = fn_ponderation(j1)
+    j2 = df[df['Joueur + Information'] == joueur_2]
+    if len(j2) > 1 and fn_ponderation:
+        j2 = fn_ponderation(j2)
 
-    for row_i, metric_name in metric_rows_info:
-        v1 = p1_raw.get(metric_name, np.nan)
-        v2 = p2_raw.get(metric_name, np.nan)
+    # --- pool de comparaison (même poste, 500+ minutes)
+    pool = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)].copy()
+    pool = pool[(pool['Joueur + Information'] != joueur_1) &
+                (pool['Joueur + Information'] != joueur_2)]
+    pool = pd.concat([pool, j1, j2], ignore_index=True)
 
-        if pd.isna(v1) and pd.isna(v2):
-            continue
-        if v1 == v2:
-            continue
+    # --- percentiles
+    pool_rank = fn_rank(pool) if fn_rank else pool
+    p1_raw = pool[pool["Joueur + Information"] == joueur_1].iloc[0]
+    p2_raw = pool[pool["Joueur + Information"] == joueur_2].iloc[0]
+    p1_pct = pool_rank[pool_rank["Joueur + Information"] == joueur_1].iloc[0]
+    p2_pct = pool_rank[pool_rank["Joueur + Information"] == joueur_2].iloc[0]
 
-        if metric_name in lower_is_better:
-            v1_comp = -v1
-            v2_comp = -v2
-        else:
-            v1_comp = v1
-            v2_comp = v2
+    exclude = {'Joueur + Information', 'Poste', 'Minutes jouées', 'Âge',
+               'Passeport pays', 'Pied', 'Valeur sur le marché', 'Matchs joués',
+               'Taille', 'Poids'}
+    numeric_cols = [c for c in pool.columns
+                    if c not in exclude and pd.api.types.is_numeric_dtype(pool[c])]
 
-        best = "player1" if v1_comp > v2_comp else "player2"
+    # --- construction des sections
+    ordered = list(metriques_par_categorie.keys())
+    if "Général" in ordered:
+        ordered = ["Général"] + [k for k in ordered if k != "Général"]
 
-        if best == "player1":
-            table[row_i, 1].set_facecolor(couleur_meilleur)
-            table[row_i, 2].set_facecolor(couleur_moins_bon)
-        else:
-            table[row_i, 2].set_facecolor(couleur_meilleur)
-            table[row_i, 1].set_facecolor(couleur_moins_bon)
+    sections, gagnes1, gagnes2, total = [], 0, 0, 0
+    for cat in ordered:
+        lignes = []
+        for m in metriques_par_categorie[cat]:
+            if m not in numeric_cols:
+                continue
+            v1, v2 = p1_raw.get(m, np.nan), p2_raw.get(m, np.nan)
+            if pd.isna(v1) and pd.isna(v2):
+                continue
+            pc1 = p1_pct.get(m, np.nan) if m in pool_rank.columns else np.nan
+            pc2 = p2_pct.get(m, np.nan) if m in pool_rank.columns else np.nan
 
-    plt.tight_layout()
-    plt.show()
-    
-    return fig
+            # gagnant : sur le percentile (gère déjà "plus bas = mieux")
+            if pd.isna(pc1) or pd.isna(pc2) or pc1 == pc2:
+                gagnant = 0
+            else:
+                gagnant = 1 if pc1 > pc2 else 2
+            if gagnant == 1:
+                gagnes1 += 1
+            elif gagnant == 2:
+                gagnes2 += 1
+            total += 1
+
+            lignes.append(_ligne_metrique(labels_fr.get(m, m), v1, v2, pc1, pc2, gagnant))
+
+        if lignes:
+            sections.append(_entete_categorie(cat) + "".join(lignes))
+
+    # --- sous-titres des joueurs
+    def _sous_titre(row):
+        eq = row.get('Équipe dans la période sélectionnée', '')
+        mn = row.get('Minutes jouées', np.nan)
+        mn = "" if pd.isna(mn) else f" · {int(mn)} min"
+        return f"{eq}{mn}"
+
+    bandeau = _bandeau_joueurs(
+        joueur_1.split(' - ')[0], _sous_titre(p1_raw),
+        joueur_2.split(' - ')[0], _sous_titre(p2_raw),
+        gagnes1, gagnes2, total
+    )
+
+    return (
+        f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
+        f'background:{C_BG};padding:4px 2px 10px;">'
+        f'{bandeau}{"".join(sections)}</div>'
+    )
+
+def afficher_comparaison(df, joueur_1, joueur_2, poste,
+                         metriques_par_categorie, labels_fr=None,
+                         fn_ponderation=None, fn_rank=None):
+    html = construire_comparaison_html(df, joueur_1, joueur_2, poste,
+                                       metriques_par_categorie, labels_fr,
+                                       fn_ponderation, fn_rank)
+    st.html(html)
 
 def plot_player_metrics(df, joueur, poste, x_metric, y_metric, nom_x_metric, nom_y_metric, description_1, description_2, description_3, description_4):
     joueur_infos = df[df['Joueur + Information'] == joueur]
@@ -5084,7 +5115,9 @@ def streamlit_application(all_df_dict):
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
                 fig = plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel)
             if type_de_comparaison == "Statistiques avancées":
-                fig = plot_stat_comparison(df, joueur_1, joueur_2, poste)
+                afficher_comparaison(df, joueur_1, joueur_2, poste,
+                        métriques_par_catégorie, label_fr,
+                        compute_weighted_stats_by_minutes, rank_columns)
             st.pyplot(fig, use_container_width=True)
             
     elif page == "Scouting":
