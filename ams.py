@@ -2007,6 +2007,13 @@ def valeurs_duel(df_collective, team, indicateurs):
     noms = adv["Équipe"].unique()
     return v_eq, v_adv, (noms[0] if len(noms) == 1 else "Adversaires")
 
+VUES_STATS = ["Face à l'adversaire", "Rang au championnat"]
+
+def sync_vue(cle):
+    """Propage le choix d'un onglet vers la préférence partagée."""
+    if st.session_state.get(cle) is not None:
+        st.session_state["vue_stats"] = st.session_state[cle]
+
 def afficher_stats(indicateurs, équipe_analysée, nom_équipe_analysée,
                    adversaire, nom_adversaire, bas_mieux=None, nb_equipes=16):
     st.html(construire_stats_html(indicateurs, équipe_analysée, nom_équipe_analysée,
@@ -4714,6 +4721,9 @@ def streamlit_application(all_df_dict):
                     équipe_analysée = df_stats_moyennes[df_stats_moyennes["Équipe"] == team]
                     équipe_analysée_rank = df_stats_ranks[df_stats_ranks["Équipe"] == team]
 
+                    if "vue_stats" not in st.session_state:
+                        st.session_state["vue_stats"] = VUES_STATS[0]
+
                     tab_score, tab_general, tab_attaques, tab_defense, tab_passes, tab_pressing = st.tabs(["Score de performance", "Général", "Attaque", "Défense", "Passe", "Pressing"])
 
                     with tab_score:
@@ -4721,11 +4731,10 @@ def streamlit_application(all_df_dict):
                         afficher_rapport_moyenne(df_score_moy, team)
 
                     with tab_general:
-                        vue = st.segmented_control(
-                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
-                            label_visibility="collapsed",
-                            key="vue_general"
-                        )
+                        st.session_state["vue_general"] = st.session_state["vue_stats"]
+                        st.segmented_control("Vue", VUES_STATS, label_visibility="collapsed",
+                                             key="vue_general", on_change=sync_vue, args=("vue_general",))
+                        vue = st.session_state["vue_stats"]
 
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
@@ -4743,11 +4752,10 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_attaques:
-                        vue = st.segmented_control(
-                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
-                            label_visibility="collapsed",
-                            key="vue_attaque"
-                        )
+                        st.session_state["vue_attaque"] = st.session_state["vue_stats"]
+                        st.segmented_control("Vue", VUES_STATS, label_visibility="collapsed",
+                                             key="vue_attaque", on_change=sync_vue, args=("vue_attaque",))
+                        vue = st.session_state["vue_stats"]
 
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
@@ -4765,11 +4773,10 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_defense:
-                        vue = st.segmented_control(
-                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
-                            label_visibility="collapsed",
-                            key="vue_defense"
-                        )
+                        st.session_state["vue_defense"] = st.session_state["vue_stats"]
+                        st.segmented_control("Vue", VUES_STATS, label_visibility="collapsed",
+                                             key="vue_defense", on_change=sync_vue, args=("vue_defense",))
+                        vue = st.session_state["vue_stats"]
 
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
@@ -4787,11 +4794,10 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_passes:
-                        vue = st.segmented_control(
-                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
-                            label_visibility="collapsed",
-                            key="vue_passes"
-                        )
+                        st.session_state["vue_passes"] = st.session_state["vue_stats"]
+                        st.segmented_control("Vue", VUES_STATS, label_visibility="collapsed",
+                                             key="vue_passes", on_change=sync_vue, args=("vue_passes",))
+                        vue = st.session_state["vue_stats"]
 
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
@@ -4809,11 +4815,10 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_pressing:
-                        vue = st.segmented_control(
-                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
-                            label_visibility="collapsed",
-                            key="vue_pressing"
-                        )
+                        st.session_state["vue_pressing"] = st.session_state["vue_stats"]
+                        st.segmented_control("Vue", VUES_STATS, label_visibility="collapsed",
+                                             key="vue_pressing", on_change=sync_vue, args=("vue_pressing",))
+                        vue = st.session_state["vue_stats"]
 
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
