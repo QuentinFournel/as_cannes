@@ -2154,7 +2154,7 @@ C_BAND = "#ECEBE3"
 # Métriques où une valeur plus basse est meilleure (aligné sur rank_columns)
 LOWER_IS_BETTER = {
     'Buts concédés par 90', 'Fautes par 90', 'Cartons jaunes', 'Cartons rouges',
-    'Cartons jaunes par 90', 'Cartons rouges par 90'
+    'Cartons jaunes par 90', 'Cartons rouges par 90',
 }
 
 def _fmt_val(v):
@@ -2208,8 +2208,12 @@ def _entete_categorie(nom):
 
 def _bandeau_joueurs(nom1, sous1, nom2, sous2, gagnes1, gagnes2, total):
     """Bandeau supérieur : les deux joueurs et le décompte des métriques dominées."""
-    part1 = (gagnes1 / total * 100) if total else 50
-    part2 = (gagnes2 / total * 100) if total else 50
+    # jauge normalisée sur les seules métriques départagées : le point de
+    # bascule reflète directement le rapport de force entre les deux joueurs
+    decides = gagnes1 + gagnes2
+    part1 = (gagnes1 / decides * 100) if decides else 50
+    part2 = 100 - part1
+    nuls = total - decides
     return (
         f'<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:6px;">'
         f'  <div style="flex:1;background:{C_J1};color:{C_BG};border-radius:10px;'
@@ -2237,7 +2241,8 @@ def _bandeau_joueurs(nom1, sous1, nom2, sous2, gagnes1, gagnes2, total):
         f'</div>'
         f'<div style="text-align:center;font-size:10.5px;color:#8a8578;'
         f'margin-bottom:4px;">Longueur des barres = percentile au poste '
-        f'(0 – 100) · {total} métriques comparées</div>'
+        f'(0 – 100) · {decides} métriques départagées'
+        f'{f" · {nuls} à égalité" if nuls else ""}</div>'
     )
 
 def construire_comparaison_html(df, joueur_1, joueur_2, poste,
