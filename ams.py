@@ -2151,6 +2151,12 @@ C_INK  = "#3d3a2a"
 C_BG   = "#F4F3ED"
 C_BAND = "#ECEBE3"
 
+# Métriques où une valeur plus basse est meilleure (aligné sur rank_columns)
+LOWER_IS_BETTER = {
+    'Buts concédés par 90', 'Fautes par 90', 'Cartons jaunes', 'Cartons rouges',
+    'Cartons jaunes par 90', 'Cartons rouges par 90'
+}
+
 def _fmt_val(v):
     """Formatage compact d'une valeur brute."""
     if pd.isna(v):
@@ -2290,11 +2296,17 @@ def construire_comparaison_html(df, joueur_1, joueur_2, poste,
             pc1 = p1_pct.get(m, np.nan) if m in pool_rank.columns else np.nan
             pc2 = p2_pct.get(m, np.nan) if m in pool_rank.columns else np.nan
 
-            # gagnant : sur le percentile (gère déjà "plus bas = mieux")
-            if pd.isna(pc1) or pd.isna(pc2) or pc1 == pc2:
+            # gagnant : d'abord le percentile (gère "plus bas = mieux"),
+            # puis la valeur brute si les percentiles sont ex aequo
+            # (rank_columns tronque les percentiles en entiers)
+            if not pd.isna(pc1) and not pd.isna(pc2) and pc1 != pc2:
+                gagnant = 1 if pc1 > pc2 else 2
+            elif pd.isna(v1) or pd.isna(v2) or v1 == v2:
                 gagnant = 0
             else:
-                gagnant = 1 if pc1 > pc2 else 2
+                meilleur_bas = m in LOWER_IS_BETTER
+                j1_devant = (v1 < v2) if meilleur_bas else (v1 > v2)
+                gagnant = 1 if j1_devant else 2
             if gagnant == 1:
                 gagnes1 += 1
             elif gagnant == 2:
