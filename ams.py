@@ -1824,8 +1824,8 @@ def rank_columns(df):
 
     return df_copy
 
-C_EQ   = "#AC141A"   # équipe analysée
-C_ADV  = "#1440AC"   # adversaire
+C_EQ   = "#AC141A"
+C_ADV  = "#1440AC"
 C_INK  = "#3d3a2a"
 C_BG   = "#F4F3ED"
 C_BAND = "#ECEBE3"
@@ -1846,7 +1846,7 @@ def _num(v):
     except (TypeError, ValueError):
         return np.nan
 
-def _fmt(valeur, label):
+def _fmt_stat(valeur, label):
     """Formatage d'affichage : ajoute % si l'indicateur est un pourcentage."""
     if valeur is None or (isinstance(valeur, float) and pd.isna(valeur)):
         return "&mdash;"
@@ -1896,11 +1896,11 @@ def _ligne_duel(label, v_eq, v_adv, bas_mieux):
         f'<div style="padding:9px 0;border-bottom:1px solid rgba(61,58,42,.08);">'
         f'  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px;">'
         f'    <div style="width:58px;text-align:left;font-size:15px;font-weight:{w_eq};'
-        f'      color:{c_eq};flex-shrink:0;">{_fmt(v_eq, label)}</div>'
+        f'      color:{c_eq};flex-shrink:0;">{_fmt_stat(v_eq, label)}</div>'
         f'    <div style="flex:1;text-align:center;font-size:12px;color:{C_INK};'
         f'      line-height:1.2;">{label}{fleche}</div>'
         f'    <div style="width:58px;text-align:right;font-size:15px;font-weight:{w_adv};'
-        f'      color:{c_adv};flex-shrink:0;">{_fmt(v_adv, label)}</div>'
+        f'      color:{c_adv};flex-shrink:0;">{_fmt_stat(v_adv, label)}</div>'
         f'  </div>'
         f'  <div style="display:flex;height:7px;border-radius:4px;overflow:hidden;'
         f'    background:{C_BAND};">'
@@ -1939,7 +1939,7 @@ def _ligne_classement(label, valeur, rang, n_equipes, bas_mieux):
         f'border-bottom:1px solid rgba(61,58,42,.08);">'
         f'  <div style="flex:1;font-size:12.5px;color:{C_INK};min-width:0;">{label}{fleche}</div>'
         f'  <div style="width:64px;text-align:right;font-size:15px;font-weight:800;'
-        f'    color:{C_EQ};flex-shrink:0;">{_fmt(valeur, label)}</div>'
+        f'    color:{C_EQ};flex-shrink:0;">{_fmt_stat(valeur, label)}</div>'
         f'  <div style="width:90px;flex-shrink:0;height:7px;border-radius:4px;'
         f'    background:{C_BAND};overflow:hidden;">'
         f'    <div style="width:{qualite:.1f}%;height:100%;background:{coul};"></div>'
