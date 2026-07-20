@@ -4720,13 +4720,13 @@ def streamlit_application(all_df_dict):
                         df_score_moy = df_collective[df_collective["Compétition"] == "France. National 2"]
                         afficher_rapport_moyenne(df_score_moy, team)
 
-                    vue = st.segmented_control(
+                    with tab_general:
+                        vue = st.segmented_control(
                             "Vue", ["Face à l'adversaire", "Rang au championnat"],
                             label_visibility="collapsed",
                             key="vue_general"
                         )
 
-                    with tab_general:
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
                             équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
@@ -4743,6 +4743,12 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_attaques:
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            label_visibility="collapsed",
+                            key="vue_attaque"
+                        )
+
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
                             équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
@@ -4759,6 +4765,12 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_defense:
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            label_visibility="collapsed",
+                            key="vue_defense"
+                        )
+
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
                             équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
@@ -4775,6 +4787,12 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_passes:
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            label_visibility="collapsed",
+                            key="vue_passes"
+                        )
+
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
                             équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
@@ -4791,6 +4809,12 @@ def streamlit_application(all_df_dict):
                                                clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_pressing:
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            label_visibility="collapsed",
+                            key="vue_pressing"
+                        )
+
                         if vue == "Rang au championnat":
                             équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
                             équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
