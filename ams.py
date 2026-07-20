@@ -1869,7 +1869,7 @@ def _couleur_rang(rang, n):
         return 'yellowgreen'
     if q <= 0.75:
         return 'orange'
-    return 'red'
+    return '#AC141A'
 
 def _ligne_duel(label, v_eq, v_adv, bas_mieux):
     n_eq, n_adv = _num(v_eq), _num(v_adv)
@@ -1995,6 +1995,17 @@ def construire_stats_html(indicateurs, équipe_analysée, nom_équipe_analysée,
         f'background:{C_BG};padding:2px 2px 6px;">'
         f'{entete}{"".join(lignes)}{legende}</div>'
     )
+
+def valeurs_duel(df_collective, team, indicateurs):
+    """Valeurs de l'équipe et de ses adversaires sur les matchs sélectionnés."""
+    eq = df_collective[df_collective["Équipe"] == team]
+    adv = df_collective[df_collective["Équipe"] != team]
+    if eq.empty or adv.empty:
+        return None, None, None
+    v_eq = [round(eq[i].mean(), 2) if i in eq.columns else np.nan for i in indicateurs]
+    v_adv = [round(adv[i].mean(), 2) if i in adv.columns else np.nan for i in indicateurs]
+    noms = adv["Équipe"].unique()
+    return v_eq, v_adv, (noms[0] if len(noms) == 1 else "Adversaires")
 
 def afficher_stats(indicateurs, équipe_analysée, nom_équipe_analysée,
                    adversaire, nom_adversaire, bas_mieux=None, nb_equipes=16):
@@ -4710,44 +4721,114 @@ def streamlit_application(all_df_dict):
                         afficher_rapport_moyenne(df_score_moy, team)
 
                     with tab_general:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
-                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            default="Face à l'adversaire", label_visibility="collapsed",
+                            key="vue_general"
+                        )
 
-                        afficher_stats(indicateurs_general_moyens, équipe_analysée_values, team,
-                                       équipe_analysée_rank_values, "Classement",
-                                       colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        if vue == "Rang au championnat":
+                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
+                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
+                            afficher_stats(indicateurs_general_moyens, équipe_analysée_values, team,
+                                           équipe_analysée_rank_values, "Classement",
+                                           colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        else:
+                            df_n2 = df_collective[df_collective["Compétition"] == "France. National 2"]
+                            v_eq, v_adv, nom_adv = valeurs_duel(df_n2, team, indicateurs_general_moyens)
+                            if v_eq is None:
+                                st.info("Pas de données adversaire pour cette sélection.")
+                            else:
+                                afficher_stats(indicateurs_general_moyens, clean_values(v_eq), team,
+                                               clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_attaques:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
-                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            default="Face à l'adversaire", label_visibility="collapsed",
+                            key="vue_attaque"
+                        )
 
-                        afficher_stats(indicateurs_attaques, équipe_analysée_values, team,
-                                       équipe_analysée_rank_values, "Classement",
-                                       colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        if vue == "Rang au championnat":
+                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
+                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
+                            afficher_stats(indicateurs_attaques, équipe_analysée_values, team,
+                                           équipe_analysée_rank_values, "Classement",
+                                           colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        else:
+                            df_n2 = df_collective[df_collective["Compétition"] == "France. National 2"]
+                            v_eq, v_adv, nom_adv = valeurs_duel(df_n2, team, indicateurs_attaques)
+                            if v_eq is None:
+                                st.info("Pas de données adversaire pour cette sélection.")
+                            else:
+                                afficher_stats(indicateurs_attaques, clean_values(v_eq), team,
+                                               clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_defense:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
-                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            default="Face à l'adversaire", label_visibility="collapsed",
+                            key="vue_defense"
+                        )
 
-                        afficher_stats(indicateurs_defense_moyens, équipe_analysée_values, team,
-                                       équipe_analysée_rank_values, "Classement",
-                                        colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        if vue == "Rang au championnat":
+                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
+                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
+                            afficher_stats(indicateurs_defense_moyens, équipe_analysée_values, team,
+                                           équipe_analysée_rank_values, "Classement",
+                                           colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        else:
+                            df_n2 = df_collective[df_collective["Compétition"] == "France. National 2"]
+                            v_eq, v_adv, nom_adv = valeurs_duel(df_n2, team, indicateurs_defense_moyens)
+                            if v_eq is None:
+                                st.info("Pas de données adversaire pour cette sélection.")
+                            else:
+                                afficher_stats(indicateurs_defense_moyens, clean_values(v_eq), team,
+                                               clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_passes:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
-                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            default="Face à l'adversaire", label_visibility="collapsed",
+                            key="vue_passes"
+                        )
 
-                        afficher_stats(indicateurs_passes, équipe_analysée_values, team,
-                                       équipe_analysée_rank_values, "Classement",
-                                        colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        if vue == "Rang au championnat":
+                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
+                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
+                            afficher_stats(indicateurs_passes, équipe_analysée_values, team,
+                                           équipe_analysée_rank_values, "Classement",
+                                           colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        else:
+                            df_n2 = df_collective[df_collective["Compétition"] == "France. National 2"]
+                            v_eq, v_adv, nom_adv = valeurs_duel(df_n2, team, indicateurs_passes)
+                            if v_eq is None:
+                                st.info("Pas de données adversaire pour cette sélection.")
+                            else:
+                                afficher_stats(indicateurs_passes, clean_values(v_eq), team,
+                                               clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
                     with tab_pressing:
-                        équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
-                        équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
+                        vue = st.segmented_control(
+                            "Vue", ["Face à l'adversaire", "Rang au championnat"],
+                            default="Face à l'adversaire", label_visibility="collapsed",
+                            key="vue_pressing"
+                        )
 
-                        afficher_stats(indicateurs_pressing, équipe_analysée_values, team,
-                                       équipe_analysée_rank_values, "Classement",
-                                        colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        if vue == "Rang au championnat":
+                            équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
+                            équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
+                            afficher_stats(indicateurs_pressing, équipe_analysée_values, team,
+                                           équipe_analysée_rank_values, "Classement",
+                                           colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
+                        else:
+                            df_n2 = df_collective[df_collective["Compétition"] == "France. National 2"]
+                            v_eq, v_adv, nom_adv = valeurs_duel(df_n2, team, indicateurs_pressing)
+                            if v_eq is None:
+                                st.info("Pas de données adversaire pour cette sélection.")
+                            else:
+                                afficher_stats(indicateurs_pressing, clean_values(v_eq), team,
+                                               clean_values(v_adv), nom_adv, colonnes_bas_mieux)
 
         df_stats_moyennes = pd.DataFrame()
 
