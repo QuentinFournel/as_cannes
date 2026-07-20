@@ -5111,14 +5111,15 @@ def streamlit_application(all_df_dict):
         if st.button("Comparer"):
             if type_de_comparaison == "Radar":
                 fig = create_comparison_radar(df, joueur_1, joueur_2, poste)
+                st.pyplot(fig, use_container_width=True)
             if type_de_comparaison == "KPI":
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
                 fig = plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel)
+                st.pyplot(fig, use_container_width=True)
             if type_de_comparaison == "Statistiques avancées":
                 afficher_comparaison(df, joueur_1, joueur_2, poste,
                         métriques_par_catégorie, label_fr,
                         compute_weighted_stats_by_minutes, rank_columns)
-            st.pyplot(fig, use_container_width=True)
             
     elif page == "Scouting":
         st.header("Scouting")
