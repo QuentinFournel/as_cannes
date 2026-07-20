@@ -1824,56 +1824,182 @@ def rank_columns(df):
 
     return df_copy
 
-def create_plot_stats(indicateurs, équipe_analysée, nom_équipe_analysée, adversaire, nom_adversaire):
-    fig_width, fig_height = 6, 9
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height), facecolor='#f4f3ed')
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.axis("off")
+C_EQ   = "#AC141A"   # équipe analysée
+C_ADV  = "#1440AC"   # adversaire
+C_INK  = "#3d3a2a"
+C_BG   = "#F4F3ED"
+C_BAND = "#ECEBE3"
+C_MUTE = "#8a8578"
 
-    ax.set_facecolor('#f4f3ed')
-    text_color = '#3d3a2a'
+def _num(v):
+    """Convertit une valeur d'affichage (éventuellement '55%') en float."""
+    if v is None:
+        return np.nan
+    if isinstance(v, str):
+        v = v.replace("%", "").replace(",", ".").strip()
+        try:
+            return float(v)
+        except ValueError:
+            return np.nan
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return np.nan
 
-    x_positions = [0.05, 0.5, 0.85]
+def _fmt(valeur, label):
+    """Formatage d'affichage : ajoute % si l'indicateur est un pourcentage."""
+    if valeur is None or (isinstance(valeur, float) and pd.isna(valeur)):
+        return "&mdash;"
+    if isinstance(valeur, float) and valeur.is_integer():
+        txt = f"{int(valeur)}"
+    else:
+        txt = str(valeur)
+    if "%" in label and not txt.endswith("%"):
+        txt += "%"
+    return txt
 
-    total_slots = 15
-    top_margin = 1
-    bottom_margin = 0.05
-    spacing = (top_margin - bottom_margin) / total_slots
+def _couleur_rang(rang, n):
+    """Vert -> rouge selon la position au classement."""
+    if pd.isna(rang) or not n or n < 2:
+        return C_MUTE
+    q = (rang - 1) / (n - 1)
+    if q <= 0.25:
+        return 'green'
+    if q <= 0.50:
+        return 'yellowgreen'
+    if q <= 0.75:
+        return 'orange'
+    return 'red'
 
-    def format_value(value, label):
-        if "%" in label and not str(value).strip().endswith("%"):
-            return f"{value}%"
-        return str(value)
+def _ligne_duel(label, v_eq, v_adv, bas_mieux):
+    n_eq, n_adv = _num(v_eq), _num(v_adv)
+    a = 0.0 if pd.isna(n_eq) else max(0.0, n_eq)
+    b = 0.0 if pd.isna(n_adv) else max(0.0, n_adv)
+    total = a + b
+    part_eq = (a / total * 100) if total > 0 else 50.0
+    part_adv = 100 - part_eq
 
-    for i in range(total_slots):
-        y = top_margin - i * spacing
+    # mise en valeur du meilleur (sens de la metrique pris en compte)
+    gagnant = 0
+    if not pd.isna(n_eq) and not pd.isna(n_adv) and n_eq != n_adv:
+        eq_devant = (n_eq < n_adv) if bas_mieux else (n_eq > n_adv)
+        gagnant = 1 if eq_devant else 2
 
-        if i == 0:
-            ax.text(x_positions[0], y, "Indicateur", fontsize=10, fontweight='bold', va='center', color=text_color)
-            ax.text(x_positions[1], y, nom_équipe_analysée, fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
-            ax.text(x_positions[2], y, nom_adversaire, fontsize=10, fontweight='bold', va='center', ha='center', color=text_color)
+    c_eq = C_EQ if gagnant == 1 else C_MUTE
+    c_adv = C_ADV if gagnant == 2 else C_MUTE
+    w_eq = "800" if gagnant == 1 else "600"
+    w_adv = "800" if gagnant == 2 else "600"
+    fleche = ('<span style="font-size:9px;color:#a8a396;margin-left:4px;">&#8595;</span>'
+              if bas_mieux else "")
 
-            ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='solid', linewidth=1)
+    return (
+        f'<div style="padding:9px 0;border-bottom:1px solid rgba(61,58,42,.08);">'
+        f'  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px;">'
+        f'    <div style="width:58px;text-align:left;font-size:15px;font-weight:{w_eq};'
+        f'      color:{c_eq};flex-shrink:0;">{_fmt(v_eq, label)}</div>'
+        f'    <div style="flex:1;text-align:center;font-size:12px;color:{C_INK};'
+        f'      line-height:1.2;">{label}{fleche}</div>'
+        f'    <div style="width:58px;text-align:right;font-size:15px;font-weight:{w_adv};'
+        f'      color:{c_adv};flex-shrink:0;">{_fmt(v_adv, label)}</div>'
+        f'  </div>'
+        f'  <div style="display:flex;height:7px;border-radius:4px;overflow:hidden;'
+        f'    background:{C_BAND};">'
+        f'    <div style="width:{part_eq:.1f}%;background:{C_EQ};"></div>'
+        f'    <div style="width:{part_adv:.1f}%;background:{C_ADV};"></div>'
+        f'  </div>'
+        f'</div>'
+    )
 
-        elif i - 1 < len(indicateurs):
-            idx = i - 1
-            label = indicateurs[idx]
-            éq_val = format_value(équipe_analysée[idx], label)
-            if nom_adversaire != 'Classement':
-                adv_val = format_value(adversaire[idx], label)
-            else:
-                adv_val = adversaire[idx]
+def _entete_duel(nom_eq, nom_adv):
+    return (
+        f'<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:10px;">'
+        f'  <div style="flex:1;background:{C_EQ};color:{C_BG};border-radius:10px;'
+        f'    padding:12px 16px;min-width:0;font-size:16px;font-weight:800;'
+        f'    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{nom_eq}</div>'
+        f'  <div style="flex:1;background:{C_ADV};color:{C_BG};border-radius:10px;'
+        f'    padding:12px 16px;min-width:0;font-size:16px;font-weight:800;text-align:right;'
+        f'    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{nom_adv}</div>'
+        f'</div>'
+    )
 
-            ax.text(x_positions[0], y, label, fontsize=10, va='center', color=text_color)
-            ax.text(x_positions[1], y, éq_val, fontsize=10, va='center', ha='center', color=text_color)
-            ax.text(x_positions[2], y, adv_val, fontsize=10, va='center', ha='center', color=text_color)
+def _ligne_classement(label, valeur, rang, n_equipes, bas_mieux):
+    r = _num(rang)
+    coul = _couleur_rang(r, n_equipes)
+    if not pd.isna(r) and n_equipes and n_equipes > 1:
+        qualite = max(0.0, min(100.0, (n_equipes - r) / (n_equipes - 1) * 100))
+    else:
+        qualite = 0.0
+    rang_txt = ("&mdash;" if pd.isna(r) else
+                f'{int(r)}<span style="font-size:10px;font-weight:600;opacity:.75;">e</span>')
+    fleche = ('<span style="font-size:9px;color:#a8a396;margin-left:4px;">&#8595;</span>'
+              if bas_mieux else "")
 
-            if i < len(indicateurs):
-                ax.hlines(y - spacing / 2, 0.05, 0.95, colors='#3d3a2a', linestyles='dotted', linewidth=1)
+    return (
+        f'<div style="display:flex;align-items:center;gap:12px;padding:9px 0;'
+        f'border-bottom:1px solid rgba(61,58,42,.08);">'
+        f'  <div style="flex:1;font-size:12.5px;color:{C_INK};min-width:0;">{label}{fleche}</div>'
+        f'  <div style="width:64px;text-align:right;font-size:15px;font-weight:800;'
+        f'    color:{C_EQ};flex-shrink:0;">{_fmt(valeur, label)}</div>'
+        f'  <div style="width:90px;flex-shrink:0;height:7px;border-radius:4px;'
+        f'    background:{C_BAND};overflow:hidden;">'
+        f'    <div style="width:{qualite:.1f}%;height:100%;background:{coul};"></div>'
+        f'  </div>'
+        f'  <div style="width:52px;flex-shrink:0;text-align:center;background:{coul};'
+        f'    color:{C_BG};border-radius:12px;padding:3px 0;font-size:13px;'
+        f'    font-weight:800;">{rang_txt}</div>'
+        f'</div>'
+    )
 
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    return fig
+def _entete_classement(nom_eq, n_equipes):
+    return (
+        f'<div style="background:{C_EQ};color:{C_BG};border-radius:10px;'
+        f'padding:12px 16px;margin-bottom:10px;display:flex;align-items:baseline;'
+        f'justify-content:space-between;gap:10px;flex-wrap:wrap;">'
+        f'  <div style="font-size:16px;font-weight:800;overflow:hidden;'
+        f'    text-overflow:ellipsis;white-space:nowrap;">{nom_eq}</div>'
+        f'  <div style="font-size:11.5px;opacity:.85;font-weight:600;white-space:nowrap;">'
+        f'    Moyenne par match &middot; rang sur {n_equipes} &eacute;quipes</div>'
+        f'</div>'
+    )
+
+def construire_stats_html(indicateurs, équipe_analysée, nom_équipe_analysée,
+                          adversaire, nom_adversaire,
+                          bas_mieux=None, nb_equipes=16):
+    """Remplace create_plot_stats. Detecte automatiquement le mode :
+    - nom_adversaire == 'Classement' -> valeur + rang
+    - sinon                          -> duel equipe vs adversaire
+    """
+    bas_mieux = bas_mieux or set()
+    mode_classement = (nom_adversaire == "Classement")
+
+    lignes = []
+    for i, label in enumerate(indicateurs):
+        v_eq = équipe_analysée[i] if i < len(équipe_analysée) else None
+        v_adv = adversaire[i] if i < len(adversaire) else None
+        est_bas = label in bas_mieux
+        if mode_classement:
+            lignes.append(_ligne_classement(label, v_eq, v_adv, nb_equipes, est_bas))
+        else:
+            lignes.append(_ligne_duel(label, v_eq, v_adv, est_bas))
+
+    entete = (_entete_classement(nom_équipe_analysée, nb_equipes) if mode_classement
+              else _entete_duel(nom_équipe_analysée, nom_adversaire))
+
+    legende = ""
+    if any(l in bas_mieux for l in indicateurs):
+        legende = (f'<div style="text-align:center;font-size:10.5px;color:{C_MUTE};'
+                   f'margin-top:8px;">&#8595; = une valeur plus basse est meilleure</div>')
+
+    return (
+        f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
+        f'background:{C_BG};padding:2px 2px 6px;">'
+        f'{entete}{"".join(lignes)}{legende}</div>'
+    )
+
+def afficher_stats(indicateurs, équipe_analysée, nom_équipe_analysée,
+                   adversaire, nom_adversaire, bas_mieux=None, nb_equipes=16):
+    st.html(construire_stats_html(indicateurs, équipe_analysée, nom_équipe_analysée,
+                                  adversaire, nom_adversaire, bas_mieux, nb_equipes))
 
 # Fonction de calcul des scores à partir de df_ranked, avec Note globale pondérée
 def calcul_scores_par_kpi(df, joueur, poste):
@@ -4587,36 +4713,41 @@ def streamlit_application(all_df_dict):
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_general_moyens].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_general_moyens].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_general_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                        st.pyplot(fig, use_container_width=True)
+                        afficher_stats(indicateurs_general_moyens, équipe_analysée_values, team,
+                                       équipe_analysée_rank_values, "Classement",
+                                       colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
 
                     with tab_attaques:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_attaques].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_attaques].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_attaques, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                        st.pyplot(fig, use_container_width=True)
+                        afficher_stats(indicateurs_attaques, équipe_analysée_values, team,
+                                       équipe_analysée_rank_values, "Classement",
+                                       colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
 
                     with tab_defense:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_defense_moyens].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_defense_moyens].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_defense_moyens, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                        st.pyplot(fig, use_container_width=True)
+                        afficher_stats(indicateurs_defense_moyens, équipe_analysée_values, team,
+                                       équipe_analysée_rank_values, "Classement",
+                                        colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
 
                     with tab_passes:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_passes].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_passes].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_passes, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                        st.pyplot(fig, use_container_width=True)
+                        afficher_stats(indicateurs_passes, équipe_analysée_values, team,
+                                       équipe_analysée_rank_values, "Classement",
+                                        colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
 
                     with tab_pressing:
                         équipe_analysée_values = clean_values(équipe_analysée[indicateurs_pressing].values.flatten())
                         équipe_analysée_rank_values = clean_values(équipe_analysée_rank[indicateurs_pressing].values.flatten())
 
-                        fig = create_plot_stats(indicateurs_pressing, équipe_analysée_values, team, équipe_analysée_rank_values, "Classement")
-                        st.pyplot(fig, use_container_width=True)
+                        afficher_stats(indicateurs_pressing, équipe_analysée_values, team,
+                                       équipe_analysée_rank_values, "Classement",
+                                        colonnes_bas_mieux, nb_equipes=len(df_stats_moyennes))
 
         df_stats_moyennes = pd.DataFrame()
 
