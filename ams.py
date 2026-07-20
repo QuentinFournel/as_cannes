@@ -2027,7 +2027,7 @@ def create_physical_radar(df, joueur, poste):
 
     return fig
 
-def create_comparison_radar(df, joueur_1, joueur_2, poste):
+def create_comparison_radar_technique(df, joueur_1, joueur_2, poste):
     joueur_1_infos = df[df['Joueur + Information'] == joueur_1]
 
     if len(joueur_1_infos) > 1:
@@ -2048,6 +2048,72 @@ def create_comparison_radar(df, joueur_1, joueur_2, poste):
     metrics_dict = next(item["metrics"] for item in metrics_by_position if item["position"] == poste)
     metrics_abbr = list(metrics_dict.keys())
     metrics_cols = [metrics_dict[m] for m in metrics_abbr]
+
+    low = [0] * len(metrics_abbr)
+    high = [100] * len(metrics_abbr)
+
+    radar = Radar(metrics_abbr, low, high,
+                  round_int=[True] * len(metrics_abbr),
+                  num_rings=4,
+                  ring_width=1, center_circle_radius=1)
+
+    URL = 'https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Thin.ttf'
+    robotto_thin = FontManager(URL)
+
+    URL2 = 'https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf'
+    robotto_bold = FontManager(URL2)
+
+    fig, axs = grid(figheight=14, grid_height=0.915, title_height=0.06, endnote_height=0.025,
+                    title_space=0, endnote_space=0, grid_key='radar', axis=False)
+
+    radar.setup_axis(ax=axs['radar'], facecolor='None')
+    radar.draw_circles(ax=axs['radar'], facecolor='#ecebe3', lw=1.5)
+
+    player_values_1 = df_ranked[df_ranked['Joueur + Information'] == joueur_1][metrics_cols].mean().values.flatten()
+    player_values_2 = df_ranked[df_ranked['Joueur + Information'] == joueur_2][metrics_cols].mean().values.flatten()
+
+    radar.draw_radar_compare(player_values_1, player_values_2, ax=axs['radar'],
+                             kwargs_radar={'facecolor': '#1440AC', 'alpha': 0.6},
+                             kwargs_compare={'facecolor': '#ac141a', 'alpha': 0.6})
+
+    radar.draw_range_labels(ax=axs['radar'], fontsize=20, color='#3d3a2a', fontproperties=robotto_thin.prop)
+    radar.draw_param_labels(ax=axs['radar'], fontsize=20, color='#3d3a2a', fontproperties=robotto_thin.prop)
+
+    axs['title'].text(0.01, 0.60, f"{joueur_1.split(' - ')[0]}", fontsize=25, color='#1440AC',
+                      fontproperties=robotto_bold.prop, ha='left', va='center')
+    axs['title'].text(0.01, 0.20,
+                      f"{df_ranked[df_ranked['Joueur + Information'] == joueur_1]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_1]['Minutes jouées'].iloc[0]} minutes jouées",
+                      fontsize=20, fontproperties=robotto_thin.prop, ha='left', va='center', color='#3d3a2a')
+
+    axs['title'].text(0.99, 0.60, f"{joueur_2.split(' - ')[0]}", fontsize=25,
+                      fontproperties=robotto_bold.prop, ha='right', va='center', color='#ac141a')
+    axs['title'].text(0.99, 0.20,
+                      f"{df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Équipe dans la période sélectionnée'].iloc[0]} | {df_ranked[df_ranked['Joueur + Information'] == joueur_2]['Minutes jouées'].iloc[0]} minutes jouées",
+                      fontsize=20, fontproperties=robotto_thin.prop, ha='right', va='center', color='#3d3a2a')
+
+    fig.set_facecolor('#f4f3ed')
+
+    return fig
+
+def create_comparison_radar_physique(df, joueur_1, joueur_2, poste):
+    joueur_1_infos = df[df['Joueur + Information'] == joueur_1]
+
+    if len(joueur_1_infos) > 1:
+        joueur_1_infos = compute_weighted_stats_by_minutes(joueur_1_infos)
+
+    joueur_2_infos = df[df['Joueur + Information'] == joueur_2]
+
+    if len(joueur_2_infos) > 1:
+        joueur_2_infos = compute_weighted_stats_by_minutes(joueur_2_infos)
+
+    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    df_filtré = df_filtré[(df_filtré['Joueur + Information'] != joueur_1) & (df_filtré['Joueur + Information'] != joueur_2)]
+    df_filtré = pd.concat([df_filtré, joueur_1_infos, joueur_2_infos], ignore_index=True)
+
+    df_ranked = rank_columns(df_filtré)
+
+    metrics_abbr = list(physical_metrics.keys())
+    metrics_cols = [physical_metrics[m] for m in metrics_abbr]
 
     low = [0] * len(metrics_abbr)
     high = [100] * len(metrics_abbr)
@@ -2145,8 +2211,8 @@ def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
 
     return fig
 
-C_J1   = "#1440AC"   # joueur 1
-C_J2   = "#AC141A"   # joueur 2
+C_J1   = "#1440AC"
+C_J2   = "#AC141A"
 C_INK  = "#3d3a2a"
 C_BG   = "#F4F3ED"
 C_BAND = "#ECEBE3"
@@ -5123,11 +5189,14 @@ def streamlit_application(all_df_dict):
                 help="Vous pouvez sélectionner n'importe quel poste, même différent de celui du joueur, pour voir comment il se comporte selon d'autres critères."
             )
 
-        type_de_comparaison = st.radio("Sélectionnez le type de comparaison", ["Radar", "KPI", "Statistiques avancées"])
+        type_de_comparaison = st.radio("Sélectionnez le type de comparaison", ["Radar technique", "Radar physique", "KPI", "Statistiques avancées"])
 
         if st.button("Comparer"):
-            if type_de_comparaison == "Radar":
-                fig = create_comparison_radar(df, joueur_1, joueur_2, poste)
+            if type_de_comparaison == "Radar technique":
+                fig = create_comparison_radar_technique(df, joueur_1, joueur_2, poste)
+                st.pyplot(fig, use_container_width=True)
+            if type_de_comparaison == "Radar physique":
+                fig = create_comparison_radar_physique(df, joueur_1, joueur_2, poste)
                 st.pyplot(fig, use_container_width=True)
             if type_de_comparaison == "KPI":
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
