@@ -1592,6 +1592,7 @@ def read_uploaded_file(uploaded_file):
     df['Buts - xG'] = df['Buts par 90'] - df['xG par 90']
     return df
 
+@st.cache_data
 def collect_collective_data(équipe):
     # Chargement des données
     df_collective = pd.read_excel(f"data/Data {st.session_state['saison']}/Team Stats {équipe}.xlsx")
@@ -5190,6 +5191,7 @@ def streamlit_application(all_df_dict):
                 else create_radar(df, joueur, poste, physical_metrics)
             
             st.pyplot(fig, use_container_width=True)
+            plt.close(fig)
 
         with tab3:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
@@ -5505,9 +5507,11 @@ def streamlit_application(all_df_dict):
                 metrics = next(item["metrics"] for item in metrics_by_position if item["position"] == poste)
                 fig = create_comparison_radar(df, joueur_1, joueur_2, poste, metrics)
                 st.pyplot(fig, use_container_width=True)
+                plt.close(fig)
             if type_de_comparaison == "Radar physique":
                 fig = create_comparison_radar(df, joueur_1, joueur_2, poste, physical_metrics)
                 st.pyplot(fig, use_container_width=True)
+                plt.close(fig)
             if type_de_comparaison == "KPI":
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
                 afficher_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel,
