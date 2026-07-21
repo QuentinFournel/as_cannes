@@ -5674,8 +5674,8 @@ def streamlit_application(all_df_dict):
                 st.pyplot(fig, use_container_width=True)
             if type_de_comparaison == "KPI":
                 kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
-                fig = plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel)
-                st.pyplot(fig, use_container_width=True)
+                afficher_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel,
+                        calcul_scores_par_kpi, note_max=100)
             if type_de_comparaison == "Statistiques avancées":
                 afficher_comparaison(df, joueur_1, joueur_2, poste,
                         métriques_par_catégorie, label_fr,
