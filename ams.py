@@ -2077,9 +2077,8 @@ def calcul_scores_par_kpi(df, joueur, poste):
 
     return df_scores
 
-def create_individual_radar(df, joueur, poste):
+def create_radar(df, joueur, poste, metrics):
     joueur_infos = df[df['Joueur + Information'] == joueur]
-
     if len(joueur_infos) > 1:
         joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
 
@@ -2088,23 +2087,20 @@ def create_individual_radar(df, joueur, poste):
     df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
 
     df_ranked = rank_columns(df_filtré)
-
-    metrics = next(item["metrics"] for item in metrics_by_position if item["position"] == poste)
-
     player = df_ranked[df_ranked["Joueur + Information"] == joueur].iloc[0]
-    values = [player[metrics[abbr]] for abbr in metrics]
 
+    values = [player[metrics[abbr]] for abbr in metrics]
     slice_colors = [assign_color(player[col]) for col in metrics.values()]
 
     pizza = PyPizza(
-        params=metrics,
-        background_color="#f4f3ed",
-        straight_line_color="#3d3a2a",
+        params=list(metrics),
+        background_color=C_BG,
+        straight_line_color=C_INK,
         straight_line_lw=1,
         last_circle_lw=2,
-        last_circle_color="#3d3a2a",
+        last_circle_color=C_INK,
         other_circle_lw=0,
-        inner_circle_size=20
+        inner_circle_size=20,
     )
 
     fig, _ = pizza.make_pizza(
@@ -2114,73 +2110,15 @@ def create_individual_radar(df, joueur, poste):
         slice_colors=slice_colors,
         value_bck_colors=slice_colors,
         blank_alpha=0.4,
-        kwargs_slices=dict(edgecolor="#3d3a2a", zorder=2, linewidth=1),
-        kwargs_params=dict(
-            color="#3d3a2a", fontsize=9, va="center"
-        ),
+        kwargs_slices=dict(edgecolor=C_INK, zorder=2, linewidth=1),
+        kwargs_params=dict(color=C_INK, fontsize=9, va="center"),
         kwargs_values=dict(
-            color="#f4f3ed", fontsize=9, zorder=3,
-            bbox=dict(
-                edgecolor="#3d3a2a", facecolor="cornflowerblue",
-                boxstyle="round,pad=0.2", lw=1
-            )
-        )
-    )
-
-    fig.set_facecolor('#f4f3ed')
-
-    return fig
-
-def create_physical_radar(df, joueur, poste):
-    joueur_infos = df[df['Joueur + Information'] == joueur]
-
-    if len(joueur_infos) > 1:
-        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
-
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
-    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
-    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
-
-    df_ranked = rank_columns(df_filtré)
-
-    player = df_ranked[df_ranked["Joueur + Information"] == joueur].iloc[0]
-    values = [player[physical_metrics[abbr]] for abbr in physical_metrics]
-
-    slice_colors = [assign_color(player[col]) for col in physical_metrics.values()]
-
-    pizza = PyPizza(
-        params=physical_metrics,
-        background_color="#f4f3ed",
-        straight_line_color="#3d3a2a",
-        straight_line_lw=1,
-        last_circle_lw=2,
-        last_circle_color="#3d3a2a",
-        other_circle_lw=0,
-        inner_circle_size=20
-    )
-
-    fig, _ = pizza.make_pizza(
-        values,
-        figsize=(8, 8),
-        color_blank_space="same",
-        slice_colors=slice_colors,
-        value_bck_colors=slice_colors,
-        blank_alpha=0.4,
-        kwargs_slices=dict(edgecolor="#3d3a2a", zorder=2, linewidth=1),
-        kwargs_params=dict(
-            color="#3d3a2a", fontsize=9, va="center"
+            color=C_BG, fontsize=9, zorder=3,
+            bbox=dict(edgecolor=C_INK, boxstyle="round,pad=0.2", lw=1),
         ),
-        kwargs_values=dict(
-            color="#f4f3ed", fontsize=9, zorder=3,
-            bbox=dict(
-                edgecolor="#3d3a2a", facecolor="cornflowerblue",
-                boxstyle="round,pad=0.2", lw=1
-            )
-        )
     )
 
-    fig.set_facecolor('#f4f3ed')
-
+    fig.set_facecolor(C_BG)
     return fig
 
 def create_comparison_radar_technique(df, joueur_1, joueur_2, poste):
@@ -3861,11 +3799,12 @@ def get_player_metrics_by_position(df, player_name, smart_goal, analyse_par_post
 def afficher_fiche(df, joueur, poste):
     col_technique, col_physique = st.columns(2)
     with col_technique:
-        fig1 = create_individual_radar(df, joueur, poste)
+        metrics = next(item["metrics"] for item in metrics_by_position if item["position"] == poste)
+        fig1 = create_radar(df, joueur, poste, metrics)
         st.pyplot(fig1)
         plt.close(fig1)
     with col_physique:
-        fig2 = create_physical_radar(df, joueur, poste)
+        fig2 = create_radar(df, joueur, poste, physical_metrics)
         st.pyplot(fig2)
         plt.close(fig2)
 
@@ -5318,9 +5257,10 @@ def streamlit_application(all_df_dict):
                 label_visibility="collapsed",
                 default="Technique"
             )
-
-            fig = create_individual_radar(df, joueur, poste) if technical_or_physical == "Technique" \
-                else create_physical_radar(df, joueur, poste)
+            
+            metrics = next(item["metrics"] for item in metrics_by_position if item["position"] == poste)
+            fig = create_radar(df, joueur, poste, metrics) if technical_or_physical == "Technique" \
+                else create_radar(df, joueur, poste, physical_metrics)
             
             st.pyplot(fig, use_container_width=True)
 
