@@ -3410,120 +3410,166 @@ def points_forts_faibles(df, joueur, poste):
 
     return points_forts, points_faibles
 
-def plot_player_ranking(df, joueur, poste):
-    # --- sélection du joueur ---
+C_INK  = "#3d3a2a"
+C_BG   = "#F4F3ED"
+C_BAND = "#ECEBE3"
+C_MUTE = "#8a8578"
+C_ACCENT = "#AC141A"
+
+def _couleur_pct(p):
+    """Vert -> rouge selon le percentile (0-100)."""
+    if pd.isna(p):
+        return C_MUTE
+    if p >= 75: return "#1e8f4e"
+    if p >= 55: return "#7aa63c"
+    if p >= 40: return "#d9b400"
+    if p >= 25: return "#d98a00"
+    return "#ac141a"
+
+def _fmt_raw(v):
+    if v is None or (isinstance(v, float) and pd.isna(v)):
+        return "&mdash;"
+    v = float(v)
+    if v == int(v) and abs(v) < 10000:
+        return f"{int(v)}"
+    return f"{v:.2f}"
+
+def _ligne_metrique(label, raw, pct):
+    p = 0.0 if pd.isna(pct) else max(0.0, min(100.0, float(pct)))
+    coul = _couleur_pct(pct)
+    pct_txt = "&mdash;" if pd.isna(pct) else f"{int(round(p))}<span style=\"font-size:9px;opacity:.7;\">e</span>"
+    return (
+        f'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;'
+        f'border-bottom:1px solid rgba(61,58,42,.07);">'
+        f'  <div style="width:190px;flex-shrink:0;font-size:12px;color:{C_INK};'
+        f'    line-height:1.2;">{label}</div>'
+        f'  <div style="width:44px;flex-shrink:0;text-align:right;font-size:12.5px;'
+        f'    font-weight:700;color:{C_MUTE};">{_fmt_raw(raw)}</div>'
+        f'  <div style="flex:1;min-width:60px;height:9px;border-radius:5px;'
+        f'    background:{C_BAND};overflow:hidden;">'
+        f'    <div style="width:{p:.1f}%;height:100%;background:{coul};border-radius:5px;"></div>'
+        f'  </div>'
+        f'  <div style="width:34px;flex-shrink:0;text-align:right;font-size:12.5px;'
+        f'    font-weight:800;color:{coul};">{pct_txt}</div>'
+        f'</div>'
+    )
+
+def _entete_categorie(nom, moyenne_pct):
+    coul = _couleur_pct(moyenne_pct)
+    badge = ("" if pd.isna(moyenne_pct) else
+             f'<span style="background:{coul};color:{C_BG};border-radius:10px;'
+             f'padding:2px 9px;font-size:11px;font-weight:800;">{int(round(moyenne_pct))}e</span>')
+    return (
+        f'<div style="display:flex;align-items:center;justify-content:space-between;'
+        f'background:{C_BAND};border-radius:6px;padding:7px 14px;margin:16px 0 4px;">'
+        f'  <span style="font-size:12px;font-weight:700;letter-spacing:.6px;'
+        f'    text-transform:uppercase;color:{C_INK};">{nom}</span>{badge}'
+        f'</div>'
+    )
+
+def _entete_joueur(nom, sous_titre, moyenne, n_forts, n_faibles, n_total):
+    coul = _couleur_pct(moyenne)
+    return (
+        f'<div style="background:{C_ACCENT};color:{C_BG};border-radius:12px;'
+        f'padding:16px 20px;margin-bottom:8px;display:flex;align-items:center;'
+        f'justify-content:space-between;gap:16px;flex-wrap:wrap;">'
+        f'  <div style="min-width:0;">'
+        f'    <div style="font-size:20px;font-weight:800;line-height:1.15;'
+        f'      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{nom}</div>'
+        f'    <div style="font-size:11.5px;opacity:.85;margin-top:3px;">{sous_titre}</div>'
+        f'  </div>'
+        f'  <div style="text-align:center;flex-shrink:0;">'
+        f'    <div style="font-size:32px;font-weight:800;line-height:1;">'
+        f'      {"&mdash;" if pd.isna(moyenne) else int(round(moyenne))}'
+        f'      <span style="font-size:14px;font-weight:600;opacity:.8;">e</span></div>'
+        f'    <div style="font-size:10.5px;opacity:.85;letter-spacing:.4px;">'
+        f'      PERCENTILE MOYEN</div>'
+        f'  </div>'
+        f'</div>'
+        f'<div style="display:flex;gap:8px;margin-bottom:4px;">'
+        f'  <div style="flex:1;background:{C_BAND};border-radius:8px;padding:8px 12px;'
+        f'    font-size:11.5px;color:{C_INK};"><b style="color:#1e8f4e;">{n_forts}</b> '
+        f'    points forts <span style="color:{C_MUTE};">(top 25%)</span></div>'
+        f'  <div style="flex:1;background:{C_BAND};border-radius:8px;padding:8px 12px;'
+        f'    font-size:11.5px;color:{C_INK};text-align:right;">'
+        f'    <b style="color:#ac141a;">{n_faibles}</b> à travailler '
+        f'    <span style="color:{C_MUTE};">(bottom 25%)</span></div>'
+        f'</div>'
+    )
+
+def construire_ranking_html(df, joueur, poste,
+                            metriques_par_categorie, labels_fr=None,
+                            fn_ponderation=None, fn_rank=None):
+    labels_fr = labels_fr or {}
+
     joueur_infos = df[df['Joueur + Information'] == joueur]
-    if len(joueur_infos) > 1:
-        joueur_infos = compute_weighted_stats_by_minutes(joueur_infos)
+    if len(joueur_infos) > 1 and fn_ponderation:
+        joueur_infos = fn_ponderation(joueur_infos)
 
-    # --- pool de comparaison ---
-    df_filtré = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
-    df_filtré = df_filtré[df_filtré['Joueur + Information'] != joueur]
-    df_filtré = pd.concat([df_filtré, joueur_infos], ignore_index=True)
+    pool = df[(df['Poste'] == poste) & (df['Minutes jouées'] >= 500)]
+    pool = pool[pool['Joueur + Information'] != joueur]
+    pool = pd.concat([pool, joueur_infos], ignore_index=True)
 
-    # --- ranking ---
-    df_ranked = rank_columns(df_filtré)
-    row_rank = df_ranked.loc[df_ranked['Joueur + Information'] == joueur].iloc[0]
-    row_raw  = df_filtré.loc[df_filtré['Joueur + Information'] == joueur].iloc[0]
+    ranked = fn_rank(pool) if fn_rank else pool
+    row_rank = ranked.loc[ranked['Joueur + Information'] == joueur].iloc[0]
+    row_raw = pool.loc[pool['Joueur + Information'] == joueur].iloc[0]
 
-    # --- colonnes numériques ---
-    exclude = {'Joueur + Information', 'Poste', 'Minutes jouées', 'Âge', 'Passeport pays', 'Pied', 'Valeur sur le marché', 'Matchs joués', 'Taille', 'Poids'}
-    numeric_cols = [c for c in df_ranked.columns if c not in exclude and pd.api.types.is_numeric_dtype(df_ranked[c])]
+    exclude = {'Joueur + Information', 'Poste', 'Minutes jouées', 'Âge',
+               'Passeport pays', 'Pied', 'Valeur sur le marché', 'Matchs joués',
+               'Taille', 'Poids'}
+    numeric_cols = [c for c in ranked.columns
+                    if c not in exclude and pd.api.types.is_numeric_dtype(ranked[c])]
 
-    # --- items ---
-    items = []
-    ordered_keys = list(métriques_par_catégorie.keys())
-    if "Général" in ordered_keys:
-        ordered_keys = ["Général"] + [k for k in ordered_keys if k != "Général"]
+    ordered = list(metriques_par_categorie.keys())
+    if "Général" in ordered:
+        ordered = ["Général"] + [k for k in ordered if k != "Général"]
 
-    for cat in ordered_keys:
-        mets = [m for m in métriques_par_catégorie[cat] if m in numeric_cols]
+    sections, tous_pct = [], []
+    n_forts = n_faibles = 0
+    for cat in ordered:
+        mets = [m for m in metriques_par_categorie[cat] if m in numeric_cols]
         if not mets:
             continue
-        if len(items) > 0:
-            items.append(("spacer", None))
-        items.append(("header", cat))
+        pcts_cat, lignes = [], []
         for m in mets:
-            items.append(("metric", m, row_raw.get(m, np.nan), row_rank.get(m, np.nan)))
+            raw = row_raw.get(m, np.nan)
+            pct = row_rank.get(m, np.nan)
+            if not pd.isna(pct):
+                pcts_cat.append(pct)
+                tous_pct.append(pct)
+                if pct >= 75: n_forts += 1
+                elif pct <= 25: n_faibles += 1
+            lignes.append(_ligne_metrique(labels_fr.get(m, m), raw, pct))
+        moy_cat = np.mean(pcts_cat) if pcts_cat else np.nan
+        sections.append(_entete_categorie(cat, moy_cat) + "".join(lignes))
 
-    # --- layout ---
-    bg, ink, mute, rail = "#f4f3ed", "#3d3a2a", "#3d3a2a", "#f4f3ed"
-    bar_len   = 55
-    val_gap   = 0.5
-    val_strip = 6.0
-    category_gap = 1.5
-    line_gap = 0.75
+    moyenne = np.mean(tous_pct) if tous_pct else np.nan
 
-    # positions Y
-    y_seq, y = [], 0.0
-    for it in items:
-        if it[0] == "spacer":
-            y += category_gap
-            continue
-        y_seq.append(y)
-        y += 1.0 if it[0] == "header" else line_gap  # 🔹 plus espacé entre lignes
-    y_seq = np.array(y_seq)
-    y_plot = (y_seq.max()) - y_seq
+    eq = row_raw.get('Équipe dans la période sélectionnée', '')
+    mn = row_raw.get('Minutes jouées', np.nan)
+    age = row_raw.get('Âge', np.nan)
+    bits = [str(eq)] if eq else []
+    if not pd.isna(age): bits.append(f"{int(age)} ans")
+    if not pd.isna(mn): bits.append(f"{int(mn)} min")
+    bits.append(poste)
+    sous_titre = " · ".join(bits)
 
-    n_metrics = sum(1 for t,*_ in items if t == "metric")
-    n_spacers = sum(1 for t,*_ in items if t == "spacer")
-    fig_h = max(6.5, min(28, 0.37*n_metrics + 1.0*n_spacers*category_gap + 2.2))
-    fig_w = 12.5
+    entete = _entete_joueur(joueur.split(' - ')[0], sous_titre, moyenne,
+                            n_forts, n_faibles, len(tous_pct))
 
-    fig = plt.figure(figsize=(fig_w, fig_h))
-    fig.patch.set_facecolor(bg)
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1.4, 2.4], wspace=0.25)
+    return (
+        f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
+        f'background:{C_BG};padding:2px;">'
+        f'{entete}{"".join(sections)}'
+        f'<div style="text-align:center;font-size:10.5px;color:{C_MUTE};margin-top:10px;">'
+        f'Barres = percentile au poste (0 – 100) parmi les joueurs à 500+ minutes</div>'
+        f'</div>'
+    )
 
-    axL = fig.add_subplot(gs[0, 0])
-    axR = fig.add_subplot(gs[0, 1])
-
-    for ax in (axL, axR):
-        ax.set_facecolor(bg)
-        ax.set_ylim(min(y_plot)-0.5, max(y_plot)+0.5)
-        ax.set_yticks([]); ax.set_xticks([])
-        for s in ax.spines.values():
-            s.set_visible(False)
-
-    # --- gauche : labels
-    axL.set_xlim(0, 1)
-    for yi, it in zip(y_plot, [i for i in items if i[0] != "spacer"]):
-        if it[0] == "header":
-            axL.text(0.02, yi, it[1], ha="left", va="center",
-                     fontsize=12.5, fontweight="bold", color=ink, transform=axL.transData)
-        elif it[0] == "metric":
-            axL.text(0.02, yi, label_fr.get(it[1], it[1]), ha="left", va="center",
-                     fontsize=10.5, color=ink, transform=axL.transData)
-
-    # --- droite : barres + valeurs
-    axR.set_xlim(-(val_strip), bar_len + 3)
-
-    bar_y, bar_vals, raw_vals = [], [], []
-    for yi, it in zip(y_plot, [i for i in items if i[0] != "spacer"]):
-        if it[0] == "metric":
-            _, name, raw, pct = it
-            bar_y.append(yi)
-            bar_vals.append(0.0 if pd.isna(pct) else pct)
-            raw_vals.append(raw)
-
-    # rails + barres
-    bar_height = 0.5
-    axR.barh(bar_y, [bar_len]*len(bar_y), height=bar_height, color=rail, edgecolor="#3d3a2a", zorder=2)
-    axR.barh(bar_y, [v*bar_len/100 for v in bar_vals], height=bar_height,
-             color=[assign_color(v) for v in bar_vals], edgecolor="#3d3a2a", zorder=3)
-
-    # valeurs gauche
-    for yi, txt in zip(bar_y, raw_vals):
-        axR.text(-val_gap, yi, txt, ha="right", va="center", fontsize=10.5, color=mute)
-
-    # pourcentages alignés au bout du rail (100%)
-    rail_offset = 0.4
-    for yi, v in zip(bar_y, bar_vals):
-        txt = "—" if np.isnan(v) else f"{int(v):d}%"
-        axR.text(bar_len + rail_offset, yi, txt,
-                 ha="left", va="center", fontsize=10.5, color=mute)
-
-    plt.subplots_adjust(left=0.05, right=0.98, top=0.98, bottom=0.04)
-    return fig
+def afficher_ranking(df, joueur, poste, metriques_par_categorie, labels_fr=None,
+                     fn_ponderation=None, fn_rank=None):
+    st.html(construire_ranking_html(df, joueur, poste, metriques_par_categorie,
+                                    labels_fr, fn_ponderation, fn_rank))
 
 def calcul_ipr(df, joueur, poste):
     joueur_infos = df[df['Joueur + Information'] == joueur]
@@ -5107,8 +5153,8 @@ def streamlit_application(all_df_dict):
             st.warning("⚠️ Les notes sont pondérées par un coefficient reflétant le niveau du championnat, sauf pour les bases de données « Joueurs du top 5 européen » et « Joueurs français », pour lesquelles aucun ajustement n'est appliqué.")
 
         with tab4:
-            fig = plot_player_ranking(df, joueur, poste)
-            st.pyplot(fig, use_container_width=True)
+            afficher_ranking(df, joueur, poste, métriques_par_catégorie, label_fr,
+                 compute_weighted_stats_by_minutes, rank_columns)
 
         with tab5:
             scores_df = calcul_scores_par_kpi(df, joueur, poste)
