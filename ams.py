@@ -2305,55 +2305,169 @@ def create_comparison_radar_physique(df, joueur_1, joueur_2, poste):
 
     return fig
 
-def plot_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel):
-    scores_df_1 = calcul_scores_par_kpi(df, joueur_1, poste)
-    joueur_1_scores = scores_df_1[scores_df_1['Joueur + Information'] == joueur_1]
+C_J1   = "#1440AC"   # joueur 1
+C_J2   = "#AC141A"   # joueur 2
+C_INK  = "#3d3a2a"
+C_BG   = "#F4F3ED"
+C_BAND = "#ECEBE3"
+C_MUTE = "#8a8578"
 
-    scores_df_2 = calcul_scores_par_kpi(df, joueur_2, poste)
-    joueur_2_scores = scores_df_2[scores_df_2['Joueur + Information'] == joueur_2]
+def _fmt(v):
+    if v is None or (isinstance(v, float) and pd.isna(v)):
+        return "&mdash;"
+    return f"{float(v):.1f}"
 
-    # Colonnes communes entre les deux DataFrames
-    colonnes_communes = joueur_1_scores.columns.intersection(joueur_2_scores.columns)
+def _barre(note, note_max, couleur, sens):
+    """Barre partant du centre, longueur proportionnelle à la note."""
+    pct = 0.0 if pd.isna(note) else max(0.0, min(100.0, float(note) / note_max * 100))
+    justify = "flex-end" if sens == "gauche" else "flex-start"
+    radius = "4px 0 0 4px" if sens == "gauche" else "0 4px 4px 0"
+    return (
+        f'<div style="flex:1;display:flex;justify-content:{justify};align-items:center;min-width:0;">'
+        f'  <div style="width:{pct:.1f}%;height:13px;background:{couleur};'
+        f'    border-radius:{radius};"></div>'
+        f'</div>'
+    )
 
-    # Sélection des colonnes numériques en excluant 'Minutes jouées'
-    colonnes_kpi = [col for col in kpis_panel if col in colonnes_communes]
+def _ligne_kpi(nom, n1, n2, note_max, est_globale=False):
+    gagnant = 0
+    if not pd.isna(n1) and not pd.isna(n2) and n1 != n2:
+        gagnant = 1 if n1 > n2 else 2
+    c1 = C_J1 if gagnant == 1 else C_MUTE
+    c2 = C_J2 if gagnant == 2 else C_MUTE
+    w1 = "800" if gagnant == 1 else "600"
+    w2 = "800" if gagnant == 2 else "600"
 
-    # Récupération des valeurs
-    values_1 = joueur_1_scores[colonnes_kpi].values.flatten()
-    values_2 = joueur_2_scores[colonnes_kpi].values.flatten()
+    if est_globale:
+        cont = (f"background:{C_BAND};border-radius:10px;padding:11px 10px;margin-top:10px;")
+        nom_style = "font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;"
+        h_barre = "16px"
+    else:
+        cont = "padding:7px 4px;border-bottom:1px solid rgba(61,58,42,.07);"
+        nom_style = "font-size:12px;"
+        h_barre = "13px"
 
-    y_pos = np.arange(len(colonnes_kpi))
-    bar_height = 0.35
+    def barre(note, couleur, sens):
+        pct = 0.0 if pd.isna(note) else max(0.0, min(100.0, float(note) / note_max * 100))
+        justify = "flex-end" if sens == "gauche" else "flex-start"
+        radius = "4px 0 0 4px" if sens == "gauche" else "0 4px 4px 0"
+        return (
+            f'<div style="flex:1;display:flex;justify-content:{justify};align-items:center;min-width:0;">'
+            f'  <div style="width:{pct:.1f}%;height:{h_barre};background:{couleur};border-radius:{radius};"></div>'
+            f'</div>'
+        )
 
-    fig, ax = plt.subplots(figsize=(10, 10))
-    _ = ax.barh(y_pos - bar_height / 2, values_1, bar_height,
-                         label=f"{joueur_1.split(' - ')[0]}", color='#1440AC', edgecolor='#3d3a2a')
-    _ = ax.barh(y_pos + bar_height / 2, values_2, bar_height,
-                         label=f"{joueur_2.split(' - ')[0]}", color='#AC141A', edgecolor='#3d3a2a')
+    return (
+        f'<div style="display:flex;align-items:center;gap:8px;{cont}">'
+        f'  <div style="width:46px;text-align:right;font-size:14px;font-weight:{w1};'
+        f'    color:{c1};flex-shrink:0;">{_fmt(n1)}</div>'
+        f'  {barre(n1, C_J1, "gauche")}'
+        f'  <div style="width:150px;flex-shrink:0;text-align:center;color:{C_INK};'
+        f'    {nom_style}line-height:1.2;">{nom}</div>'
+        f'  {barre(n2, C_J2, "droite")}'
+        f'  <div style="width:46px;text-align:left;font-size:14px;font-weight:{w2};'
+        f'    color:{c2};flex-shrink:0;">{_fmt(n2)}</div>'
+        f'</div>'
+    )
 
-    # Ajouter les valeurs à la fin des barres
-    for i, (v1, v2) in enumerate(zip(values_1, values_2)):
-        ax.text(v1 + 1, y_pos[i] - bar_height / 2, f"{v1:.1f}", 
-                va='center', fontsize=9, fontweight="bold")
-        ax.text(v2 + 1, y_pos[i] + bar_height / 2, f"{v2:.1f}", 
-                va='center', fontsize=9, fontweight="bold")
+def _entete(nom1, sous1, ng1, nom2, sous2, ng2, gagnes1, gagnes2, note_max):
+    decides = gagnes1 + gagnes2
+    part1 = (gagnes1 / decides * 100) if decides else 50
+    part2 = 100 - part1
+    return (
+        f'<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:6px;">'
+        f'  <div style="flex:1;background:{C_J1};color:{C_BG};border-radius:10px;'
+        f'    padding:13px 16px;min-width:0;">'
+        f'    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">'
+        f'      <span style="font-size:18px;font-weight:800;overflow:hidden;'
+        f'        text-overflow:ellipsis;white-space:nowrap;">{nom1}</span>'
+        f'      <span style="font-size:22px;font-weight:800;flex-shrink:0;">{_fmt(ng1)}</span>'
+        f'    </div>'
+        f'    <div style="display:flex;justify-content:space-between;align-items:baseline;'
+        f'      gap:8px;margin-top:2px;">'
+        f'      <span style="font-size:11px;opacity:.85;overflow:hidden;'
+        f'        text-overflow:ellipsis;white-space:nowrap;">{sous1}</span>'
+        f'      <span style="font-size:9.5px;opacity:.8;flex-shrink:0;">NOTE GLOBALE</span>'
+        f'    </div>'
+        f'    <div style="font-size:11px;opacity:.9;margin-top:7px;font-weight:700;">'
+        f'      {gagnes1} KPI dominés</div>'
+        f'  </div>'
+        f'  <div style="flex:1;background:{C_J2};color:{C_BG};border-radius:10px;'
+        f'    padding:13px 16px;min-width:0;text-align:right;">'
+        f'    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">'
+        f'      <span style="font-size:22px;font-weight:800;flex-shrink:0;">{_fmt(ng2)}</span>'
+        f'      <span style="font-size:18px;font-weight:800;overflow:hidden;'
+        f'        text-overflow:ellipsis;white-space:nowrap;">{nom2}</span>'
+        f'    </div>'
+        f'    <div style="display:flex;justify-content:space-between;align-items:baseline;'
+        f'      gap:8px;margin-top:2px;">'
+        f'      <span style="font-size:9.5px;opacity:.8;flex-shrink:0;">NOTE GLOBALE</span>'
+        f'      <span style="font-size:11px;opacity:.85;overflow:hidden;'
+        f'        text-overflow:ellipsis;white-space:nowrap;">{sous2}</span>'
+        f'    </div>'
+        f'    <div style="font-size:11px;opacity:.9;margin-top:7px;font-weight:700;">'
+        f'      {gagnes2} KPI dominés</div>'
+        f'  </div>'
+        f'</div>'
+        f'<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;'
+        f'margin-bottom:8px;background:{C_BAND};">'
+        f'  <div style="width:{part1:.1f}%;background:{C_J1};"></div>'
+        f'  <div style="width:{part2:.1f}%;background:{C_J2};"></div>'
+        f'</div>'
+    )
 
-    ax.set_xticks([])
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(colonnes_kpi)
-    ax.invert_yaxis()
-    ax.legend()
+def construire_kpi_comparison_html(df, joueur_1, joueur_2, poste, kpis_panel,
+                                   fn_scores, note_max=100,
+                                   note_globale_kpi="Note globale"):
+    """Remplace plot_kpi_comparison.
 
-    for spine in ax.spines.values():
-        spine.set_visible(False)
+    fn_scores : calcul_scores_par_kpi (fn(df, joueur, poste) -> df_scores)
+    """
+    s1 = fn_scores(df, joueur_1, poste)
+    s1 = s1[s1['Joueur + Information'] == joueur_1].iloc[0]
+    s2 = fn_scores(df, joueur_2, poste)
+    s2 = s2[s2['Joueur + Information'] == joueur_2].iloc[0]
 
-    plt.tight_layout()
+    kpis = [k for k in kpis_panel if k in s1.index and k in s2.index and k != note_globale_kpi]
 
-    # Transparence
-    fig.patch.set_alpha(0)
-    ax.patch.set_alpha(0)
+    lignes, gagnes1, gagnes2 = [], 0, 0
+    for kpi in kpis:
+        n1 = s1[kpi] if not pd.isna(s1[kpi]) else np.nan
+        n2 = s2[kpi] if not pd.isna(s2[kpi]) else np.nan
+        if not pd.isna(n1) and not pd.isna(n2) and n1 != n2:
+            if n1 > n2: gagnes1 += 1
+            else:       gagnes2 += 1
+        lignes.append(_ligne_kpi(kpi, n1, n2, note_max))
 
-    return fig
+    ng1 = s1.get(note_globale_kpi, np.nan)
+    ng2 = s2.get(note_globale_kpi, np.nan)
+
+    def _sous(row):
+        eq = row.get('Équipe dans la période sélectionnée', '')
+        age = row.get('Âge', np.nan)
+        bits = [str(eq)] if eq else []
+        if not pd.isna(age): bits.append(f"{int(age)} ans")
+        return " · ".join(bits)
+
+    entete = _entete(joueur_1.split(' - ')[0], _sous(s1), ng1,
+                     joueur_2.split(' - ')[0], _sous(s2), ng2,
+                     gagnes1, gagnes2, note_max)
+
+    bloc_global = _ligne_kpi(note_globale_kpi, ng1, ng2, note_max, est_globale=True)
+
+    return (
+        f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
+        f'background:{C_BG};padding:2px;">'
+        f'{entete}{"".join(lignes)}{bloc_global}'
+        f'<div style="text-align:center;font-size:10.5px;color:{C_MUTE};margin-top:10px;">'
+        f'Notes par KPI (0 – {note_max:g}) · barre proportionnelle à la note</div>'
+        f'</div>'
+    )
+
+def afficher_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel,
+                            fn_scores, note_max=100, note_globale_kpi="Note globale"):
+    st.html(construire_kpi_comparison_html(df, joueur_1, joueur_2, poste, kpis_panel,
+                                           fn_scores, note_max, note_globale_kpi))
 
 C_J1   = "#1440AC"
 C_J2   = "#AC141A"
