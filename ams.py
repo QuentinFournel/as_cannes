@@ -2438,9 +2438,9 @@ def construire_kpi_comparison_html(df, joueur_1, joueur_2, poste, kpis_panel,
 
     def _sous(row):
         eq = row.get('Équipe dans la période sélectionnée', '')
-        age = row.get('Âge', np.nan)
+        mn = row.get('Minutes jouées', np.nan)
         bits = [str(eq)] if eq else []
-        if not pd.isna(age): bits.append(f"{int(age)} ans")
+        if not pd.isna(mn): bits.append(f"{int(mn)} min")
         return " · ".join(bits)
 
     entete = _kc_entete(joueur_1.split(' - ')[0], _sous(s1), ng1,
