@@ -3377,6 +3377,34 @@ def _ligne_kpi(kpi, note, percentile, note_max, est_globale=False):
         f'</div>'
     )
 
+def _ligne_note_globale(note, percentile, note_max):
+    """Bloc note globale : pleine largeur, barre épaisse, visuellement distinct des KPI."""
+    p = 0.0 if pd.isna(percentile) else max(0.0, min(100.0, float(percentile)))
+    coul = _couleur_pct(percentile)
+    pct_txt = "&mdash;" if pd.isna(percentile) else f"{percentile:.0f}"
+    note_txt = "&mdash;" if pd.isna(note) else f"{note:.1f}"
+    return (
+        f'<div style="background:{C_BAND};border-radius:10px;padding:14px 16px;margin-top:12px;">'
+        f'  <div style="display:flex;align-items:center;justify-content:space-between;'
+        f'    gap:10px;margin-bottom:8px;">'
+        f'    <div style="font-size:14px;font-weight:800;letter-spacing:.4px;'
+        f'      text-transform:uppercase;color:{C_INK};">Note globale</div>'
+        f'    <div style="flex-shrink:0;">'
+        f'      <span style="font-size:20px;font-weight:800;color:{coul};">{note_txt}</span>'
+        f'      <span style="font-size:12px;color:{C_MUTE};font-weight:600;">/ {note_max:g}</span>'
+        f'    </div>'
+        f'  </div>'
+        f'  <div style="display:flex;align-items:center;gap:10px;">'
+        f'    <div style="flex:1;height:14px;border-radius:7px;background:{C_BG};'
+        f'      border:1px solid rgba(61,58,42,.15);overflow:hidden;">'
+        f'      <div style="width:{p:.1f}%;height:100%;background:{coul};"></div>'
+        f'    </div>'
+        f'    <div style="width:96px;flex-shrink:0;text-align:right;font-size:12px;'
+        f'      color:{C_MUTE};">percentile <b style="color:{coul};">{pct_txt}</b></div>'
+        f'  </div>'
+        f'</div>'
+    )
+
 def _entete(nom_joueur, sous_titre, note_globale, note_max):
     coul = "#AC141A"
     note_txt = "&mdash;" if pd.isna(note_globale) else f"{note_globale:.1f}"
@@ -3397,21 +3425,22 @@ def _entete(nom_joueur, sous_titre, note_globale, note_max):
         f'</div>'
     )
 
-def construire_rating_html(df, joueur_scores, kpis, nom_joueur=None,
+def construire_rating_html(df, joueur_scores, kpis, poste=None, nom_joueur=None,
                            note_max=100, note_globale_kpi="Note globale"):
     """Remplace plot_rating_bars_panel.
 
     df            : pool de comparaison (contient les colonnes KPI)
     joueur_scores : ligne (Series) des scores du joueur
     kpis          : liste des KPI à afficher (barres)
+    poste         : poste sélectionné (affiché dans le sous-titre)
     """
     nom_joueur = nom_joueur or str(joueur_scores.get('Joueur + Information', '')).split(' - ')[0]
 
-    # sous-titre : club · âge · minutes · poste
+    # sous-titre : club · âge · minutes · poste sélectionné
     eq = joueur_scores.get('Équipe dans la période sélectionnée', '')
     age = joueur_scores.get('Âge', np.nan)
     mn = joueur_scores.get('Minutes jouées', np.nan)
-    poste = joueur_scores.get('Poste', '')
+    poste = poste or joueur_scores.get('Poste', '')
     bits = [str(eq)] if eq else []
     if not pd.isna(age): bits.append(f"{int(age)} ans")
     if not pd.isna(mn): bits.append(f"{int(mn)} min")
@@ -3431,24 +3460,29 @@ def construire_rating_html(df, joueur_scores, kpis, nom_joueur=None,
             pct = np.nan
         lignes.append(_ligne_kpi(kpi, note, pct, note_max))
 
-    # note globale : uniquement dans l'en-tête (plus de bloc dupliqué en bas)
+    # note globale : dans l'en-tête ET dans un bloc distinct en bas
     ng = joueur_scores.get(note_globale_kpi, np.nan)
     ng = float(ng) if not pd.isna(ng) else np.nan
+    bloc_global = ""
+    if not pd.isna(ng) and note_globale_kpi in df.columns:
+        valeurs = np.asarray(df[note_globale_kpi].dropna(), dtype=float)
+        pct_g = stats.percentileofscore(valeurs, ng) if len(valeurs) else np.nan
+        bloc_global = _ligne_note_globale(ng, pct_g, note_max)
 
     entete = _entete(nom_joueur, sous_titre, ng, note_max)
 
     return (
         f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
         f'background:{C_BG};padding:2px;">'
-        f'{entete}{"".join(lignes)}'
+        f'{entete}{"".join(lignes)}{bloc_global}'
         f'<div style="text-align:center;font-size:10.5px;color:{C_MUTE};margin-top:10px;">'
         f'Note = score du joueur · barre = percentile au poste (500+ min)</div>'
         f'</div>'
     )
 
-def afficher_rating(df, joueur_scores, kpis, nom_joueur=None,
+def afficher_rating(df, joueur_scores, kpis, poste=None, nom_joueur=None,
                     note_max=100, note_globale_kpi="Note globale"):
-    st.html(construire_rating_html(df, joueur_scores, kpis, nom_joueur,
+    st.html(construire_rating_html(df, joueur_scores, kpis, poste, nom_joueur,
                                    note_max, note_globale_kpi))
 
 def points_forts_faibles(df, joueur, poste):
@@ -5213,7 +5247,7 @@ def streamlit_application(all_df_dict):
             joueur_scores = scores_df[scores_df['Joueur + Information'] == joueur].iloc[0]
             kpis_panel = list(kpi_by_position[poste].keys()) + ["Note globale"]
 
-            afficher_rating(scores_df, joueur_scores, kpis_panel, note_max=100)
+            afficher_rating(scores_df, joueur_scores, kpis_panel, poste=poste, note_max=100)
 
         with tab4:
             afficher_ranking(df, joueur, poste, métriques_par_catégorie, label_fr,
