@@ -6,30 +6,48 @@ import io
 from mplsoccer import Radar, FontManager, grid
 import streamlit as st
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import plotly.express as px
 import plotly.graph_objects as go
 import requests
 import unicodedata
-import zipfile
 from streamlit_option_menu import option_menu
-import math
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics.pairwise import cosine_distances
-import seaborn as sns
 from scipy import stats
 from pathlib import Path
-from bs4 import BeautifulSoup
-import openpyxl
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
-from googleapiclient.http import MediaFileUpload
 
 import warnings
 warnings.filterwarnings('ignore')
+
+# ============================================================
+# Palette de couleurs — source unique de vérité
+# ============================================================
+C_INK   = "#3d3a2a"   # texte principal
+C_BG    = "#f4f3ed"   # fond clair
+C_BAND  = "#ecebe3"   # bande beige
+C_MUTE  = "#8a8578"   # texte secondaire / gris
+C_BORD  = "#eef0f2"   # bordures fines
+
+C_EQ    = "#ac141a"   # rouge Cannes / équipe analysée
+C_ADV   = "#1440ac"   # bleu / adversaire
+C_J1    = C_ADV       # comparaison : joueur 1 = bleu
+C_J2    = C_EQ        # comparaison : joueur 2 = rouge
+C_ACCENT = C_EQ       # accent des bandeaux
+
+# échelle de performance (percentile / rang) : vert -> rouge
+C_VERT       = "#1e8f4e"
+C_VERT_CLAIR = "#7aa63c"
+C_JAUNE      = "#d9b400"
+C_ORANGE     = "#d98a00"
+# (le palier le plus bas réutilise C_EQ)
+
+# couleurs des dimensions du score de match
+COULEURS_DIM = {1: C_EQ, 2: "#1d3a5f", 3: "#2a7f5e"}
+
 
 # Authentification avec Google Drive via compte de service
 def authenticate_google_drive():
@@ -1672,7 +1690,7 @@ def collect_data():
         return pd.concat(valid_df, ignore_index=True) if valid_df else pd.DataFrame()
 
     for saison in saisons:
-        base_dir = Path(f"data") / f"Data {saison}"
+        base_dir = Path("data") / f"Data {saison}"
         dfs = {comp: {} for comp in competitions}
 
         # Lecture sécurisée
@@ -1824,12 +1842,6 @@ def rank_columns(df):
 
     return df_copy
 
-C_EQ   = "#AC141A"
-C_ADV  = "#1440AC"
-C_INK  = "#3d3a2a"
-C_BG   = "#F4F3ED"
-C_BAND = "#ECEBE3"
-C_MUTE = "#8a8578"
 
 def _num(v):
     """Convertit une valeur d'affichage (éventuellement '55%') en float."""
@@ -1864,12 +1876,12 @@ def _couleur_rang(rang, n):
         return C_MUTE
     q = (rang - 1) / (n - 1)
     if q <= 0.25:
-        return 'green'
+        return C_VERT
     if q <= 0.50:
-        return 'yellowgreen'
+        return C_VERT_CLAIR
     if q <= 0.75:
-        return 'orange'
-    return '#AC141A'
+        return C_ORANGE
+    return C_EQ
 
 def _ligne_duel(label, v_eq, v_adv, bas_mieux):
     n_eq, n_adv = _num(v_eq), _num(v_adv)
@@ -2305,31 +2317,13 @@ def create_comparison_radar_physique(df, joueur_1, joueur_2, poste):
 
     return fig
 
-C_J1   = "#1440AC"   # joueur 1
-C_J2   = "#AC141A"   # joueur 2
-C_INK  = "#3d3a2a"
-C_BG   = "#F4F3ED"
-C_BAND = "#ECEBE3"
-C_MUTE = "#8a8578"
 
-def _fmt(v):
+def _kc_fmt(v):
     if v is None or (isinstance(v, float) and pd.isna(v)):
         return "&mdash;"
     return f"{float(v):.1f}"
 
-def _barre(note, note_max, couleur, sens):
-    """Barre partant du centre, longueur proportionnelle à la note."""
-    pct = 0.0 if pd.isna(note) else max(0.0, min(100.0, float(note) / note_max * 100))
-    justify = "flex-end" if sens == "gauche" else "flex-start"
-    radius = "4px 0 0 4px" if sens == "gauche" else "0 4px 4px 0"
-    return (
-        f'<div style="flex:1;display:flex;justify-content:{justify};align-items:center;min-width:0;">'
-        f'  <div style="width:{pct:.1f}%;height:13px;background:{couleur};'
-        f'    border-radius:{radius};"></div>'
-        f'</div>'
-    )
-
-def _ligne_kpi(nom, n1, n2, note_max, est_globale=False):
+def _kc_ligne_kpi(nom, n1, n2, note_max, est_globale=False):
     gagnant = 0
     if not pd.isna(n1) and not pd.isna(n2) and n1 != n2:
         gagnant = 1 if n1 > n2 else 2
@@ -2360,17 +2354,17 @@ def _ligne_kpi(nom, n1, n2, note_max, est_globale=False):
     return (
         f'<div style="display:flex;align-items:center;gap:8px;{cont}">'
         f'  <div style="width:46px;text-align:right;font-size:14px;font-weight:{w1};'
-        f'    color:{c1};flex-shrink:0;">{_fmt(n1)}</div>'
+        f'    color:{c1};flex-shrink:0;">{_kc_fmt(n1)}</div>'
         f'  {barre(n1, C_J1, "gauche")}'
         f'  <div style="width:150px;flex-shrink:0;text-align:center;color:{C_INK};'
         f'    {nom_style}line-height:1.2;">{nom}</div>'
         f'  {barre(n2, C_J2, "droite")}'
         f'  <div style="width:46px;text-align:left;font-size:14px;font-weight:{w2};'
-        f'    color:{c2};flex-shrink:0;">{_fmt(n2)}</div>'
+        f'    color:{c2};flex-shrink:0;">{_kc_fmt(n2)}</div>'
         f'</div>'
     )
 
-def _entete(nom1, sous1, ng1, nom2, sous2, ng2, gagnes1, gagnes2, note_max):
+def _kc_entete(nom1, sous1, ng1, nom2, sous2, ng2, gagnes1, gagnes2, note_max):
     decides = gagnes1 + gagnes2
     part1 = (gagnes1 / decides * 100) if decides else 50
     part2 = 100 - part1
@@ -2381,7 +2375,7 @@ def _entete(nom1, sous1, ng1, nom2, sous2, ng2, gagnes1, gagnes2, note_max):
         f'    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">'
         f'      <span style="font-size:18px;font-weight:800;overflow:hidden;'
         f'        text-overflow:ellipsis;white-space:nowrap;">{nom1}</span>'
-        f'      <span style="font-size:22px;font-weight:800;flex-shrink:0;">{_fmt(ng1)}</span>'
+        f'      <span style="font-size:22px;font-weight:800;flex-shrink:0;">{_kc_fmt(ng1)}</span>'
         f'    </div>'
         f'    <div style="display:flex;justify-content:space-between;align-items:baseline;'
         f'      gap:8px;margin-top:2px;">'
@@ -2395,7 +2389,7 @@ def _entete(nom1, sous1, ng1, nom2, sous2, ng2, gagnes1, gagnes2, note_max):
         f'  <div style="flex:1;background:{C_J2};color:{C_BG};border-radius:10px;'
         f'    padding:13px 16px;min-width:0;text-align:right;">'
         f'    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">'
-        f'      <span style="font-size:22px;font-weight:800;flex-shrink:0;">{_fmt(ng2)}</span>'
+        f'      <span style="font-size:22px;font-weight:800;flex-shrink:0;">{_kc_fmt(ng2)}</span>'
         f'      <span style="font-size:18px;font-weight:800;overflow:hidden;'
         f'        text-overflow:ellipsis;white-space:nowrap;">{nom2}</span>'
         f'    </div>'
@@ -2437,7 +2431,7 @@ def construire_kpi_comparison_html(df, joueur_1, joueur_2, poste, kpis_panel,
         if not pd.isna(n1) and not pd.isna(n2) and n1 != n2:
             if n1 > n2: gagnes1 += 1
             else:       gagnes2 += 1
-        lignes.append(_ligne_kpi(kpi, n1, n2, note_max))
+        lignes.append(_kc_ligne_kpi(kpi, n1, n2, note_max))
 
     ng1 = s1.get(note_globale_kpi, np.nan)
     ng2 = s2.get(note_globale_kpi, np.nan)
@@ -2449,11 +2443,11 @@ def construire_kpi_comparison_html(df, joueur_1, joueur_2, poste, kpis_panel,
         if not pd.isna(age): bits.append(f"{int(age)} ans")
         return " · ".join(bits)
 
-    entete = _entete(joueur_1.split(' - ')[0], _sous(s1), ng1,
+    entete = _kc_entete(joueur_1.split(' - ')[0], _sous(s1), ng1,
                      joueur_2.split(' - ')[0], _sous(s2), ng2,
                      gagnes1, gagnes2, note_max)
 
-    bloc_global = _ligne_kpi(note_globale_kpi, ng1, ng2, note_max, est_globale=True)
+    bloc_global = _kc_ligne_kpi(note_globale_kpi, ng1, ng2, note_max, est_globale=True)
 
     return (
         f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
@@ -2469,11 +2463,6 @@ def afficher_kpi_comparison(df, joueur_1, joueur_2, poste, kpis_panel,
     st.html(construire_kpi_comparison_html(df, joueur_1, joueur_2, poste, kpis_panel,
                                            fn_scores, note_max, note_globale_kpi))
 
-C_J1   = "#1440AC"
-C_J2   = "#AC141A"
-C_INK  = "#3d3a2a"
-C_BG   = "#F4F3ED"
-C_BAND = "#ECEBE3"
 
 # Métriques où une valeur plus basse est meilleure (aligné sur rank_columns)
 LOWER_IS_BETTER = {
@@ -2503,7 +2492,7 @@ def _barre(pct, couleur, sens):
         f'</div>'
     )
 
-def _ligne_metrique(nom, v1, v2, p1, p2, gagnant):
+def _cmp_ligne_metrique(nom, v1, v2, p1, p2, gagnant):
     """Une ligne : valeur J1 | barre J1 | nom | barre J2 | valeur J2."""
     poids1 = "800" if gagnant == 1 else "500"
     poids2 = "800" if gagnant == 2 else "500"
@@ -2523,7 +2512,7 @@ def _ligne_metrique(nom, v1, v2, p1, p2, gagnant):
         f'</div>'
     )
 
-def _entete_categorie(nom):
+def _cmp_entete_categorie(nom):
     return (
         f'<div style="background:{C_BAND};border-radius:6px;padding:7px 14px;'
         f'margin:16px 0 6px;font-size:12px;font-weight:700;letter-spacing:.6px;'
@@ -2642,10 +2631,10 @@ def construire_comparaison_html(df, joueur_1, joueur_2, poste,
                 gagnes2 += 1
             total += 1
 
-            lignes.append(_ligne_metrique(labels_fr.get(m, m), v1, v2, pc1, pc2, gagnant))
+            lignes.append(_cmp_ligne_metrique(labels_fr.get(m, m), v1, v2, pc1, pc2, gagnant))
 
         if lignes:
-            sections.append(_entete_categorie(cat) + "".join(lignes))
+            sections.append(_cmp_entete_categorie(cat) + "".join(lignes))
 
     # --- sous-titres des joueurs
     def _sous_titre(row):
@@ -3444,22 +3433,18 @@ def create_player_data(nom_joueur, sélection_dataframe):
 
     return df_player
 
-C_INK  = "#3d3a2a"
-C_BG   = "#F4F3ED"
-C_BAND = "#ECEBE3"
-C_MUTE = "#8a8578"
 
 def _couleur_pct(p):
     """Vert -> rouge selon le percentile (0-100)."""
     if pd.isna(p):
         return C_MUTE
-    if p >= 75: return "#1e8f4e"
-    if p >= 55: return "#7aa63c"
-    if p >= 40: return "#d9b400"
-    if p >= 25: return "#d98a00"
-    return "#ac141a"
+    if p >= 75: return C_VERT
+    if p >= 55: return C_VERT_CLAIR
+    if p >= 40: return C_JAUNE
+    if p >= 25: return C_ORANGE
+    return C_EQ
 
-def _ligne_kpi(kpi, note, percentile, note_max, est_globale=False):
+def _rating_ligne_kpi(kpi, note, percentile, note_max, est_globale=False):
     p = 0.0 if pd.isna(percentile) else max(0.0, min(100.0, float(percentile)))
     coul = _couleur_pct(percentile)
     pct_txt = "—" if pd.isna(percentile) else f"{percentile:.0f}"
@@ -3519,7 +3504,7 @@ def _ligne_note_globale(note, percentile, note_max):
         f'</div>'
     )
 
-def _entete(nom_joueur, sous_titre, note_globale, note_max):
+def _rating_entete(nom_joueur, sous_titre, note_globale, note_max):
     coul = "#AC141A"
     note_txt = "&mdash;" if pd.isna(note_globale) else f"{note_globale:.1f}"
     return (
@@ -3572,7 +3557,7 @@ def construire_rating_html(df, joueur_scores, kpis, poste=None, nom_joueur=None,
             pct = stats.percentileofscore(valeurs, note) if len(valeurs) and not pd.isna(note) else np.nan
         else:
             pct = np.nan
-        lignes.append(_ligne_kpi(kpi, note, pct, note_max))
+        lignes.append(_rating_ligne_kpi(kpi, note, pct, note_max))
 
     # note globale : dans l'en-tête ET dans un bloc distinct en bas
     ng = joueur_scores.get(note_globale_kpi, np.nan)
@@ -3583,7 +3568,7 @@ def construire_rating_html(df, joueur_scores, kpis, poste=None, nom_joueur=None,
         pct_g = stats.percentileofscore(valeurs, ng) if len(valeurs) else np.nan
         bloc_global = _ligne_note_globale(ng, pct_g, note_max)
 
-    entete = _entete(nom_joueur, sous_titre, ng, note_max)
+    entete = _rating_entete(nom_joueur, sous_titre, ng, note_max)
 
     return (
         f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
@@ -3625,21 +3610,6 @@ def points_forts_faibles(df, joueur, poste):
 
     return points_forts, points_faibles
 
-C_INK  = "#3d3a2a"
-C_BG   = "#F4F3ED"
-C_BAND = "#ECEBE3"
-C_MUTE = "#8a8578"
-C_ACCENT = "#AC141A"
-
-def _couleur_pct(p):
-    """Vert -> rouge selon le percentile (0-100)."""
-    if pd.isna(p):
-        return C_MUTE
-    if p >= 75: return "#1e8f4e"
-    if p >= 55: return "#7aa63c"
-    if p >= 40: return "#d9b400"
-    if p >= 25: return "#d98a00"
-    return "#ac141a"
 
 def _fmt_raw(v):
     if v is None or (isinstance(v, float) and pd.isna(v)):
@@ -3649,7 +3619,7 @@ def _fmt_raw(v):
         return f"{int(v)}"
     return f"{v:.2f}"
 
-def _ligne_metrique(label, raw, pct):
+def _rank_ligne_metrique(label, raw, pct):
     p = 0.0 if pd.isna(pct) else max(0.0, min(100.0, float(pct)))
     coul = _couleur_pct(pct)
     pct_txt = "&mdash;" if pd.isna(pct) else f"{int(round(p))}<span style=\"font-size:9px;opacity:.7;\">e</span>"
@@ -3669,7 +3639,7 @@ def _ligne_metrique(label, raw, pct):
         f'</div>'
     )
 
-def _entete_categorie(nom, moyenne_pct):
+def _rank_entete_categorie(nom, moyenne_pct):
     coul = _couleur_pct(moyenne_pct)
     badge = ("" if pd.isna(moyenne_pct) else
              f'<span style="background:{coul};color:{C_BG};border-radius:10px;'
@@ -3683,7 +3653,6 @@ def _entete_categorie(nom, moyenne_pct):
     )
 
 def _entete_joueur(nom, sous_titre, moyenne, n_forts, n_faibles, n_total):
-    coul = _couleur_pct(moyenne)
     return (
         f'<div style="background:{C_ACCENT};color:{C_BG};border-radius:12px;'
         f'padding:16px 20px;margin-bottom:8px;display:flex;align-items:center;'
@@ -3754,9 +3723,9 @@ def construire_ranking_html(df, joueur, poste,
                 tous_pct.append(pct)
                 if pct >= 75: n_forts += 1
                 elif pct <= 25: n_faibles += 1
-            lignes.append(_ligne_metrique(labels_fr.get(m, m), raw, pct))
+            lignes.append(_rank_ligne_metrique(labels_fr.get(m, m), raw, pct))
         moy_cat = np.mean(pcts_cat) if pcts_cat else np.nan
-        sections.append(_entete_categorie(cat, moy_cat) + "".join(lignes))
+        sections.append(_rank_entete_categorie(cat, moy_cat) + "".join(lignes))
 
     moyenne = np.mean(tous_pct) if tous_pct else np.nan
 
@@ -3909,12 +3878,11 @@ COL = {
     'passes_avant': 79, 'rythme': 104, 'ppda': 109,
 }
 
-COULEURS_DIM = {1: "#ac141a", 2: "#1D3A5F", 3: "#2A7F5E"}
 
 def _isna(v):
     return v is None or (isinstance(v, float) and pd.isna(v))
 
-def _fmt(v):
+def _sm_fmt(v):
     """Entier si valeur entière, sinon 1 décimale (utile pour les moyennes)."""
     return f"{int(v)}" if float(v) % 1 == 0 else f"{v:.1f}"
 
@@ -3945,7 +3913,7 @@ def _c_contre(eq, adv):
     tir = 0 if _isna(tir) else tir
     tot = 0 if _isna(tot) else tot
     idx = 0 if tir >= 2 else 1 if tir >= 1 else 2 if tot >= 1 else 3
-    return (_fmt(tir), idx)
+    return (_sm_fmt(tir), idx)
 
 def _c_passes_avant(eq, adv):
     pa, pt = eq['passes_avant'], eq['passes']
@@ -3967,14 +3935,14 @@ def _c_tirs_cadres(eq, adv):
     if _isna(v):
         return ("n/d", 3)
     idx = 0 if v >= 5 else 1 if v >= 3 else 2 if v >= 1 else 3
-    return (_fmt(v), idx)
+    return (_sm_fmt(v), idx)
 
 def _c_touches(eq, adv):
     v = eq['touches_surface']
     if _isna(v):
         return ("n/d", 3)
     idx = 0 if v >= 20 else 1 if v >= 15 else 2 if v >= 10 else 3
-    return (_fmt(v), idx)
+    return (_sm_fmt(v), idx)
 
 def _c_corners(eq, adv):
     nb = eq['corners']
@@ -3986,21 +3954,21 @@ def _c_corners(eq, adv):
     volume_ok = nb >= 5
     conv_ok = conv >= 30 and nb > 0
     idx = 0 if (volume_ok and conv_ok) else 1 if (volume_ok or conv_ok) else 2 if nb >= 3 else 3
-    return (f"{_fmt(nb)} / {conv:.0f} %", idx)
+    return (f"{_sm_fmt(nb)} / {conv:.0f} %", idx)
 
 def _c_buts_encaisses(eq, adv):
     v = eq['buts_concedes']
     if _isna(v):
         return ("n/d", 3)
     idx = 0 if v == 0 else 1 if v <= 1 else 2 if v <= 2 else 3
-    return (_fmt(v), idx)
+    return (_sm_fmt(v), idx)
 
 def _c_tirs_c_concedes(eq, adv):
     v = eq['tirs_contre_cadres']
     if _isna(v):
         return ("n/d", 3)
     idx = 0 if v <= 3 else 1 if v <= 4 else 2 if v <= 5 else 3
-    return (_fmt(v), idx)
+    return (_sm_fmt(v), idx)
 
 def _c_duels_def(eq, adv):
     v = eq['duels_def_pct']
@@ -4142,7 +4110,7 @@ def _echelle_html(kpi):
             f'</div>'
         )
     # meilleur palier à droite : on affiche du plus mauvais (gauche) au meilleur (droite)
-    return (f'<div style="display:flex;gap:5px;margin-top:6px;">' + "".join(reversed(chips)) + "</div>")
+    return ('<div style="display:flex;gap:5px;margin-top:6px;">' + "".join(reversed(chips)) + "</div>")
 
 def _kpi_html(kpi):
     coul = COULEURS_DIM[kpi["dimension"]]
@@ -5593,10 +5561,10 @@ def streamlit_application(all_df_dict):
                         if isinstance(value, str) and "%" in value:
                             v = float(value.replace("%", ""))
                             m = float(mean_value.replace("%", ""))
-                            color = "#1aac14" if v > m else "#ac141a"
+                            color = C_VERT if v > m else C_EQ
                             bordered_metric(row[j], col_name, value, 225, color)
                         else:
-                            color = "#1aac14" if value > mean_value else "#ac141a"
+                            color = C_VERT if value > mean_value else C_EQ
                             bordered_metric(row[j], col_name, round(value, 1), 225, color)
 
                     st.markdown("<div style='margin-top: 10px'></div>", unsafe_allow_html=True)
