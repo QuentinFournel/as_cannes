@@ -5,15 +5,35 @@ from difflib import get_close_matches
 
 import pandas as pd
 import streamlit as st
-from anthropic import Anthropic
+
+# SDK optionnels : seul celui du fournisseur configuré est nécessaire
+try:
+    from anthropic import Anthropic
+except ImportError:
+    Anthropic = None
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 
 # ============================================================
 # Configuration
 # ============================================================
-MODELE = "claude-sonnet-4-6"
+MODELE_ANTHROPIC = "claude-sonnet-4-6"          # payant, qualité maximale
+MODELE_GROQ = "llama-3.3-70b-versatile"         # palier gratuit de Groq
 MAX_TOKENS = 2000
 MAX_ITERATIONS_OUTILS = 8   # garde-fou de la boucle agentique
-TOP_N_RESULTATS = 15        # nb max de lignes renvoyées à Claude par outil
+TOP_N_RESULTATS = 15        # nb max de lignes renvoyées au modèle par outil
+
+
+def _detecter_fournisseur():
+    """Choisit le fournisseur selon les clés présentes dans les secrets.
+    Anthropic est prioritaire si sa clé est configurée."""
+    if "ANTHROPIC_API_KEY" in st.secrets and Anthropic is not None:
+        return "anthropic"
+    if "GROQ_API_KEY" in st.secrets and Groq is not None:
+        return "groq"
+    return None
 
 
 # ============================================================
@@ -768,7 +788,7 @@ MÉTRIQUES BRUTES DISPONIBLES ({len(metriques)}) :
 # ============================================================
 # Boucle agentique
 # ============================================================
-def _executer_tour(client, system_prompt, df, registre, on_texte=None, on_outil=None):
+def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None, on_outil=None):
     """Envoie l'historique API à Claude et exécute les outils jusqu'à la réponse finale.
 
     on_texte(buffer)       : callback appelé à chaque delta avec le texte accumulé (streaming).
@@ -781,7 +801,7 @@ def _executer_tour(client, system_prompt, df, registre, on_texte=None, on_outil=
 
     for _ in range(MAX_ITERATIONS_OUTILS):
         with client.messages.stream(
-            model=MODELE,
+            model=MODELE_ANTHROPIC,
             max_tokens=MAX_TOKENS,
             system=system_prompt,
             tools=_schemas_outils(),
@@ -832,6 +852,112 @@ def _executer_tour(client, system_prompt, df, registre, on_texte=None, on_outil=
     )
 
 
+def _schemas_outils_openai():
+    """Convertit les schémas d'outils au format OpenAI (utilisé par Groq)."""
+    return [
+        {"type": "function",
+         "function": {"name": s["name"],
+                      "description": s["description"],
+                      "parameters": s["input_schema"]}}
+        for s in _schemas_outils()
+    ]
+
+
+def _executer_tour_groq(client, system_prompt, df, registre, on_texte=None, on_outil=None):
+    """Même boucle agentique que la version Anthropic, au format OpenAI/Groq.
+
+    Pas de streaming token par token (Groq est quasi instantané) : on_texte est
+    appelé une fois par tour avec le texte accumulé.
+    """
+    appels_outils = []
+    texte_complet = ""
+
+    for _ in range(MAX_ITERATIONS_OUTILS):
+        reponse = client.chat.completions.create(
+            model=MODELE_GROQ,
+            max_tokens=MAX_TOKENS,
+            messages=[{"role": "system", "content": system_prompt}]
+                     + st.session_state.assistant_api_history,
+            tools=_schemas_outils_openai(),
+        )
+        message = reponse.choices[0].message
+
+        # Réponse finale (pas d'appel d'outil)
+        if not message.tool_calls:
+            texte_complet += message.content or ""
+            if on_texte:
+                on_texte(texte_complet)
+            st.session_state.assistant_api_history.append(
+                {"role": "assistant", "content": message.content or ""}
+            )
+            return texte_complet, appels_outils
+
+        # Tour avec appels d'outils
+        st.session_state.assistant_api_history.append(
+            {"role": "assistant",
+             "content": message.content or "",
+             "tool_calls": [
+                 {"id": tc.id, "type": "function",
+                  "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+                 for tc in message.tool_calls
+             ]}
+        )
+        if message.content:
+            texte_complet += message.content + "\n\n"
+            if on_texte:
+                on_texte(texte_complet)
+
+        for tc in message.tool_calls:
+            nom_outil = tc.function.name
+            try:
+                arguments = json.loads(tc.function.arguments or "{}")
+            except json.JSONDecodeError:
+                arguments = None
+
+            appels_outils.append(
+                {"nom": nom_outil,
+                 "params": arguments if arguments is not None else tc.function.arguments}
+            )
+            if on_outil:
+                on_outil(nom_outil, appels_outils[-1]["params"])
+
+            # Garde-fous : Llama est moins fiable que Claude sur le respect des schémas
+            if arguments is None:
+                sortie = json.dumps(
+                    {"erreur": "Arguments JSON invalides. Renvoie un objet JSON valide."},
+                    ensure_ascii=False,
+                )
+            elif nom_outil not in EXECUTEURS:
+                sortie = json.dumps(
+                    {"erreur": f"Outil inconnu : {nom_outil}.",
+                     "outils_valides": list(EXECUTEURS)},
+                    ensure_ascii=False,
+                )
+            else:
+                try:
+                    sortie = EXECUTEURS[nom_outil](df, registre, arguments)
+                except KeyError as e:
+                    sortie = json.dumps(
+                        {"erreur": f"Paramètre obligatoire manquant : {e}."},
+                        ensure_ascii=False,
+                    )
+                except Exception as e:
+                    sortie = json.dumps(
+                        {"erreur": f"Erreur d'exécution : {type(e).__name__} : {e}"},
+                        ensure_ascii=False,
+                    )
+
+            st.session_state.assistant_api_history.append(
+                {"role": "tool", "tool_call_id": tc.id, "content": sortie}
+            )
+
+    return (
+        texte_complet
+        or "Je n'ai pas réussi à aboutir à une réponse (trop d'étapes de recherche). Reformule ta demande.",
+        appels_outils,
+    )
+
+
 # ============================================================
 # Point d'entrée — appelé depuis ams.py
 # ============================================================
@@ -842,8 +968,12 @@ def afficher_assistant(df, registre, nom_base):
     registre  : dict de callables/structures injectés depuis ams.py
     nom_base  : nom de la base sélectionnée (pour le contexte et le reset)
     """
-    if "ANTHROPIC_API_KEY" not in st.secrets:
-        st.error("Clé API manquante : ajoutez ANTHROPIC_API_KEY dans les secrets Streamlit.")
+    fournisseur = _detecter_fournisseur()
+    if fournisseur is None:
+        st.error(
+            "Clé API manquante : ajoutez GROQ_API_KEY (gratuit, console.groq.com) "
+            "ou ANTHROPIC_API_KEY dans les secrets Streamlit."
+        )
         st.stop()
 
     # Reset de la conversation si la base de données change
@@ -892,7 +1022,12 @@ def afficher_assistant(df, registre, nom_base):
     # Collecteur des DataFrames produits par les outils pendant ce tour
     st.session_state.assistant_dfs_courants = []
 
-    client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+    if fournisseur == "anthropic":
+        client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+        executer_tour = _executer_tour_anthropic
+    else:
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        executer_tour = _executer_tour_groq
     system_prompt = _construire_system_prompt(df, registre, nom_base)
 
     # Snapshot pour restaurer proprement l'historique API en cas d'erreur en cours de boucle
@@ -912,7 +1047,7 @@ def afficher_assistant(df, registre, nom_base):
             zone_texte.markdown(buffer + " ▌")
 
         try:
-            texte, appels_outils = _executer_tour(client, system_prompt, df, registre, on_texte, on_outil)
+            texte, appels_outils = executer_tour(client, system_prompt, df, registre, on_texte, on_outil)
         except Exception as e:
             statut.update(label="Erreur", state="error")
             st.error(f"Erreur lors de l'appel à l'API Anthropic : {e}")
