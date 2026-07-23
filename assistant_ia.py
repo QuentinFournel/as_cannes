@@ -1,0 +1,942 @@
+import json
+import os
+import unicodedata
+from difflib import get_close_matches
+
+import pandas as pd
+import streamlit as st
+from anthropic import Anthropic
+
+# ============================================================
+# Configuration
+# ============================================================
+MODELE = "claude-sonnet-4-6"
+MAX_TOKENS = 2000
+MAX_ITERATIONS_OUTILS = 8   # garde-fou de la boucle agentique
+TOP_N_RESULTATS = 15        # nb max de lignes renvoyées à Claude par outil
+
+
+# ============================================================
+# Utilitaires
+# ============================================================
+# Caractères cyrilliques visuellement identiques à des latins,
+# présents dans certains exports Wyscout (ex. "Сentres précises, %")
+_CYRILLIQUES_SOSIES = str.maketrans("СсЕеАаОоРрХхВвМмТтКкНн", "CcEeAaOoPpXxBbMmTtKkHh")
+
+
+def _normaliser(texte):
+    """Minuscules + suppression des accents + translittération des sosies cyrilliques."""
+    texte = str(texte).translate(_CYRILLIQUES_SOSIES)
+    texte = unicodedata.normalize("NFKD", texte)
+    return "".join(c for c in texte if not unicodedata.combining(c)).lower().strip()
+
+
+def _resoudre_colonne(nom, colonnes_valides):
+    """Retrouve le nom exact d'une colonne (ou d'une équipe, d'un rôle...)
+    à partir d'un nom approximatif.
+
+    Retourne (nom_exact, None) si trouvé, sinon (None, suggestions).
+    """
+    normalise_vers_exact = {_normaliser(c): c for c in colonnes_valides}
+    cle = _normaliser(nom)
+
+    # 1. Correspondance exacte
+    if cle in normalise_vers_exact:
+        return normalise_vers_exact[cle], None
+
+    # 2. Sous-chaîne : acceptée seulement si une unique correspondance ('frejus' -> 'Fréjus St-Raphaël')
+    partiels = [exact for norm, exact in normalise_vers_exact.items() if cle in norm]
+    if len(partiels) == 1:
+        return partiels[0], None
+    if partiels:
+        return None, partiels[:5]
+
+    # 3. Correspondance approximative
+    suggestions = get_close_matches(cle, list(normalise_vers_exact.keys()), n=5, cutoff=0.6)
+    return None, [normalise_vers_exact[s] for s in suggestions]
+
+
+def _df_vers_json(df, n=TOP_N_RESULTATS):
+    """Compacte un DataFrame en JSON (top n lignes) pour l'envoyer à Claude."""
+    extrait = df.head(n).copy()
+    return json.dumps(
+        {
+            "nb_resultats_total": int(len(df)),
+            "nb_resultats_affiches": int(min(n, len(df))),
+            "joueurs": extrait.to_dict(orient="records"),
+        },
+        ensure_ascii=False,
+        default=str,
+    )
+
+
+def _colonnes_metriques(df):
+    """Colonnes numériques du DataFrame utilisables comme critères de recherche."""
+    exclues = [
+        "Minutes jouées", "Âge", "Taille", "Poids", "Valeur marchande",
+        "Matchs joués", "Cartons jaunes", "Cartons rouges",
+    ]
+    return [c for c in df.select_dtypes(include="number").columns if c not in exclues]
+
+
+def _appliquer_filtres(df_resultats, params):
+    """Filtres transverses (âge, taille, minutes, contrat) sur un DataFrame de résultats.
+
+    Chaque filtre n'est appliqué que si la colonne correspondante existe
+    (ex. compute_similarity ne renvoie pas de colonne Taille).
+    """
+    res = df_resultats
+
+    if params.get("age_min") is not None and "Âge" in res.columns:
+        res = res[res["Âge"] >= params["age_min"]]
+    if params.get("age_max") is not None and "Âge" in res.columns:
+        res = res[res["Âge"] <= params["age_max"]]
+    if params.get("taille_min") is not None and "Taille" in res.columns:
+        res = res[(res["Taille"] >= params["taille_min"]) | (res["Taille"] == 0)]
+    if params.get("minutes_min") is not None and "Minutes jouées" in res.columns:
+        res = res[res["Minutes jouées"] >= params["minutes_min"]]
+    if params.get("contrat_annee_max") is not None and "Contrat expiration" in res.columns:
+        contrats = pd.to_datetime(res["Contrat expiration"], errors="coerce")
+        res = res[(contrats.dt.year <= params["contrat_annee_max"]) | contrats.isna()]
+
+    return res
+
+
+def _resoudre_joueur(df, nom):
+    """Retrouve l'identifiant exact 'Joueur + Information' à partir d'un nom
+    éventuellement partiel ('Corchia', 'S. Corchia', 'Corchia - Cannes'...).
+
+    Retourne (identifiant_exact, None) si un seul candidat,
+    sinon (None, liste_de_candidats).
+    """
+    valeurs = df["Joueur + Information"].dropna().unique()
+    cible = _normaliser(nom)
+
+    # 1. Correspondance exacte sur l'identifiant complet
+    for v in valeurs:
+        if _normaliser(v) == cible:
+            return v, None
+
+    # 2. Correspondance exacte sur le nom seul (avant ' - ')
+    exacts = [v for v in valeurs if _normaliser(str(v).split(" - ")[0]) == cible]
+    if len(exacts) == 1:
+        return exacts[0], None
+    if len(exacts) > 1:
+        return None, exacts[:10]
+
+    # 3. Sous-chaîne dans le nom ('corchia' dans 's. corchia')
+    partiels = [v for v in valeurs if cible in _normaliser(str(v).split(" - ")[0])]
+    if len(partiels) == 1:
+        return partiels[0], None
+    if partiels:
+        return None, partiels[:10]
+
+    # 4. Correspondance approximative
+    noms_normalises = {_normaliser(str(v).split(" - ")[0]): v for v in valeurs}
+    proches = get_close_matches(cible, list(noms_normalises.keys()), n=5, cutoff=0.6)
+    return None, [noms_normalises[p] for p in proches]
+
+
+def _erreur_joueur(nom, candidats):
+    """Message d'erreur JSON standard quand un joueur n'est pas résolu."""
+    if candidats:
+        return json.dumps(
+            {"erreur": f"Plusieurs joueurs ou aucun joueur exact pour '{nom}'.",
+             "candidats": candidats,
+             "conseil": "Choisis le candidat pertinent (identifiant complet) et rappelle l'outil, ou demande une précision à l'utilisateur si l'ambiguïté est réelle."},
+            ensure_ascii=False,
+        )
+    return json.dumps(
+        {"erreur": f"Aucun joueur trouvé pour '{nom}' dans la base sélectionnée.",
+         "conseil": "Vérifie l'orthographe ou indique à l'utilisateur que le joueur n'est pas dans cette base."},
+        ensure_ascii=False,
+    )
+
+
+def _poste_du_joueur(df, joueur):
+    return df.loc[df["Joueur + Information"] == joueur, "Poste"].iloc[0]
+
+
+def _valider_poste(registre, poste):
+    """Retourne (poste_exact, None) ou (None, message_erreur_json)."""
+    exact, _ = _resoudre_colonne(poste, list(registre["kpi_by_position"].keys()))
+    if exact is None:
+        return None, json.dumps(
+            {"erreur": f"Poste inconnu : {poste}.",
+             "postes_valides": list(registre["kpi_by_position"].keys())},
+            ensure_ascii=False,
+        )
+    return exact, None
+
+
+# ============================================================
+# Outils exposés à Claude
+# ============================================================
+def outil_rechercher_joueurs(df, registre, params):
+    """Recherche par seuils de percentiles — réutilise search_recommended_players
+    et la logique de la page Scouting (métriques brutes + KPI mappés)."""
+    poste = params["poste"]
+    criteres = params.get("criteres", {})
+
+    if poste not in registre["kpi_by_position"]:
+        return json.dumps({"erreur": f"Poste inconnu : {poste}. Postes valides : {list(registre['kpi_by_position'].keys())}"}, ensure_ascii=False)
+    if not criteres:
+        return json.dumps({"erreur": "Aucun critère fourni. Fournis au moins une métrique ou un KPI avec un percentile minimum."}, ensure_ascii=False)
+
+    noms_kpi = list(registre["kpi_by_position"][poste].keys()) + ["Note globale"]
+    noms_metriques = _colonnes_metriques(df)
+
+    # Résolution des noms de critères (KPI prioritaire, puis métrique)
+    criteres_resolus = {}   # nom exact -> (source, seuil)
+    for nom, seuil in criteres.items():
+        exact, _ = _resoudre_colonne(nom, noms_kpi)
+        if exact is not None:
+            criteres_resolus[exact] = ("kpi", float(seuil))
+            continue
+        exact, suggestions = _resoudre_colonne(nom, noms_metriques)
+        if exact is not None:
+            criteres_resolus[exact] = ("metrique", float(seuil))
+            continue
+        return json.dumps(
+            {"erreur": f"Critère inconnu : '{nom}'.",
+             "suggestions": suggestions or [],
+             "conseil": "Utilise exactement un nom de la liste des métriques ou des KPI fournie dans les instructions."},
+            ensure_ascii=False,
+        )
+
+    # KPI -> colonnes mappées dans une copie de travail (même logique que la page Scouting)
+    df_travail = df.copy()
+    besoin_kpi = any(src == "kpi" for src, _ in criteres_resolus.values())
+    if besoin_kpi:
+        scores_df = registre["calcul_scores_par_kpi"](df, "", poste)
+        scores_indexe = scores_df.drop_duplicates(subset="Joueur + Information").set_index("Joueur + Information")
+        for nom, (src, _) in criteres_resolus.items():
+            if src == "kpi":
+                df_travail[nom] = df_travail["Joueur + Information"].map(scores_indexe[nom])
+
+    thresholds = {nom: seuil for nom, (_, seuil) in criteres_resolus.items()}
+    resultats = registre["search_recommended_players"](df_travail, poste, thresholds)
+
+    resultats = _appliquer_filtres(resultats, params)
+    resultats = resultats.sort_values(by=list(thresholds.keys()), ascending=[False] * len(thresholds))
+
+    st.session_state.assistant_dfs_courants.append(
+        (f"Recherche {poste} — " + ", ".join(thresholds.keys()), resultats.reset_index(drop=True))
+    )
+    return _df_vers_json(resultats)
+
+
+def outil_classement_par_role(df, registre, params):
+    """Classement des joueurs d'un poste selon un rôle tactique
+    — réutilise calcul_scores_par_kpi (colonnes de rôles)."""
+    poste = params["poste"]
+    role = params["role"]
+
+    roles_valides = registre["kpi_coefficients_by_role"].get(poste, {})
+    if poste not in registre["kpi_by_position"]:
+        return json.dumps({"erreur": f"Poste inconnu : {poste}. Postes valides : {list(registre['kpi_by_position'].keys())}"}, ensure_ascii=False)
+
+    role_exact, suggestions = _resoudre_colonne(role, list(roles_valides.keys()))
+    if role_exact is None:
+        return json.dumps(
+            {"erreur": f"Rôle inconnu pour le poste {poste} : '{role}'.",
+             "roles_valides": list(roles_valides.keys()),
+             "suggestions": suggestions or []},
+            ensure_ascii=False,
+        )
+
+    df_scores = registre["calcul_scores_par_kpi"](df, "", poste)
+    df_scores = _appliquer_filtres(df_scores, params)
+    df_scores = df_scores.sort_values(by=role_exact, ascending=False)
+
+    colonnes_kpi = list(registre["kpi_by_position"][poste].keys())
+    colonnes = (
+        ["Joueur + Information", "Équipe dans la période sélectionnée", "Âge", "Taille",
+         "Pied", "Minutes jouées", "Contrat expiration", role_exact, "Note globale"]
+        + colonnes_kpi
+    )
+    resultats = df_scores[[c for c in colonnes if c in df_scores.columns]].reset_index(drop=True)
+
+    st.session_state.assistant_dfs_courants.append((f"{role_exact} — {poste}", resultats))
+    return _df_vers_json(resultats)
+
+
+# Colonnes à exclure des points forts/faibles (valeurs brutes, pas des percentiles)
+_COLONNES_HORS_PERCENTILES = [
+    "Minutes jouées", "Âge", "Taille", "Poids", "Valeur marchande", "Matchs joués",
+]
+
+
+def _extraire_profil(df, registre, joueur, poste):
+    """Notes KPI + rôles + infos d'un joueur — réutilise calcul_scores_par_kpi.
+
+    Retourne (dict_profil, ligne_scores_df) pour le JSON et l'affichage.
+    """
+    df_scores = registre["calcul_scores_par_kpi"](df, joueur, poste)
+    ligne = df_scores[df_scores["Joueur + Information"] == joueur].iloc[0]
+
+    colonnes_kpi = list(registre["kpi_by_position"][poste].keys()) + ["Note globale"]
+    colonnes_roles = list(registre["kpi_coefficients_by_role"][poste].keys())
+
+    profil = {
+        "joueur": joueur,
+        "poste_analyse": poste,
+        "infos": {
+            "equipe": ligne.get("Équipe dans la période sélectionnée"),
+            "age": ligne.get("Âge"),
+            "taille": ligne.get("Taille"),
+            "pied": ligne.get("Pied"),
+            "passeport": ligne.get("Passeport pays"),
+            "minutes_jouees": ligne.get("Minutes jouées"),
+            "contrat_expiration": str(ligne.get("Contrat expiration")),
+        },
+        "notes_kpi": {k: float(ligne[k]) for k in colonnes_kpi if k in ligne.index},
+        "notes_roles": {r: float(ligne[r]) for r in colonnes_roles if r in ligne.index},
+    }
+
+    colonnes_ligne = (
+        ["Joueur + Information", "Équipe dans la période sélectionnée", "Âge",
+         "Minutes jouées"] + colonnes_kpi + colonnes_roles
+    )
+    ligne_df = df_scores[df_scores["Joueur + Information"] == joueur][
+        [c for c in colonnes_ligne if c in df_scores.columns]
+    ].reset_index(drop=True)
+
+    return profil, ligne_df
+
+
+def outil_profil_joueur(df, registre, params):
+    """Profil complet d'un joueur : notes KPI/rôles + points forts et faibles
+    — réutilise calcul_scores_par_kpi et points_forts_faibles."""
+    joueur, candidats = _resoudre_joueur(df, params["joueur"])
+    if joueur is None:
+        return _erreur_joueur(params["joueur"], candidats)
+
+    if params.get("poste"):
+        poste, erreur = _valider_poste(registre, params["poste"])
+        if erreur:
+            return erreur
+    else:
+        poste = _poste_du_joueur(df, joueur)
+
+    profil, ligne_df = _extraire_profil(df, registre, joueur, poste)
+
+    forts, faibles = registre["points_forts_faibles"](df, joueur, poste)
+    forts = {k: v for k, v in forts.items() if k not in _COLONNES_HORS_PERCENTILES}
+    faibles = {k: v for k, v in faibles.items() if k not in _COLONNES_HORS_PERCENTILES}
+    profil["points_forts"] = dict(sorted(forts.items(), key=lambda x: -x[1])[:15])
+    profil["points_faibles"] = dict(sorted(faibles.items(), key=lambda x: x[1])[:15])
+    profil["contexte"] = (
+        f"Percentiles calculés parmi les joueurs du poste {poste} avec au moins 500 minutes. "
+        "Points forts : percentile >= 80. Points faibles : percentile <= 20 (listes tronquées à 15)."
+    )
+
+    st.session_state.assistant_dfs_courants.append((f"Profil — {joueur}", ligne_df))
+    return json.dumps(profil, ensure_ascii=False, default=str)
+
+
+def outil_joueurs_similaires(df, registre, params):
+    """Joueurs au profil statistique proche — réutilise compute_similarity."""
+    joueur, candidats = _resoudre_joueur(df, params["joueur"])
+    if joueur is None:
+        return _erreur_joueur(params["joueur"], candidats)
+
+    if params.get("poste"):
+        poste, erreur = _valider_poste(registre, params["poste"])
+        if erreur:
+            return erreur
+    else:
+        poste = _poste_du_joueur(df, joueur)
+
+    resultats = registre["compute_similarity"](df, joueur, poste)
+    resultats = _appliquer_filtres(resultats, params)
+    resultats = resultats.reset_index(drop=True)
+
+    st.session_state.assistant_dfs_courants.append((f"Joueurs similaires à {joueur}", resultats))
+    return _df_vers_json(resultats)
+
+
+def outil_comparer_joueurs(df, registre, params):
+    """Comparaison KPI/rôles de deux joueurs sur une même base de poste."""
+    joueur_1, candidats_1 = _resoudre_joueur(df, params["joueur_1"])
+    if joueur_1 is None:
+        return _erreur_joueur(params["joueur_1"], candidats_1)
+    joueur_2, candidats_2 = _resoudre_joueur(df, params["joueur_2"])
+    if joueur_2 is None:
+        return _erreur_joueur(params["joueur_2"], candidats_2)
+
+    poste_1 = _poste_du_joueur(df, joueur_1)
+    poste_2 = _poste_du_joueur(df, joueur_2)
+
+    # Même logique que la page Analyse comparative : un gardien ne se compare qu'à un gardien
+    if (poste_1 == "Gardien") != (poste_2 == "Gardien"):
+        return json.dumps(
+            {"erreur": "Un gardien ne peut être comparé qu'à un autre gardien.",
+             "postes": {joueur_1: poste_1, joueur_2: poste_2}},
+            ensure_ascii=False,
+        )
+
+    if poste_1 == "Gardien":
+        poste = "Gardien"
+    elif params.get("poste"):
+        poste, erreur = _valider_poste(registre, params["poste"])
+        if erreur:
+            return erreur
+    else:
+        poste = poste_1
+
+    profil_1, ligne_1 = _extraire_profil(df, registre, joueur_1, poste)
+    profil_2, ligne_2 = _extraire_profil(df, registre, joueur_2, poste)
+
+    kpis = list(registre["kpi_by_position"][poste].keys()) + ["Note globale"]
+    bilan = {joueur_1: 0, joueur_2: 0}
+    for kpi in kpis:
+        n1, n2 = profil_1["notes_kpi"].get(kpi), profil_2["notes_kpi"].get(kpi)
+        if n1 is None or n2 is None or n1 == n2:
+            continue
+        bilan[joueur_1 if n1 > n2 else joueur_2] += 1
+
+    comparaison_df = pd.concat([ligne_1, ligne_2], ignore_index=True)
+    st.session_state.assistant_dfs_courants.append(
+        (f"Comparaison — {joueur_1} vs {joueur_2} (base {poste})", comparaison_df)
+    )
+
+    return json.dumps(
+        {"poste_de_comparaison": poste,
+         "joueur_1": profil_1,
+         "joueur_2": profil_2,
+         "kpis_remportes": bilan,
+         "contexte": "Notes 0-100 calculées sur la même base de poste (>= 500 minutes), pondérées par la ligue."},
+        ensure_ascii=False,
+        default=str,
+    )
+
+
+# ---- Analyse collective ----
+COMPETITION_LIGUE = "France. National 2"   # même filtre que la page Analyse collective
+NB_DERNIERS_MATCHS = 5
+
+
+def _nom_fichier_equipe(equipe):
+    """Les fichiers Team Stats des saisons != 24-25 sont nommés en Unicode NFD
+    (même logique que la page Analyse collective)."""
+    if st.session_state.get("saison") != "24-25":
+        return unicodedata.normalize("NFD", equipe)
+    return equipe
+
+
+def _chemin_stats_equipe(equipe):
+    return f"data/Data {st.session_state.get('saison')}/Team Stats {_nom_fichier_equipe(equipe)}.xlsx"
+
+
+def _stats_moyennes_ligue(registre, equipes_saison):
+    """Moyennes par match de chaque équipe du championnat
+    — réplique la construction de df_stats_moyennes de la page Analyse collective."""
+    lignes = []
+    for equipe in equipes_saison:
+        if not os.path.exists(_chemin_stats_equipe(equipe)):
+            continue
+        d = registre["collect_collective_data"](_nom_fichier_equipe(equipe))
+        d = d[d["Compétition"] == COMPETITION_LIGUE]
+        d = d[d["Équipe"] == equipe]
+        if d.empty:
+            continue
+        ligne = d.mean(numeric_only=True).to_frame().T.round(2)
+        ligne["Équipe"] = equipe
+        ligne["Matchs analysés"] = len(d)
+        lignes.append(ligne)
+
+    if not lignes:
+        return pd.DataFrame()
+
+    df_moy = pd.concat(lignes, ignore_index=True)
+    return df_moy.drop(columns=["Championnat"], errors="ignore")
+
+
+def outil_analyse_equipe(df, registre, params):
+    """Analyse collective d'une équipe : score de performance moyen, derniers
+    matchs, forces et faiblesses par rapport au reste du championnat
+    — réutilise collect_collective_data, construire_df_moyenne et evaluer_match."""
+    saison = st.session_state.get("saison")
+    equipes_saison = registre["equipes"].get(saison, [])
+
+    equipe, suggestions = _resoudre_colonne(params["equipe"], equipes_saison)
+    if equipe is None:
+        return json.dumps(
+            {"erreur": f"Équipe inconnue : '{params['equipe']}'.",
+             "equipes_valides": equipes_saison,
+             "suggestions": suggestions or []},
+            ensure_ascii=False,
+        )
+
+    if not os.path.exists(_chemin_stats_equipe(equipe)):
+        return json.dumps(
+            {"erreur": f"Fichier de statistiques collectives introuvable pour {equipe} (saison {saison})."},
+            ensure_ascii=False,
+        )
+
+    df_collectif = registre["collect_collective_data"](_nom_fichier_equipe(equipe))
+    df_ligue = df_collectif[df_collectif["Compétition"] == COMPETITION_LIGUE]
+    if df_ligue.empty:
+        return json.dumps(
+            {"erreur": f"Aucun match trouvé pour {equipe} avec le filtre '{COMPETITION_LIGUE}'.",
+             "competitions_disponibles": sorted(df_collectif["Compétition"].dropna().unique().tolist())},
+            ensure_ascii=False,
+        )
+
+    # 1. Score de performance moyen (equipe vs moyenne des adversaires)
+    try:
+        df_moyenne, nb_matchs = registre["construire_df_moyenne"](df_ligue, equipe)
+        res = registre["evaluer_match"](df_moyenne, equipe, moyenne=True, nb_matchs=nb_matchs)
+        score_performance = {
+            "score_total_sur_100": res["total"],
+            "verdict": res["verdict"],
+            "nb_matchs_analyses": res["nb_matchs"],
+            "dimensions": {d["nom"]: f"{d['points']}/{d['max']}" for d in res["dimensions"].values()},
+            "kpis": [
+                {"nom": k["nom"], "valeur": k["valeur"], "points": f"{k['points']}/{k['points_max']}"}
+                for k in res["kpis"]
+            ],
+        }
+    except ValueError as e:
+        score_performance = {"indisponible": str(e)}
+
+    # 2. Derniers matchs
+    lignes_equipe = df_ligue[df_ligue["Équipe"] == equipe].copy()
+    lignes_equipe["_date"] = pd.to_datetime(lignes_equipe["Date"], errors="coerce", dayfirst=True)
+    derniers = (
+        lignes_equipe.sort_values("_date", ascending=False)
+        .head(NB_DERNIERS_MATCHS)[["Date", "Match", "Buts", "Buts concédés"]]
+        .to_dict(orient="records")
+    )
+
+    # 3. Forces / faiblesses par rapport au championnat
+    df_moy = _stats_moyennes_ligue(registre, equipes_saison)
+    forces, faiblesses = [], []
+    if not df_moy.empty and equipe in df_moy["Équipe"].values:
+        colonnes_bas_mieux = registre["colonnes_bas_mieux"]
+        colonnes_a_ranker = [c for c in df_moy.columns if c not in ("Équipe", "Matchs analysés")]
+        n_equipes = len(df_moy)
+
+        rangs = {}
+        for col in colonnes_a_ranker:
+            ascending = col in colonnes_bas_mieux
+            rangs[col] = df_moy[col].rank(ascending=ascending, method="min")
+
+        idx = df_moy.index[df_moy["Équipe"] == equipe][0]
+        lignes_rang = []
+        for col in colonnes_a_ranker:
+            rang = rangs[col].loc[idx]
+            if pd.isna(rang):
+                continue
+            lignes_rang.append(
+                {"metrique": col,
+                 "valeur_moyenne_par_match": df_moy.loc[idx, col],
+                 "classement": f"{int(rang)}/{n_equipes}"}
+            )
+            if rang <= 3:
+                forces.append(lignes_rang[-1])
+            elif rang >= n_equipes - 2:
+                faiblesses.append(lignes_rang[-1])
+
+        forces = sorted(forces, key=lambda x: int(x["classement"].split("/")[0]))[:20]
+        faiblesses = sorted(faiblesses, key=lambda x: -int(x["classement"].split("/")[0]))[:20]
+
+        df_affichage = pd.DataFrame(
+            [{"Type": "Point fort", **f} for f in forces]
+            + [{"Type": "Point faible", **f} for f in faiblesses]
+        )
+        if not df_affichage.empty:
+            df_affichage.columns = ["Type", "Métrique", "Valeur moyenne / match", "Classement"]
+            st.session_state.assistant_dfs_courants.append(
+                (f"Forces et faiblesses — {equipe} ({saison})", df_affichage)
+            )
+
+    return json.dumps(
+        {"equipe": equipe,
+         "saison": saison,
+         "score_performance_moyen": score_performance,
+         "derniers_matchs": derniers,
+         "points_forts": forces,
+         "points_faibles": faiblesses,
+         "contexte": (
+             f"Classements calculés sur les moyennes par match des {len(df_moy)} équipes du championnat "
+             f"(filtre '{COMPETITION_LIGUE}'). Point fort : top 3. Point faible : 3 derniers. "
+             "Attention au sens des métriques : pour certaines (pertes, buts concédés, PPDA...), "
+             "une valeur basse est meilleure — le classement en tient déjà compte."
+         )},
+        ensure_ascii=False,
+        default=str,
+    )
+
+
+# Schémas d'outils au format Anthropic
+def _schemas_outils():
+    return [
+        {
+            "name": "rechercher_joueurs",
+            "description": (
+                "Recherche des joueurs d'un poste donné dont les percentiles dépassent des seuils "
+                "sur des métriques brutes et/ou des KPI. Chaque critère est un percentile minimum "
+                "entre 0 et 100 (ex. 70 = top 30 % du poste). Seuls les joueurs avec au moins "
+                "500 minutes jouées sont considérés (filtre interne). À utiliser pour les demandes "
+                "de profils par caractéristiques (ex. ailier qui centre beaucoup : 'Centres par 90' "
+                "et 'Сentres précises, %')."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "poste": {"type": "string", "description": "Poste exact parmi la liste fournie dans les instructions."},
+                    "criteres": {
+                        "type": "object",
+                        "description": "Dictionnaire {nom exact de métrique ou de KPI: percentile minimum 0-100}.",
+                        "additionalProperties": {"type": "number"},
+                    },
+                    "age_min": {"type": "integer"},
+                    "age_max": {"type": "integer"},
+                    "taille_min": {"type": "integer", "description": "Taille minimum en cm."},
+                    "minutes_min": {"type": "integer"},
+                    "contrat_annee_max": {"type": "integer", "description": "Année maximum d'expiration de contrat."},
+                },
+                "required": ["poste", "criteres"],
+            },
+        },
+        {
+            "name": "classement_par_role",
+            "description": (
+                "Classe les joueurs d'un poste selon leur note sur un rôle tactique prédéfini "
+                "(ex. Buteur → 'Attaquant de profondeur', Ailier → 'Ailier percutant', "
+                "Milieu → 'Box-to-box'). À utiliser dès que la demande correspond à un profil "
+                "tactique existant plutôt qu'à des métriques individuelles."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "poste": {"type": "string"},
+                    "role": {"type": "string", "description": "Rôle tactique exact parmi ceux du poste (liste dans les instructions)."},
+                    "age_min": {"type": "integer"},
+                    "age_max": {"type": "integer"},
+                    "taille_min": {"type": "integer"},
+                    "minutes_min": {"type": "integer"},
+                    "contrat_annee_max": {"type": "integer"},
+                },
+                "required": ["poste", "role"],
+            },
+        },
+        {
+            "name": "profil_joueur",
+            "description": (
+                "Profil complet d'un joueur : infos (âge, taille, pied, contrat), notes KPI et notes "
+                "par rôle tactique (0-100), points forts (percentile >= 80) et points faibles "
+                "(percentile <= 20) parmi les joueurs de son poste. Le nom peut être partiel "
+                "('Corchia') : l'outil le résout automatiquement. À utiliser pour 'quels sont les "
+                "points forts/faibles de X', 'que vaut X', 'parle-moi de X'."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "joueur": {"type": "string", "description": "Nom du joueur, même partiel."},
+                    "poste": {"type": "string", "description": "Optionnel : base de comparaison. Par défaut, le poste du joueur."},
+                },
+                "required": ["joueur"],
+            },
+        },
+        {
+            "name": "joueurs_similaires",
+            "description": (
+                "Trouve les joueurs au profil statistique le plus proche d'un joueur donné "
+                "(similarité cosinus pondérée par les KPI du poste, score 0-100). "
+                "À utiliser pour 'quels joueurs ressemblent à X', 'trouve-moi un remplaçant pour X', "
+                "'un profil comparable à X'."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "joueur": {"type": "string", "description": "Joueur de référence, nom même partiel."},
+                    "poste": {"type": "string", "description": "Optionnel : par défaut, le poste du joueur."},
+                    "age_min": {"type": "integer"},
+                    "age_max": {"type": "integer"},
+                    "minutes_min": {"type": "integer"},
+                    "contrat_annee_max": {"type": "integer"},
+                },
+                "required": ["joueur"],
+            },
+        },
+        {
+            "name": "comparer_joueurs",
+            "description": (
+                "Compare deux joueurs sur la même base de poste : infos, notes KPI, notes par rôle, "
+                "et bilan des KPI remportés par chacun. Un gardien ne se compare qu'à un autre gardien. "
+                "À utiliser pour 'compare X et Y', 'qui est meilleur entre X et Y'."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "joueur_1": {"type": "string"},
+                    "joueur_2": {"type": "string"},
+                    "poste": {"type": "string", "description": "Optionnel : base de comparaison commune. Par défaut, le poste du joueur 1."},
+                },
+                "required": ["joueur_1", "joueur_2"],
+            },
+        },
+        {
+            "name": "analyse_equipe",
+            "description": (
+                "Analyse collective d'une équipe du championnat (données par match, indépendantes de "
+                "la base joueurs sélectionnée) : score de performance moyen sur 100 (Fidélité au style, "
+                "Efficacité offensive, Solidité défensive), derniers résultats, et points forts/faibles "
+                "par rapport aux autres équipes (classement sur chaque métrique moyenne par match). "
+                "À utiliser pour 'points forts et faibles de cette équipe', 'comment joue X', "
+                "'analyse notre prochain adversaire'."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "equipe": {"type": "string", "description": "Nom de l'équipe, même approximatif (liste des équipes valides dans les instructions)."},
+                },
+                "required": ["equipe"],
+            },
+        },
+    ]
+
+
+EXECUTEURS = {
+    "rechercher_joueurs": outil_rechercher_joueurs,
+    "classement_par_role": outil_classement_par_role,
+    "profil_joueur": outil_profil_joueur,
+    "joueurs_similaires": outil_joueurs_similaires,
+    "comparer_joueurs": outil_comparer_joueurs,
+    "analyse_equipe": outil_analyse_equipe,
+}
+
+
+# ============================================================
+# System prompt (généré dynamiquement depuis les données réelles)
+# ============================================================
+def _construire_system_prompt(df, registre, nom_base):
+    postes = list(registre["kpi_by_position"].keys())
+
+    lignes_roles = []
+    for poste, roles in registre["kpi_coefficients_by_role"].items():
+        lignes_roles.append(f"- {poste} : {', '.join(roles.keys())}")
+
+    lignes_kpi = []
+    for poste, kpis in registre["kpi_by_position"].items():
+        lignes_kpi.append(f"- {poste} : {', '.join(kpis.keys())}, Note globale")
+
+    metriques = _colonnes_metriques(df)
+
+    equipes_saison = registre.get("equipes", {}).get(st.session_state.get("saison"), [])
+    bloc_equipes = ""
+    if equipes_saison:
+        bloc_equipes = f"\n\nÉQUIPES DU CHAMPIONNAT (pour analyse_equipe) :\n{', '.join(equipes_saison)}"
+
+    return f"""Tu es l'assistant data de l'AS Cannes, intégré à l'application d'analyse du club.
+Tu aides le staff (recruteurs, analystes, entraîneurs) à explorer les données joueurs en langage naturel.
+
+Base de données active : "{nom_base}" ({len(df)} lignes). Saison : {st.session_state.get('saison', '?')}.
+Les données proviennent de Wyscout. L'identifiant joueur est "Joueur + Information" au format "Nom - Équipe (Compétition)".
+
+RÈGLES :
+- Utilise UNIQUEMENT les noms exacts de postes, rôles, KPI et métriques listés ci-dessous. N'invente jamais un nom.
+- Les critères de recherche sont des percentiles minimums (0-100) calculés au sein du poste : 70 = top 30 %.
+- Traduis les demandes floues en critères pertinents. Ex. "ailier rapide qui centre beaucoup" → poste Ailier,
+  critères sur "Accélérations par 90", "Centres par 90", "Сentres précises, %".
+- Si la demande correspond à un profil tactique existant (ex. "attaquant de profondeur"), préfère classement_par_role.
+- Pour analyser un joueur précis : profil_joueur. Pour "qui ressemble à X" : joueurs_similaires. Pour "compare X et Y" : comparer_joueurs.
+- Pour analyser une ÉQUIPE du championnat (forces/faiblesses collectives, forme, style) : analyse_equipe.
+- Les noms de joueurs peuvent être partiels : les outils les résolvent. En cas d'ambiguïté, l'outil renvoie les
+  candidats ; choisis le plus pertinent d'après le contexte (équipe, compétition) ou demande une précision à l'utilisateur.
+- Réponds en français, de façon concise et structurée. Cite les joueurs avec leur équipe et leur compétition.
+- Précise toujours le nombre total de résultats et les critères utilisés.
+- Si aucun résultat, propose d'assouplir les seuils.
+- Attention : certains noms de métriques Wyscout ont une orthographe inhabituelle, copie-les exactement
+  (ex. "Сentres précises, %" commence par un caractère cyrillique).
+
+POSTES : {', '.join(postes)}
+
+RÔLES TACTIQUES PAR POSTE :
+{chr(10).join(lignes_roles)}
+
+KPI PAR POSTE (notes 0-100 déjà pondérées par la ligue) :
+{chr(10).join(lignes_kpi)}
+
+MÉTRIQUES BRUTES DISPONIBLES ({len(metriques)}) :
+{', '.join(metriques)}{bloc_equipes}"""
+
+
+# ============================================================
+# Boucle agentique
+# ============================================================
+def _executer_tour(client, system_prompt, df, registre, on_texte=None, on_outil=None):
+    """Envoie l'historique API à Claude et exécute les outils jusqu'à la réponse finale.
+
+    on_texte(buffer)       : callback appelé à chaque delta avec le texte accumulé (streaming).
+    on_outil(nom, params)  : callback appelé à chaque appel d'outil (affichage en direct).
+
+    Retourne (texte_final, liste_appels_outils).
+    """
+    appels_outils = []
+    texte_complet = ""
+
+    for _ in range(MAX_ITERATIONS_OUTILS):
+        with client.messages.stream(
+            model=MODELE,
+            max_tokens=MAX_TOKENS,
+            system=system_prompt,
+            tools=_schemas_outils(),
+            messages=st.session_state.assistant_api_history,
+        ) as stream:
+            for delta in stream.text_stream:
+                texte_complet += delta
+                if on_texte:
+                    on_texte(texte_complet)
+            reponse = stream.get_final_message()
+
+        st.session_state.assistant_api_history.append(
+            {"role": "assistant", "content": reponse.content}
+        )
+
+        if reponse.stop_reason != "tool_use":
+            return texte_complet, appels_outils
+
+        # Séparer l'éventuelle narration pré-outil du texte du tour suivant
+        if texte_complet and not texte_complet.endswith("\n"):
+            texte_complet += "\n\n"
+            if on_texte:
+                on_texte(texte_complet)
+
+        resultats_blocs = []
+        for bloc in reponse.content:
+            if bloc.type != "tool_use":
+                continue
+            appels_outils.append({"nom": bloc.name, "params": bloc.input})
+            if on_outil:
+                on_outil(bloc.name, bloc.input)
+            try:
+                sortie = EXECUTEURS[bloc.name](df, registre, bloc.input)
+            except Exception as e:
+                sortie = json.dumps({"erreur": f"Erreur d'exécution : {type(e).__name__} : {e}"}, ensure_ascii=False)
+            resultats_blocs.append(
+                {"type": "tool_result", "tool_use_id": bloc.id, "content": sortie}
+            )
+
+        st.session_state.assistant_api_history.append(
+            {"role": "user", "content": resultats_blocs}
+        )
+
+    return (
+        texte_complet
+        or "Je n'ai pas réussi à aboutir à une réponse (trop d'étapes de recherche). Reformule ta demande.",
+        appels_outils,
+    )
+
+
+# ============================================================
+# Point d'entrée — appelé depuis ams.py
+# ============================================================
+def afficher_assistant(df, registre, nom_base):
+    """Affiche la page Assistant IA.
+
+    df        : DataFrame joueurs sélectionné (une des bases de all_df)
+    registre  : dict de callables/structures injectés depuis ams.py
+    nom_base  : nom de la base sélectionnée (pour le contexte et le reset)
+    """
+    if "ANTHROPIC_API_KEY" not in st.secrets:
+        st.error("Clé API manquante : ajoutez ANTHROPIC_API_KEY dans les secrets Streamlit.")
+        st.stop()
+
+    # Reset de la conversation si la base de données change
+    if st.session_state.get("assistant_nom_base") != nom_base:
+        st.session_state.assistant_nom_base = nom_base
+        st.session_state.assistant_api_history = []
+        st.session_state.assistant_display = []
+
+    if "assistant_api_history" not in st.session_state:
+        st.session_state.assistant_api_history = []
+    if "assistant_display" not in st.session_state:
+        st.session_state.assistant_display = []
+
+    col_info, col_reset = st.columns([4, 1])
+    with col_info:
+        st.caption(f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')}")
+    with col_reset:
+        if st.button("Nouvelle conversation", use_container_width=True):
+            st.session_state.assistant_api_history = []
+            st.session_state.assistant_display = []
+            st.rerun()
+
+    # Historique affiché
+    for message in st.session_state.assistant_display:
+        with st.chat_message(message["role"]):
+            if message.get("outils"):
+                with st.expander("Détail des recherches effectuées"):
+                    for appel in message["outils"]:
+                        st.markdown(f"**{appel['nom']}**")
+                        st.json(appel["params"])
+            st.markdown(message["text"])
+            for titre, df_resultat in message.get("dataframes", []):
+                st.caption(titre)
+                st.dataframe(df_resultat, use_container_width=True, hide_index=True)
+
+    question = st.chat_input("Posez une question (ex. : trouve-moi un attaquant de profondeur de moins de 25 ans)")
+    if not question:
+        return
+
+    st.session_state.assistant_display.append({"role": "user", "text": question})
+    st.session_state.assistant_api_history.append({"role": "user", "content": question})
+
+    with st.chat_message("user"):
+        st.markdown(question)
+
+    # Collecteur des DataFrames produits par les outils pendant ce tour
+    st.session_state.assistant_dfs_courants = []
+
+    client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+    system_prompt = _construire_system_prompt(df, registre, nom_base)
+
+    # Snapshot pour restaurer proprement l'historique API en cas d'erreur en cours de boucle
+    historique_avant = list(st.session_state.assistant_api_history[:-1])
+
+    with st.chat_message("assistant"):
+        statut = st.status("Analyse de la demande...", expanded=False)
+        zone_texte = st.empty()
+
+        def on_outil(nom, params):
+            statut.update(label=f"Recherche en cours — {nom}")
+            with statut:
+                st.markdown(f"**{nom}**")
+                st.json(params)
+
+        def on_texte(buffer):
+            zone_texte.markdown(buffer + " ▌")
+
+        try:
+            texte, appels_outils = _executer_tour(client, system_prompt, df, registre, on_texte, on_outil)
+        except Exception as e:
+            statut.update(label="Erreur", state="error")
+            st.error(f"Erreur lors de l'appel à l'API Anthropic : {e}")
+            st.session_state.assistant_api_history = historique_avant
+            st.session_state.assistant_display.pop()
+            return
+
+        if appels_outils:
+            statut.update(
+                label=f"Détail des recherches effectuées ({len(appels_outils)})",
+                state="complete",
+                expanded=False,
+            )
+        else:
+            statut.update(label="Réponse directe (aucune recherche nécessaire)", state="complete")
+
+        zone_texte.markdown(texte)
+
+        dataframes = st.session_state.assistant_dfs_courants
+        for titre, df_resultat in dataframes:
+            st.caption(titre)
+            st.dataframe(df_resultat, use_container_width=True, hide_index=True)
+
+    st.session_state.assistant_display.append(
+        {"role": "assistant", "text": texte, "outils": appels_outils, "dataframes": dataframes}
+    )
+    st.session_state.assistant_dfs_courants = []

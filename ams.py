@@ -15,6 +15,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy import stats
 from pathlib import Path
+from assistant_ia import afficher_assistant
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -128,6 +129,27 @@ league_rating = {
     "Ligue 3": 69.6,
     "National 1": 63.8,
     "National 2": 59.3
+}
+
+équipes = {
+    "24-25": [
+        "Andrézieux", "Anglet Genets", "Angoulême", "Bergerac", "Cannes",
+        "Fréjus St-Raphaël", "GOAL FC", "Grasse", "Hyères FC", "Istres",
+        "Jura Sud Foot", "Le Puy F.43 Auvergne", "Marignane Gignac CB",
+        "Rumilly Vallières", "Saint-Priest", "Toulon"
+    ],
+    "25-26": [
+        "Andrézieux", "Cannes", "Fréjus St-Raphaël", "GOAL FC", "Grasse",
+        "Hyères FC", "Istres", "Rumilly Vallières", "Saint-Priest", "Toulon",
+        "Créteil", "St Maur Lusitanos", "Nîmes", "FC 93 Bobigny BG",
+        "Rousset-Ste Victoire", "Limonest"
+    ]
+}
+
+colonnes_bas_mieux = {
+    'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
+    'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
+    'Cartons jaunes', 'Cartons rouges', 'PPDA', 'Distance moyenne de tir'
 }
 
 smart_goal = {
@@ -4087,7 +4109,7 @@ def streamlit_application(all_df_dict):
         page = option_menu(
             menu_title="",
             options=st.secrets['roles'].get(st.session_state.username, []),
-            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search"],
+            icons=["house", "bar-chart", "camera-video", "graph-up-arrow", "person", "people", "search", "robot"],
             menu_icon="cast",
             default_index=0,
             orientation="vertical",
@@ -4683,51 +4705,6 @@ def streamlit_application(all_df_dict):
         st.header("Analyse collective")
 
         tab1, tab2, tab3 = st.tabs(['Statistiques des matchs', 'Statistiques des équipes', 'Statistiques des joueurs'])
-
-        équipes = {
-            "24-25": [
-                "Andrézieux",
-                "Anglet Genets",
-                "Angoulême",
-                "Bergerac",
-                "Cannes",
-                "Fréjus St-Raphaël",
-                "GOAL FC",
-                "Grasse",
-                "Hyères FC",
-                "Istres",
-                "Jura Sud Foot",
-                "Le Puy F.43 Auvergne",
-                "Marignane Gignac CB",
-                "Rumilly Vallières",
-                "Saint-Priest",
-                "Toulon"
-            ],
-            "25-26": [
-                "Andrézieux",
-                "Cannes",
-                "Fréjus St-Raphaël",
-                "GOAL FC",
-                "Grasse",
-                "Hyères FC",
-                "Istres",
-                "Rumilly Vallières",
-                "Saint-Priest",
-                "Toulon",
-                "Créteil",
-                "St Maur Lusitanos",
-                "Nîmes",
-                "FC 93 Bobigny BG",
-                "Rousset-Ste Victoire",
-                "Limonest"
-            ]
-        }
-
-        colonnes_bas_mieux = {
-            'Pertes', 'Pertes bas', 'Pertes Moyen', 'Pertes élevé', 'Hors-jeu',
-            'Tirs contre', 'Tirs contre cadrés', 'Buts concédés', 'Fautes',
-            'Cartons jaunes', 'Cartons rouges', 'PPDA', 'Distance moyenne de tir'
-        }
 
         with tab1:
             team = st.selectbox("Sélectionnez une équipe", équipes[st.session_state['saison']], index=équipes[st.session_state['saison']].index("Cannes"))
@@ -5658,6 +5635,31 @@ def streamlit_application(all_df_dict):
             idx = event.selection.rows[0]
             joueur = df_affichage.iloc[idx]['Joueur + Information']
             afficher_fiche(df, joueur, poste)
+
+    elif page == "Assistant IA":
+        st.header("Assistant IA")
+
+        sélection_dataframe = st.selectbox(
+            "Sélectionnez la base de données que vous souhaitez analyser",
+            list(all_df.keys())
+        )
+        df = all_df[sélection_dataframe]
+
+        registre = {
+            "search_recommended_players": search_recommended_players,
+            "calcul_scores_par_kpi": calcul_scores_par_kpi,
+            "compute_similarity": compute_similarity,
+            "points_forts_faibles": points_forts_faibles,
+            "collect_collective_data": collect_collective_data,
+            "construire_df_moyenne": construire_df_moyenne,
+            "evaluer_match": evaluer_match,
+            "equipes": équipes,
+            "colonnes_bas_mieux": colonnes_bas_mieux,
+            "kpi_by_position": kpi_by_position,
+            "kpi_coefficients_by_role": kpi_coefficients_by_role,
+        }
+
+        afficher_assistant(df, registre, sélection_dataframe)
 
 if __name__ == '__main__':
     st.set_page_config(
