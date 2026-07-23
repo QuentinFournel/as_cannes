@@ -4645,7 +4645,7 @@ def streamlit_application(all_df_dict):
         with tab1:
             col1, col2 = st.columns([3, 1])
 
-            équipes = sorted({
+            équipes_vidéos = sorted({
                 club.strip()
                 for matchs in journées[st.session_state['saison']].values()
                 for match in matchs
@@ -4653,7 +4653,7 @@ def streamlit_application(all_df_dict):
             })
 
             with col1:
-                équipe = st.selectbox("Sélectionnez une équipe", équipes)
+                équipe = st.selectbox("Sélectionnez une équipe", équipes_vidéos)
             with col2:
                 journée = st.selectbox("Sélectionnez une journée", list(journées[st.session_state['saison']].keys()), key="sb_journee_tab1")
 
