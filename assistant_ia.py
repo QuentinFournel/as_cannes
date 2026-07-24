@@ -1499,8 +1499,8 @@ details[data-testid="stExpander"] button {
 }
 div[data-testid="stExpander"] div.stButton:first-child > button,
 div[data-testid="stExpander"] div[data-testid="column"]:first-child button {
-    justify-content: flex-start !important;
-    text-align: left !important;
+    justify-content: center !important;
+    text-align: center !important;
 }
 
 /* ---- Espacement homogène entre les blocs ---- */
