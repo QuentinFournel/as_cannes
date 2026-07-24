@@ -1426,8 +1426,17 @@ def _supprimer_conversation(identifiant):
         st.session_state.assistant_stockage_ko = str(e)
 
 
+COULEUR_FOND_QUESTION = "#ECEBE3"   # fond des messages de l'utilisateur
+
 STYLE_ASSISTANT = """
 <style>
+/* ---- Message de l'utilisateur : fond personnalisé ---- */
+div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]),
+div[data-testid="stChatMessage"]:has(img[alt="user avatar"]) {
+    background-color: __COULEUR_QUESTION__ !important;
+    border-radius: 0.6rem !important;
+}
+
 /* ---- Boutons : dimensions strictement identiques ---- */
 div.stButton > button,
 div[data-testid="stButton"] > button,
@@ -1461,11 +1470,17 @@ div[data-testid="stExpander"] details {
     border-radius: 0.5rem !important;
 }
 
-/* ---- Boutons internes au volet : plus compacts ---- */
-div[data-testid="stExpander"] div.stButton > button,
-div[data-testid="stExpander"] div[data-testid="stButton"] > button {
-    height: 2.4rem !important;
-    min-height: 2.4rem !important;
+/* ---- Boutons internes au volet : hauteur identique entre titre et corbeille ---- */
+div[data-testid="stExpander"] button,
+details[data-testid="stExpander"] button {
+    height: 2.75rem !important;
+    min-height: 2.75rem !important;
+    line-height: 1.1rem !important;
+    font-size: 0.88rem !important;
+    padding: 0.3rem 0.7rem !important;
+}
+div[data-testid="stExpander"] div.stButton:first-child > button,
+div[data-testid="stExpander"] div[data-testid="column"]:first-child button {
     justify-content: flex-start !important;
     text-align: left !important;
 }
@@ -1479,7 +1494,7 @@ div[data-testid="column"] > div {
     gap: 0.75rem !important;
 }
 </style>
-"""
+""".replace("__COULEUR_QUESTION__", COULEUR_FOND_QUESTION)
 
 
 def _afficher_historique_conversations():
@@ -1494,16 +1509,17 @@ def _afficher_historique_conversations():
                 st.caption("Aucune conversation enregistrée pour le moment.")
 
             for conversation in conversations:
-                colonne_titre, colonne_date, colonne_suppr = st.columns([6, 2, 1])
+                colonne_titre, colonne_suppr = st.columns([9, 1])
                 actuelle = conversation.get("id") == st.session_state.get("assistant_conv_id")
+                date = str(conversation.get("date", ""))[:10]
                 libelle = ("● " if actuelle else "") + conversation.get("titre", "Conversation")
+                if date:
+                    libelle += f"   ·   {date}"
 
                 if colonne_titre.button(libelle, key=f"conv_{conversation['id']}",
                                         use_container_width=True):
                     _ouvrir_conversation(conversation)
                     st.rerun()
-
-                colonne_date.caption(str(conversation.get("date", ""))[:10])
 
                 if colonne_suppr.button("🗑", key=f"suppr_{conversation['id']}", help="Supprimer"):
                     _supprimer_conversation(conversation["id"])
