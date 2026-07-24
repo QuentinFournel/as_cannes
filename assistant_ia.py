@@ -1,6 +1,10 @@
+import io
 import json
 import os
+import re
+import time
 import unicodedata
+from datetime import datetime
 from difflib import get_close_matches
 from functools import partial
 
@@ -20,6 +24,14 @@ try:
     from openai import OpenAI          # utilisé pour Gemini (endpoint compatible)
 except ImportError:
     OpenAI = None
+
+# Persistance des conversations sur Google Drive (mêmes identifiants que l'app)
+try:
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
+except ImportError:
+    service_account = None
 
 # ============================================================
 # Configuration
@@ -1117,7 +1129,8 @@ MÉTRIQUES BRUTES DISPONIBLES ({len(metriques)}) :
 # ============================================================
 # Boucle agentique
 # ============================================================
-def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None, on_outil=None):
+def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None, on_outil=None,
+                             on_attente=None):
     """Envoie l'historique API à Claude et exécute les outils jusqu'à la réponse finale.
 
     on_texte(buffer)       : callback appelé à chaque delta avec le texte accumulé (streaming).
@@ -1183,6 +1196,42 @@ def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None,
 
 SENTINELLE_SIGNATURE = "skip_thought_signature_validator"
 
+# Le palier gratuit de Gemini est limité à quelques requêtes par minute, et une
+# question consomme un appel par aller-retour d'outil : on reprend donc
+# automatiquement au lieu de renvoyer l'erreur à l'utilisateur.
+MAX_REPRISES_QUOTA = 3
+DELAI_REPRISE_DEFAUT = 25
+DELAI_REPRISE_MAX = 70
+
+
+def _est_erreur_quota(erreur):
+    texte = str(erreur)
+    return (getattr(erreur, "status_code", None) == 429
+            or "429" in texte
+            or "RESOURCE_EXHAUSTED" in texte)
+
+
+def _delai_reprise(erreur):
+    """Délai conseillé par l'API ('retryDelay': '46s'), sinon valeur par défaut."""
+    trouve = re.search(r"retryDelay['\"]?\s*:\s*['\"](\d+)s", str(erreur))
+    if trouve:
+        return min(int(trouve.group(1)) + 2, DELAI_REPRISE_MAX)
+    return DELAI_REPRISE_DEFAUT
+
+
+def _appeler_avec_reprise(appel, on_attente=None):
+    """Exécute un appel API en réessayant si le quota par minute est dépassé."""
+    for tentative in range(MAX_REPRISES_QUOTA + 1):
+        try:
+            return appel()
+        except Exception as e:
+            if not _est_erreur_quota(e) or tentative == MAX_REPRISES_QUOTA:
+                raise
+            attente = _delai_reprise(e)
+            if on_attente:
+                on_attente(attente, tentative + 1)
+            time.sleep(attente)
+
 
 def _message_assistant_openai(message, signatures=False):
     """Sérialise un message assistant contenant des appels d'outils.
@@ -1237,7 +1286,7 @@ def _schemas_outils_openai():
 
 
 def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on_outil=None,
-                          modele=None, signatures=False):
+                          on_attente=None, modele=None, signatures=False):
     """Même boucle agentique que la version Anthropic, au format OpenAI.
 
     Utilisée par Gemini (endpoint compatible OpenAI) et par Groq.
@@ -1250,12 +1299,15 @@ def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on
     texte_complet = ""
 
     for _ in range(MAX_ITERATIONS_OUTILS):
-        reponse = client.chat.completions.create(
-            model=modele or MODELE_GROQ,
-            max_tokens=MAX_TOKENS,
-            messages=[{"role": "system", "content": system_prompt}]
-                     + st.session_state.assistant_api_history,
-            tools=_schemas_outils_openai(),
+        reponse = _appeler_avec_reprise(
+            lambda: client.chat.completions.create(
+                model=modele or MODELE_GROQ,
+                max_tokens=MAX_TOKENS,
+                messages=[{"role": "system", "content": system_prompt}]
+                         + st.session_state.assistant_api_history,
+                tools=_schemas_outils_openai(),
+            ),
+            on_attente,
         )
         message = reponse.choices[0].message
 
@@ -1330,6 +1382,242 @@ def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on
 
 
 # ============================================================
+# Historique persistant des conversations
+# ============================================================
+MAX_CONVERSATIONS = 30       # conversations conservées par utilisateur
+MAX_LIGNES_TABLEAU = 30      # lignes de tableau conservées par message
+DOSSIER_LOCAL = "data/conversations"
+
+
+def _utilisateur():
+    return st.session_state.get("username") or "invite"
+
+
+def _nom_fichier_conversations():
+    return f"conversations_{_utilisateur()}.json"
+
+
+def _drive_actif():
+    return service_account is not None and "DRIVE_CONVERSATIONS_FOLDER_ID" in st.secrets
+
+
+@st.cache_resource(show_spinner=False)
+def _service_drive():
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["GOOGLE_SERVICE_ACCOUNT_JSON"],
+        scopes=["https://www.googleapis.com/auth/drive"],
+    )
+    return build("drive", "v3", credentials=creds)
+
+
+def _id_fichier_drive(service, nom):
+    dossier = st.secrets["DRIVE_CONVERSATIONS_FOLDER_ID"]
+    reponse = service.files().list(
+        q=f"'{dossier}' in parents and name='{nom}' and trashed=false",
+        spaces="drive", fields="files(id, name)",
+    ).execute()
+    fichiers = reponse.get("files", [])
+    return fichiers[0]["id"] if fichiers else None
+
+
+def _lire_conversations():
+    """Charge les conversations de l'utilisateur (Drive si configuré, sinon disque local)."""
+    nom = _nom_fichier_conversations()
+
+    if _drive_actif():
+        service = _service_drive()
+        identifiant = _id_fichier_drive(service, nom)
+        if identifiant is None:
+            return []
+        tampon = io.BytesIO()
+        telechargement = MediaIoBaseDownload(tampon, service.files().get_media(fileId=identifiant))
+        termine = False
+        while not termine:
+            _, termine = telechargement.next_chunk()
+        return json.loads(tampon.getvalue().decode("utf-8")).get("conversations", [])
+
+    chemin = os.path.join(DOSSIER_LOCAL, nom)
+    if not os.path.exists(chemin):
+        return []
+    with open(chemin, encoding="utf-8") as fichier:
+        return json.load(fichier).get("conversations", [])
+
+
+def _ecrire_conversations(conversations):
+    """Enregistre les conversations (Drive si configuré, sinon disque local)."""
+    nom = _nom_fichier_conversations()
+    contenu = json.dumps(
+        {"conversations": conversations[:MAX_CONVERSATIONS]}, ensure_ascii=False, default=str
+    ).encode("utf-8")
+
+    if _drive_actif():
+        service = _service_drive()
+        support = MediaIoBaseUpload(io.BytesIO(contenu), mimetype="application/json", resumable=False)
+        identifiant = _id_fichier_drive(service, nom)
+        if identifiant:
+            service.files().update(fileId=identifiant, media_body=support).execute()
+        else:
+            service.files().create(
+                body={"name": nom, "parents": [st.secrets["DRIVE_CONVERSATIONS_FOLDER_ID"]]},
+                media_body=support, fields="id",
+            ).execute()
+        return
+
+    os.makedirs(DOSSIER_LOCAL, exist_ok=True)
+    with open(os.path.join(DOSSIER_LOCAL, nom), "wb") as fichier:
+        fichier.write(contenu)
+
+
+def _serialiser_messages(messages):
+    """Convertit l'historique affiché en structure JSON (DataFrames -> enregistrements)."""
+    sortie = []
+    for message in messages:
+        sortie.append({
+            "role": message["role"],
+            "text": message.get("text", ""),
+            "outils": message.get("outils", []),
+            "tableaux": [
+                {"titre": titre, "lignes": tableau.head(MAX_LIGNES_TABLEAU).to_dict(orient="records")}
+                for titre, tableau in message.get("dataframes", [])
+            ],
+        })
+    return sortie
+
+
+def _deserialiser_messages(messages):
+    """Reconstruit l'historique affichable à partir du JSON stocké."""
+    sortie = []
+    for message in messages:
+        sortie.append({
+            "role": message.get("role", "assistant"),
+            "text": message.get("text", ""),
+            "outils": message.get("outils", []),
+            "dataframes": [
+                (tableau.get("titre", ""), pd.DataFrame(tableau.get("lignes", [])))
+                for tableau in message.get("tableaux", [])
+            ],
+        })
+    return sortie
+
+
+def _historique_api_depuis_messages(messages):
+    """Reconstruit un historique API neutre (texte seul) à partir des messages affichés.
+
+    Les appels d'outils ne sont pas rejoués : le modèle reprend le fil de la
+    conversation à partir des échanges rédigés, ce qui reste valable quel que
+    soit le fournisseur.
+    """
+    historique = []
+    for message in messages:
+        texte = (message.get("text") or "").strip()
+        if texte:
+            historique.append({"role": message["role"], "content": texte})
+    return historique
+
+
+def _titre_conversation(question):
+    titre = " ".join(str(question).split())
+    return titre[:60] + ("..." if len(titre) > 60 else "")
+
+
+def _charger_liste_conversations():
+    """Charge la liste une seule fois par session."""
+    if "assistant_conversations" in st.session_state:
+        return
+    try:
+        st.session_state.assistant_conversations = _lire_conversations()
+        st.session_state.assistant_stockage_ko = None
+    except Exception as e:
+        st.session_state.assistant_conversations = []
+        st.session_state.assistant_stockage_ko = str(e)
+
+
+def _enregistrer_conversation_courante(nom_base):
+    """Crée ou met à jour la conversation en cours, puis persiste l'ensemble."""
+    messages = st.session_state.assistant_display
+    if not messages:
+        return
+
+    premiere_question = next((m["text"] for m in messages if m["role"] == "user"), "Conversation")
+    conversation = {
+        "id": st.session_state.get("assistant_conv_id") or datetime.now().strftime("%Y%m%d%H%M%S%f"),
+        "titre": _titre_conversation(premiere_question),
+        "date": datetime.now().isoformat(timespec="seconds"),
+        "base": nom_base,
+        "messages": _serialiser_messages(messages),
+    }
+    st.session_state.assistant_conv_id = conversation["id"]
+
+    conversations = [
+        c for c in st.session_state.assistant_conversations if c.get("id") != conversation["id"]
+    ]
+    conversations.insert(0, conversation)
+    st.session_state.assistant_conversations = conversations[:MAX_CONVERSATIONS]
+
+    try:
+        _ecrire_conversations(st.session_state.assistant_conversations)
+        st.session_state.assistant_stockage_ko = None
+    except Exception as e:
+        st.session_state.assistant_stockage_ko = str(e)
+
+
+def _ouvrir_conversation(conversation):
+    st.session_state.assistant_conv_id = conversation.get("id")
+    st.session_state.assistant_display = _deserialiser_messages(conversation.get("messages", []))
+    st.session_state.assistant_api_history = _historique_api_depuis_messages(
+        st.session_state.assistant_display
+    )
+
+
+def _nouvelle_conversation():
+    st.session_state.assistant_conv_id = None
+    st.session_state.assistant_display = []
+    st.session_state.assistant_api_history = []
+
+
+def _supprimer_conversation(identifiant):
+    st.session_state.assistant_conversations = [
+        c for c in st.session_state.assistant_conversations if c.get("id") != identifiant
+    ]
+    if st.session_state.get("assistant_conv_id") == identifiant:
+        _nouvelle_conversation()
+    try:
+        _ecrire_conversations(st.session_state.assistant_conversations)
+    except Exception as e:
+        st.session_state.assistant_stockage_ko = str(e)
+
+
+def _afficher_barre_conversations():
+    """Liste des conversations passées, dans la barre latérale."""
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("**Mes conversations**")
+
+        if st.button("Nouvelle conversation", use_container_width=True, key="assistant_nouvelle"):
+            _nouvelle_conversation()
+            st.rerun()
+
+        conversations = st.session_state.assistant_conversations
+        if not conversations:
+            st.caption("Aucune conversation enregistrée.")
+        for conversation in conversations:
+            colonne_titre, colonne_suppr = st.columns([5, 1])
+            actuelle = conversation.get("id") == st.session_state.get("assistant_conv_id")
+            libelle = ("● " if actuelle else "") + conversation.get("titre", "Conversation")
+            if colonne_titre.button(libelle, key=f"conv_{conversation['id']}", use_container_width=True):
+                _ouvrir_conversation(conversation)
+                st.rerun()
+            if colonne_suppr.button("🗑", key=f"suppr_{conversation['id']}", help="Supprimer"):
+                _supprimer_conversation(conversation["id"])
+                st.rerun()
+
+        if st.session_state.get("assistant_stockage_ko"):
+            st.caption("Historique non sauvegardé (stockage indisponible).")
+        elif not _drive_actif():
+            st.caption("Historique local : perdu au redémarrage de l'application.")
+
+
+# ============================================================
 # Point d'entrée — appelé depuis ams.py
 # ============================================================
 def afficher_assistant(df, registre, nom_base):
@@ -1347,25 +1635,21 @@ def afficher_assistant(df, registre, nom_base):
         )
         st.stop()
 
-    # Reset de la conversation si la base de données change
-    if st.session_state.get("assistant_nom_base") != nom_base:
-        st.session_state.assistant_nom_base = nom_base
-        st.session_state.assistant_api_history = []
-        st.session_state.assistant_display = []
-
     if "assistant_api_history" not in st.session_state:
         st.session_state.assistant_api_history = []
     if "assistant_display" not in st.session_state:
         st.session_state.assistant_display = []
+    st.session_state.setdefault("assistant_conv_id", None)
 
-    col_info, col_reset = st.columns([4, 1])
-    with col_info:
-        st.caption(f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')}")
-    with col_reset:
-        if st.button("Nouvelle conversation", use_container_width=True):
-            st.session_state.assistant_api_history = []
-            st.session_state.assistant_display = []
-            st.rerun()
+    # Changement de base : on repart d'une conversation vierge
+    if st.session_state.get("assistant_nom_base") != nom_base:
+        st.session_state.assistant_nom_base = nom_base
+        _nouvelle_conversation()
+
+    _charger_liste_conversations()
+    _afficher_barre_conversations()
+
+    st.caption(f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')}")
 
     # Historique affiché
     for message in st.session_state.assistant_display:
@@ -1431,11 +1715,26 @@ def afficher_assistant(df, registre, nom_base):
         def on_texte(buffer):
             zone_texte.markdown(buffer + " ▌")
 
+        def on_attente(secondes, tentative):
+            statut.update(
+                label=f"Quota par minute atteint — reprise dans {secondes} s "
+                      f"(tentative {tentative}/{MAX_REPRISES_QUOTA})"
+            )
+
         try:
-            texte, appels_outils = executer_tour(client, system_prompt, df, registre, on_texte, on_outil)
+            texte, appels_outils = executer_tour(
+                client, system_prompt, df, registre, on_texte, on_outil, on_attente
+            )
         except Exception as e:
             statut.update(label="Erreur", state="error")
-            st.error(f"Erreur lors de l'appel à l'API Anthropic : {e}")
+            if _est_erreur_quota(e):
+                st.error(
+                    "Quota de l'API atteint. Le palier gratuit est limité à quelques requêtes "
+                    "par minute et chaque question en consomme plusieurs. Patientez une minute "
+                    "avant de réessayer."
+                )
+            else:
+                st.error(f"Erreur lors de l'appel à l'API ({fournisseur}) : {e}")
             st.session_state.assistant_api_history = historique_avant
             st.session_state.assistant_display.pop()
             return
@@ -1460,3 +1759,6 @@ def afficher_assistant(df, registre, nom_base):
         {"role": "assistant", "text": texte, "outils": appels_outils, "dataframes": dataframes}
     )
     st.session_state.assistant_dfs_courants = []
+
+    _enregistrer_conversation_courante(nom_base)
+    st.rerun()   # rafraîchit la liste des conversations dans la barre latérale
