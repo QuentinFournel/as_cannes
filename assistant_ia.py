@@ -1587,26 +1587,34 @@ def _supprimer_conversation(identifiant):
         st.session_state.assistant_stockage_ko = str(e)
 
 
-def _afficher_barre_conversations():
-    """Liste des conversations passées, dans la barre latérale."""
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("**Mes conversations**")
+def _afficher_historique_conversations(nom_base):
+    """Barre d'historique affichée dans la page Assistant IA (pas dans le menu)."""
+    conversations = st.session_state.assistant_conversations
 
+    colonne_info, colonne_bouton = st.columns([3, 1])
+    with colonne_info:
+        st.caption(f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')}")
+    with colonne_bouton:
         if st.button("Nouvelle conversation", use_container_width=True, key="assistant_nouvelle"):
             _nouvelle_conversation()
             st.rerun()
 
-        conversations = st.session_state.assistant_conversations
+    with st.expander(f"Mes conversations ({len(conversations)})", expanded=False):
         if not conversations:
-            st.caption("Aucune conversation enregistrée.")
+            st.caption("Aucune conversation enregistrée pour le moment.")
+
         for conversation in conversations:
-            colonne_titre, colonne_suppr = st.columns([5, 1])
+            colonne_titre, colonne_date, colonne_suppr = st.columns([6, 2, 1])
             actuelle = conversation.get("id") == st.session_state.get("assistant_conv_id")
             libelle = ("● " if actuelle else "") + conversation.get("titre", "Conversation")
+
             if colonne_titre.button(libelle, key=f"conv_{conversation['id']}", use_container_width=True):
                 _ouvrir_conversation(conversation)
                 st.rerun()
+
+            date = str(conversation.get("date", ""))[:10]
+            colonne_date.caption(date)
+
             if colonne_suppr.button("🗑", key=f"suppr_{conversation['id']}", help="Supprimer"):
                 _supprimer_conversation(conversation["id"])
                 st.rerun()
@@ -1647,9 +1655,7 @@ def afficher_assistant(df, registre, nom_base):
         _nouvelle_conversation()
 
     _charger_liste_conversations()
-    _afficher_barre_conversations()
-
-    st.caption(f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')}")
+    _afficher_historique_conversations(nom_base)
 
     # Historique affiché
     for message in st.session_state.assistant_display:
