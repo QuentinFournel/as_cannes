@@ -2,6 +2,7 @@ import json
 import os
 import unicodedata
 from difflib import get_close_matches
+from functools import partial
 
 import pandas as pd
 import streamlit as st
@@ -15,22 +16,40 @@ try:
     from groq import Groq
 except ImportError:
     Groq = None
+try:
+    from openai import OpenAI          # utilisé pour Gemini (endpoint compatible)
+except ImportError:
+    OpenAI = None
 
 # ============================================================
 # Configuration
 # ============================================================
 MODELE_ANTHROPIC = "claude-sonnet-4-6"          # payant, qualité maximale
+MODELE_GEMINI = "gemini-3.5-flash"              # palier gratuit de Google AI Studio
 MODELE_GROQ = "llama-3.3-70b-versatile"         # palier gratuit de Groq
-MAX_TOKENS = 2000
-MAX_ITERATIONS_OUTILS = 8   # garde-fou de la boucle agentique
+URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+MAX_TOKENS = 4000
+MAX_ITERATIONS_OUTILS = 10  # garde-fou de la boucle agentique
 TOP_N_RESULTATS = 15        # nb max de lignes renvoyées au modèle par outil
+
+EXEMPLES_QUESTIONS = [
+    "Trouve-moi un ailier rapide qui centre beaucoup",
+    "Fais-moi un rapport complet sur Ousmane Dembélé",
+    "Quels joueurs ressemblent à notre meilleur milieu ?",
+    "Quels sont les points forts et faibles de Fréjus ?",
+    "Quels joueurs sont en fin de contrat cet été ?",
+    "Compare les deux meilleurs latéraux droits de National 1",
+]
 
 
 def _detecter_fournisseur():
     """Choisit le fournisseur selon les clés présentes dans les secrets.
-    Anthropic est prioritaire si sa clé est configurée."""
+    Ordre de priorité : Anthropic (payant, meilleure qualité), Gemini, Groq."""
     if "ANTHROPIC_API_KEY" in st.secrets and Anthropic is not None:
         return "anthropic"
+    if "GEMINI_API_KEY" in st.secrets and OpenAI is not None:
+        return "gemini"
     if "GROQ_API_KEY" in st.secrets and Groq is not None:
         return "groq"
     return None
@@ -122,38 +141,100 @@ def _appliquer_filtres(df_resultats, params):
     return res
 
 
+def _tokens_nom(texte):
+    """Tokens significatifs d'un nom : initiales et particules retirées.
+
+    'O. Dembélé'       -> ['dembele']
+    'Ousmane Dembélé'  -> ['ousmane', 'dembele']
+    """
+    brut = _normaliser(texte).replace("-", " ").replace("'", " ")
+    tokens = [t.strip(".") for t in brut.split()]
+    return [t for t in tokens if len(t) > 1 and t not in ("de", "da", "du", "le", "la", "el", "al", "van", "von", "dos", "den")]
+
+
+def _initiale_prenom(identifiant):
+    """Initiale du prénom d'un identifiant de base : 'O. Dembélé - PSG' -> 'o'."""
+    premier = _normaliser(str(identifiant).split(" - ")[0]).split()
+    if premier and len(premier[0].strip(".")) == 1:
+        return premier[0].strip(".")
+    return ""
+
+
 def _resoudre_joueur(df, nom):
     """Retrouve l'identifiant exact 'Joueur + Information' à partir d'un nom
-    éventuellement partiel ('Corchia', 'S. Corchia', 'Corchia - Cannes'...).
+    libre : 'Dembélé', 'Ousmane Dembélé', 'O. Dembélé', 'Dembélé PSG'...
+
+    La base ne stocke que l'initiale du prénom ('O. Dembélé - PSG (Ligue 1)') :
+    le matching se fait donc sur les tokens du nom de famille, pas sur la chaîne
+    entière.
 
     Retourne (identifiant_exact, None) si un seul candidat,
     sinon (None, liste_de_candidats).
     """
-    valeurs = df["Joueur + Information"].dropna().unique()
+    valeurs = list(df["Joueur + Information"].dropna().unique())
     cible = _normaliser(nom)
+    tokens_cible = set(_tokens_nom(nom))
 
     # 1. Correspondance exacte sur l'identifiant complet
     for v in valeurs:
         if _normaliser(v) == cible:
             return v, None
 
-    # 2. Correspondance exacte sur le nom seul (avant ' - ')
-    exacts = [v for v in valeurs if _normaliser(str(v).split(" - ")[0]) == cible]
-    if len(exacts) == 1:
-        return exacts[0], None
-    if len(exacts) > 1:
-        return None, exacts[:10]
+    # 2. Tokens du nom de famille : ceux de la base doivent être contenus
+    #    dans la demande ('dembele' ⊆ {'ousmane', 'dembele'})
+    correspondances = []
+    for v in valeurs:
+        partie_nom = str(v).split(" - ")[0]
+        tokens_base = set(_tokens_nom(partie_nom))
+        if tokens_base and tokens_base <= tokens_cible:
+            correspondances.append(v)
+    if len(correspondances) == 1:
+        return correspondances[0], None
 
-    # 3. Sous-chaîne dans le nom ('corchia' dans 's. corchia')
-    partiels = [v for v in valeurs if cible in _normaliser(str(v).split(" - ")[0])]
+    # 3. Plusieurs homonymes : départager par l'initiale du prénom
+    #    ('Ousmane Dembélé' -> 'O. Dembélé' plutôt que 'M. Dembélé')
+    if len(correspondances) > 1:
+        prenoms = tokens_cible - set().union(
+            *[set(_tokens_nom(str(v).split(" - ")[0])) for v in correspondances]
+        )
+        if prenoms:
+            initiales = [
+                v for v in correspondances
+                if any(p.startswith(_initiale_prenom(v)) for p in prenoms if _initiale_prenom(v))
+            ]
+            if len(initiales) == 1:
+                return initiales[0], None
+            if initiales:
+                correspondances = initiales
+
+    # 4. Toujours ambigu : départager avec l'équipe ou la compétition citée
+    #    dans la demande ('Dembélé PSG')
+    if len(correspondances) > 1:
+        affines = [
+            v for v in correspondances
+            if any(t in _normaliser(str(v).split(" - ", 1)[-1]) for t in tokens_cible)
+        ]
+        if len(affines) == 1:
+            return affines[0], None
+        return None, (affines or correspondances)[:10]
+    if len(correspondances) == 1:
+        return correspondances[0], None
+
+    # 4. Demande plus courte que le nom en base ('traore' pour 'traore diakite')
+    partiels = [
+        v for v in valeurs
+        if tokens_cible and tokens_cible <= set(_tokens_nom(str(v).split(" - ")[0]))
+    ]
     if len(partiels) == 1:
         return partiels[0], None
     if partiels:
         return None, partiels[:10]
 
-    # 4. Correspondance approximative
-    noms_normalises = {_normaliser(str(v).split(" - ")[0]): v for v in valeurs}
-    proches = get_close_matches(cible, list(noms_normalises.keys()), n=5, cutoff=0.6)
+    # 5. Correspondance approximative (fautes de frappe)
+    noms_normalises = {}
+    for v in valeurs:
+        noms_normalises.setdefault(_normaliser(str(v).split(" - ")[0]), v)
+    proches = get_close_matches(cible, list(noms_normalises), n=5, cutoff=0.6)
     return None, [noms_normalises[p] for p in proches]
 
 
@@ -590,6 +671,168 @@ def outil_analyse_equipe(df, registre, params):
     )
 
 
+def outil_chercher_joueur(df, registre, params):
+    """Recherche d'identité : retrouve les joueurs correspondant à un nom libre.
+    Sert à lever une ambiguïté avant d'appeler un autre outil."""
+    nom = params["nom"]
+    tokens = set(_tokens_nom(nom))
+
+    if not tokens:
+        return json.dumps({"erreur": "Nom vide ou non exploitable."}, ensure_ascii=False)
+
+    lignes = []
+    for _, ligne in df.iterrows():
+        identifiant = ligne.get("Joueur + Information")
+        if not isinstance(identifiant, str):
+            continue
+        tokens_base = set(_tokens_nom(identifiant.split(" - ")[0]))
+        if not tokens_base:
+            continue
+        if tokens_base <= tokens or tokens <= tokens_base:
+            lignes.append(ligne)
+
+    if not lignes:
+        joueur, candidats = _resoudre_joueur(df, nom)   # repli sur l'approximatif
+        if joueur is not None:
+            lignes = [df[df["Joueur + Information"] == joueur].iloc[0]]
+        elif candidats:
+            lignes = [df[df["Joueur + Information"] == c].iloc[0] for c in candidats]
+
+    if not lignes:
+        return json.dumps(
+            {"resultats": [], "conseil": f"Aucun joueur ne correspond à '{nom}' dans cette base. "
+                                         "Signale-le à l'utilisateur et propose une autre base de données."},
+            ensure_ascii=False,
+        )
+
+    colonnes = ["Joueur + Information", "Équipe dans la période sélectionnée", "Poste",
+                "Âge", "Minutes jouées", "Contrat expiration"]
+    resultats = pd.DataFrame(lignes)[
+        [c for c in colonnes if c in df.columns]
+    ].head(20)
+
+    return json.dumps(
+        {"nb_resultats": int(len(resultats)),
+         "resultats": resultats.to_dict(orient="records"),
+         "conseil": "Utilise la valeur exacte de 'Joueur + Information' dans les autres outils."},
+        ensure_ascii=False,
+        default=str,
+    )
+
+
+_OPERATEURS = {">=": "ge", "<=": "le", ">": "gt", "<": "lt", "==": "eq", "!=": "ne"}
+
+
+def outil_explorer_donnees(df, registre, params):
+    """Exploration libre de la base : filtres, tri, colonnes au choix.
+
+    Complète les outils spécialisés pour toutes les questions non prévues
+    (moyennes d'âge, joueurs en fin de contrat, effectifs d'une équipe...).
+    """
+    colonnes_valides = list(df.columns)
+    travail = df
+
+    # --- Filtres ---
+    for filtre in params.get("filtres", []) or []:
+        nom_col = filtre.get("colonne")
+        operateur = filtre.get("operateur")
+        valeur = filtre.get("valeur")
+
+        colonne, suggestions = _resoudre_colonne(nom_col, colonnes_valides)
+        if colonne is None:
+            return json.dumps(
+                {"erreur": f"Colonne inconnue : '{nom_col}'.", "suggestions": suggestions or []},
+                ensure_ascii=False,
+            )
+        if operateur not in _OPERATEURS and operateur != "contient":
+            return json.dumps(
+                {"erreur": f"Opérateur invalide : '{operateur}'.",
+                 "operateurs_valides": list(_OPERATEURS) + ["contient"]},
+                ensure_ascii=False,
+            )
+
+        try:
+            if operateur == "contient":
+                masque = travail[colonne].astype(str).apply(_normaliser).str.contains(
+                    _normaliser(valeur), na=False
+                )
+            else:
+                serie = travail[colonne]
+                if pd.api.types.is_numeric_dtype(serie):
+                    valeur = float(valeur)
+                masque = getattr(serie, _OPERATEURS[operateur])(valeur)
+            travail = travail[masque]
+        except Exception as e:
+            return json.dumps(
+                {"erreur": f"Filtre impossible sur '{colonne}' : {type(e).__name__} : {e}"},
+                ensure_ascii=False,
+            )
+
+    if travail.empty:
+        return json.dumps(
+            {"nb_resultats_total": 0,
+             "conseil": "Aucun joueur ne correspond. Propose d'assouplir les filtres."},
+            ensure_ascii=False,
+        )
+
+    # --- Colonnes affichées ---
+    demandees = params.get("colonnes") or []
+    colonnes_sortie = []
+    for nom_col in demandees:
+        colonne, suggestions = _resoudre_colonne(nom_col, colonnes_valides)
+        if colonne is None:
+            return json.dumps(
+                {"erreur": f"Colonne inconnue : '{nom_col}'.", "suggestions": suggestions or []},
+                ensure_ascii=False,
+            )
+        colonnes_sortie.append(colonne)
+
+    base = ["Joueur + Information", "Équipe dans la période sélectionnée", "Poste", "Âge", "Minutes jouées"]
+    colonnes_finales = [c for c in base if c in travail.columns]
+    colonnes_finales += [c for c in colonnes_sortie if c not in colonnes_finales]
+
+    # --- Tri ---
+    tri = params.get("trier_par")
+    if tri:
+        colonne_tri, suggestions = _resoudre_colonne(tri, colonnes_valides)
+        if colonne_tri is None:
+            return json.dumps(
+                {"erreur": f"Colonne de tri inconnue : '{tri}'.", "suggestions": suggestions or []},
+                ensure_ascii=False,
+            )
+        travail = travail.sort_values(colonne_tri, ascending=bool(params.get("croissant", False)))
+        if colonne_tri not in colonnes_finales:
+            colonnes_finales.append(colonne_tri)
+
+    resultats = travail[colonnes_finales].reset_index(drop=True)
+    limite = int(params.get("limite") or TOP_N_RESULTATS)
+
+    # --- Statistiques d'ensemble sur les colonnes numériques demandées ---
+    stats = {}
+    for colonne in colonnes_sortie:
+        if pd.api.types.is_numeric_dtype(travail[colonne]):
+            stats[colonne] = {
+                "moyenne": round(float(travail[colonne].mean()), 2),
+                "mediane": round(float(travail[colonne].median()), 2),
+                "min": round(float(travail[colonne].min()), 2),
+                "max": round(float(travail[colonne].max()), 2),
+            }
+
+    st.session_state.assistant_dfs_courants.append(
+        (params.get("titre") or "Exploration de la base", resultats.head(50))
+    )
+
+    return json.dumps(
+        {"nb_resultats_total": int(len(resultats)),
+         "nb_resultats_affiches": int(min(limite, len(resultats))),
+         "statistiques": stats,
+         "joueurs": resultats.head(limite).to_dict(orient="records"),
+         "contexte": "Valeurs brutes (non converties en percentiles)."},
+        ensure_ascii=False,
+        default=str,
+    )
+
+
 # Schémas d'outils au format Anthropic
 def _schemas_outils():
     return [
@@ -717,6 +960,61 @@ def _schemas_outils():
                 "required": ["equipe"],
             },
         },
+        {
+            "name": "chercher_joueur",
+            "description": (
+                "Retrouve l'identifiant exact d'un ou plusieurs joueurs à partir d'un nom libre "
+                "('Dembélé', 'Ousmane Dembélé', 'Dembélé PSG'). Renvoie équipe, poste, âge et minutes "
+                "pour chaque correspondance. À utiliser EN PREMIER dès qu'un autre outil renvoie une "
+                "ambiguïté de nom, ou pour vérifier qu'un joueur figure bien dans la base."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "nom": {"type": "string", "description": "Nom recherché, sous n'importe quelle forme."},
+                },
+                "required": ["nom"],
+            },
+        },
+        {
+            "name": "explorer_donnees",
+            "description": (
+                "Exploration libre de la base joueurs : filtres sur n'importe quelle colonne, tri, "
+                "choix des colonnes affichées, et statistiques (moyenne, médiane, min, max) sur les "
+                "colonnes numériques demandées. À utiliser pour toutes les questions que les outils "
+                "spécialisés ne couvrent pas : effectif d'une équipe, joueurs en fin de contrat, "
+                "moyenne d'âge, meilleur total de buts, valeurs brutes d'une métrique... "
+                "Attention : renvoie des valeurs BRUTES, pas des percentiles — pour comparer des "
+                "joueurs entre eux au sein d'un poste, préfère rechercher_joueurs ou classement_par_role."
+            ),
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "filtres": {
+                        "type": "array",
+                        "description": "Conditions combinées par ET.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "colonne": {"type": "string"},
+                                "operateur": {"type": "string", "enum": [">=", "<=", ">", "<", "==", "!=", "contient"]},
+                                "valeur": {"type": "string", "description": "Valeur comparée (nombre ou texte)."},
+                            },
+                            "required": ["colonne", "operateur", "valeur"],
+                        },
+                    },
+                    "colonnes": {
+                        "type": "array",
+                        "description": "Colonnes supplémentaires à afficher et à résumer statistiquement.",
+                        "items": {"type": "string"},
+                    },
+                    "trier_par": {"type": "string"},
+                    "croissant": {"type": "boolean", "description": "Faux par défaut (tri décroissant)."},
+                    "limite": {"type": "integer", "description": "Nombre de lignes renvoyées (15 par défaut)."},
+                    "titre": {"type": "string", "description": "Titre du tableau affiché à l'utilisateur."},
+                },
+            },
+        },
     ]
 
 
@@ -727,6 +1025,8 @@ EXECUTEURS = {
     "joueurs_similaires": outil_joueurs_similaires,
     "comparer_joueurs": outil_comparer_joueurs,
     "analyse_equipe": outil_analyse_equipe,
+    "chercher_joueur": outil_chercher_joueur,
+    "explorer_donnees": outil_explorer_donnees,
 }
 
 
@@ -757,21 +1057,50 @@ Tu aides le staff (recruteurs, analystes, entraîneurs) à explorer les données
 Base de données active : "{nom_base}" ({len(df)} lignes). Saison : {st.session_state.get('saison', '?')}.
 Les données proviennent de Wyscout. L'identifiant joueur est "Joueur + Information" au format "Nom - Équipe (Compétition)".
 
-RÈGLES :
+TON RÔLE
+Tu n'es pas un moteur de recherche : tu es un analyste. Ton interlocuteur ne connaît ni les noms de
+colonnes, ni les postes, ni les rôles de l'application. C'est à TOI de traduire sa demande en requêtes,
+pas à lui d'être précis. Ne lui demande jamais un identifiant exact, un nom de métrique ou un nom de poste :
+utilise les outils pour le trouver toi-même.
+
+MÉTHODE (à suivre à chaque demande)
+1. Identifie l'intention réelle. "Un ailier rapide qui centre" = un profil, pas une liste de colonnes.
+2. Lève les ambiguïtés avec les outils : chercher_joueur pour une identité, explorer_donnees pour vérifier
+   ce que contient la base. Un nom d'utilisateur ne correspond jamais exactement à la base : cherche d'abord.
+3. Enchaîne plusieurs outils si nécessaire. Une bonne réponse demande souvent 2 à 4 appels
+   (ex. chercher_joueur -> profil_joueur -> joueurs_similaires).
+4. Si un outil renvoie une erreur ou des suggestions, corrige-toi et rappelle-le. Ne renvoie jamais
+   l'erreur brute à l'utilisateur.
+5. RÉDIGE une analyse. Ne te contente pas de recopier les chiffres : explique ce qu'ils signifient sur le
+   terrain, hiérarchise, prends position, signale les limites (faible temps de jeu, niveau de la ligue,
+   âge, fin de contrat). Termine par une recommandation ou une piste d'approfondissement.
+
+CHOIX DES OUTILS
+- Profil par caractéristiques ("rapide", "qui centre", "bon dans les duels") : rechercher_joueurs.
+- Profil tactique existant ("attaquant de profondeur", "box-to-box") : classement_par_role.
+- Un joueur précis (points forts/faibles, rapport, "que vaut X") : profil_joueur.
+- "Qui ressemble à X", "un remplaçant pour X" : joueurs_similaires.
+- "Compare X et Y" : comparer_joueurs.
+- Une équipe (style, forme, forces/faiblesses collectives) : analyse_equipe.
+- Identité d'un joueur, vérifier sa présence dans la base : chercher_joueur.
+- Tout le reste (effectifs, fins de contrat, moyennes d'âge, totaux bruts, questions imprévues) : explorer_donnees.
+
+RÈGLES DE DONNÉES
 - Utilise UNIQUEMENT les noms exacts de postes, rôles, KPI et métriques listés ci-dessous. N'invente jamais un nom.
-- Les critères de recherche sont des percentiles minimums (0-100) calculés au sein du poste : 70 = top 30 %.
-- Traduis les demandes floues en critères pertinents. Ex. "ailier rapide qui centre beaucoup" → poste Ailier,
-  critères sur "Accélérations par 90", "Centres par 90", "Сentres précises, %".
-- Si la demande correspond à un profil tactique existant (ex. "attaquant de profondeur"), préfère classement_par_role.
-- Pour analyser un joueur précis : profil_joueur. Pour "qui ressemble à X" : joueurs_similaires. Pour "compare X et Y" : comparer_joueurs.
-- Pour analyser une ÉQUIPE du championnat (forces/faiblesses collectives, forme, style) : analyse_equipe.
-- Les noms de joueurs peuvent être partiels : les outils les résolvent. En cas d'ambiguïté, l'outil renvoie les
-  candidats ; choisis le plus pertinent d'après le contexte (équipe, compétition) ou demande une précision à l'utilisateur.
-- Réponds en français, de façon concise et structurée. Cite les joueurs avec leur équipe et leur compétition.
-- Précise toujours le nombre total de résultats et les critères utilisés.
-- Si aucun résultat, propose d'assouplir les seuils.
-- Attention : certains noms de métriques Wyscout ont une orthographe inhabituelle, copie-les exactement
+- Les critères de rechercher_joueurs sont des percentiles minimums (0-100) au sein du poste : 70 = top 30 %.
+  Commence autour de 70-75 ; descends si la recherche ne renvoie rien.
+- Certains noms de métriques Wyscout ont une orthographe inhabituelle, copie-les exactement
   (ex. "Сentres précises, %" commence par un caractère cyrillique).
+- Distingue percentile (comparaison entre joueurs du poste) et valeur brute (explorer_donnees).
+- Un percentile élevé sur peu de minutes jouées est peu fiable : signale-le.
+
+STYLE
+- Réponds en français, en prose structurée, sans jargon technique de l'application (ne cite pas les noms
+  d'outils ni de colonnes bruts). Les tableaux de résultats s'affichent automatiquement sous ta réponse :
+  ne les recopie pas intégralement, commente-les.
+- Cite les joueurs avec leur équipe et leur compétition.
+- Précise le nombre total de résultats et les critères retenus.
+- Sois concis : va à l'essentiel, pas de remplissage.
 
 POSTES : {', '.join(postes)}
 
@@ -863,18 +1192,20 @@ def _schemas_outils_openai():
     ]
 
 
-def _executer_tour_groq(client, system_prompt, df, registre, on_texte=None, on_outil=None):
-    """Même boucle agentique que la version Anthropic, au format OpenAI/Groq.
+def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on_outil=None,
+                          modele=None):
+    """Même boucle agentique que la version Anthropic, au format OpenAI.
 
-    Pas de streaming token par token (Groq est quasi instantané) : on_texte est
-    appelé une fois par tour avec le texte accumulé.
+    Utilisée par Gemini (endpoint compatible OpenAI) et par Groq.
+    Pas de streaming token par token : on_texte est appelé une fois par tour
+    avec le texte accumulé.
     """
     appels_outils = []
     texte_complet = ""
 
     for _ in range(MAX_ITERATIONS_OUTILS):
         reponse = client.chat.completions.create(
-            model=MODELE_GROQ,
+            model=modele or MODELE_GROQ,
             max_tokens=MAX_TOKENS,
             messages=[{"role": "system", "content": system_prompt}]
                      + st.session_state.assistant_api_history,
@@ -971,8 +1302,8 @@ def afficher_assistant(df, registre, nom_base):
     fournisseur = _detecter_fournisseur()
     if fournisseur is None:
         st.error(
-            "Clé API manquante : ajoutez GROQ_API_KEY (gratuit, console.groq.com) "
-            "ou ANTHROPIC_API_KEY dans les secrets Streamlit."
+            "Clé API manquante : ajoutez GEMINI_API_KEY (gratuit, aistudio.google.com), "
+            "GROQ_API_KEY ou ANTHROPIC_API_KEY dans les secrets Streamlit."
         )
         st.stop()
 
@@ -1009,7 +1340,18 @@ def afficher_assistant(df, registre, nom_base):
                 st.caption(titre)
                 st.dataframe(df_resultat, use_container_width=True, hide_index=True)
 
-    question = st.chat_input("Posez une question (ex. : trouve-moi un attaquant de profondeur de moins de 25 ans)")
+    # Exemples cliquables tant que la conversation est vide
+    if not st.session_state.assistant_display:
+        st.caption("Exemples de questions — cliquez ou écrivez la vôtre")
+        colonnes = st.columns(2)
+        for i, exemple in enumerate(EXEMPLES_QUESTIONS):
+            if colonnes[i % 2].button(exemple, key=f"assistant_ex_{i}", use_container_width=True):
+                st.session_state.assistant_question_suggeree = exemple
+                st.rerun()
+
+    question = st.chat_input("Posez votre question en langage naturel")
+    if not question:
+        question = st.session_state.pop("assistant_question_suggeree", None)
     if not question:
         return
 
@@ -1025,9 +1367,12 @@ def afficher_assistant(df, registre, nom_base):
     if fournisseur == "anthropic":
         client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
         executer_tour = _executer_tour_anthropic
+    elif fournisseur == "gemini":
+        client = OpenAI(api_key=st.secrets["GEMINI_API_KEY"], base_url=URL_GEMINI)
+        executer_tour = partial(_executer_tour_openai, modele=MODELE_GEMINI)
     else:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        executer_tour = _executer_tour_groq
+        executer_tour = partial(_executer_tour_openai, modele=MODELE_GROQ)
     system_prompt = _construire_system_prompt(df, registre, nom_base)
 
     # Snapshot pour restaurer proprement l'historique API en cas d'erreur en cours de boucle
