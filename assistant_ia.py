@@ -1427,6 +1427,8 @@ def _supprimer_conversation(identifiant):
 
 
 COULEUR_FOND_QUESTION = "#ECEBE3"   # fond des messages de l'utilisateur
+COULEUR_FOND_BOUTON = "transparent"  # fond des boutons ("transparent" ou ex. "#F4F3ED")
+COULEUR_SURVOL_BOUTON = "#E6E4D8"    # fond des boutons au survol
 
 STYLE_ASSISTANT = """
 <style>
@@ -1453,6 +1455,22 @@ button[kind="secondary"] {
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
+}
+
+/* ---- Fond des boutons ---- */
+div.stButton > button,
+div[data-testid="stButton"] > button,
+div[data-testid="stExpander"] button,
+button[data-testid="baseButton-secondary"],
+button[kind="secondary"] {
+    background-color: __COULEUR_BOUTON__ !important;
+}
+div.stButton > button:hover,
+div[data-testid="stButton"] > button:hover,
+div[data-testid="stExpander"] button:hover,
+button[data-testid="baseButton-secondary"]:hover,
+button[kind="secondary"]:hover {
+    background-color: __COULEUR_SURVOL__ !important;
 }
 
 /* ---- Volet "Mes conversations" : même hauteur que le bouton ---- */
@@ -1494,7 +1512,9 @@ div[data-testid="column"] > div {
     gap: 0.75rem !important;
 }
 </style>
-""".replace("__COULEUR_QUESTION__", COULEUR_FOND_QUESTION)
+""".replace("__COULEUR_QUESTION__", COULEUR_FOND_QUESTION) \
+   .replace("__COULEUR_BOUTON__", COULEUR_FOND_BOUTON) \
+   .replace("__COULEUR_SURVOL__", COULEUR_SURVOL_BOUTON)
 
 
 def _afficher_historique_conversations():
