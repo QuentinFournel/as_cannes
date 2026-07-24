@@ -1426,45 +1426,98 @@ def _supprimer_conversation(identifiant):
         st.session_state.assistant_stockage_ko = str(e)
 
 
-def _afficher_historique_conversations(nom_base):
+STYLE_ASSISTANT = """
+<style>
+/* ---- Boutons : dimensions strictement identiques ---- */
+div.stButton > button,
+div[data-testid="stButton"] > button,
+div[data-testid="stBaseButton-secondary"] > button,
+button[data-testid="baseButton-secondary"],
+button[kind="secondary"] {
+    height: 3.5rem !important;
+    min-height: 3.5rem !important;
+    width: 100% !important;
+    white-space: normal !important;
+    line-height: 1.2rem !important;
+    padding: 0.4rem 0.8rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* ---- Volet "Mes conversations" : même hauteur que le bouton ---- */
+div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] > details > summary,
+details[data-testid="stExpander"] > summary,
+div[data-testid="stExpanderHeader"] {
+    height: 3.5rem !important;
+    min-height: 3.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 0.9rem !important;
+}
+div[data-testid="stExpander"] details {
+    border-radius: 0.5rem !important;
+}
+
+/* ---- Boutons internes au volet : plus compacts ---- */
+div[data-testid="stExpander"] div.stButton > button,
+div[data-testid="stExpander"] div[data-testid="stButton"] > button {
+    height: 2.4rem !important;
+    min-height: 2.4rem !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+/* ---- Espacement homogène entre les blocs ---- */
+div[data-testid="stHorizontalBlock"] {
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+}
+div[data-testid="column"] > div {
+    gap: 0.75rem !important;
+}
+</style>
+"""
+
+
+def _afficher_historique_conversations():
     """Barre d'historique affichée dans la page Assistant IA (pas dans le menu)."""
     conversations = st.session_state.assistant_conversations
 
-    colonne_info, colonne_bouton = st.columns([3, 1])
-    with colonne_info:
-        st.caption(
-            f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')} "
-            f"· modèle `{MODELE}`"
-        )
+    colonne_historique, colonne_bouton = st.columns([3, 1])
+
+    with colonne_historique:
+        with st.expander(f"Mes conversations ({len(conversations)})", expanded=False):
+            if not conversations:
+                st.caption("Aucune conversation enregistrée pour le moment.")
+
+            for conversation in conversations:
+                colonne_titre, colonne_date, colonne_suppr = st.columns([6, 2, 1])
+                actuelle = conversation.get("id") == st.session_state.get("assistant_conv_id")
+                libelle = ("● " if actuelle else "") + conversation.get("titre", "Conversation")
+
+                if colonne_titre.button(libelle, key=f"conv_{conversation['id']}",
+                                        use_container_width=True):
+                    _ouvrir_conversation(conversation)
+                    st.rerun()
+
+                colonne_date.caption(str(conversation.get("date", ""))[:10])
+
+                if colonne_suppr.button("🗑", key=f"suppr_{conversation['id']}", help="Supprimer"):
+                    _supprimer_conversation(conversation["id"])
+                    st.rerun()
+
+            if st.session_state.get("assistant_stockage_ko"):
+                st.caption("Historique non sauvegardé (stockage indisponible).")
+            elif not _drive_actif():
+                st.caption("Historique local : perdu au redémarrage de l'application.")
+
     with colonne_bouton:
         if st.button("Nouvelle conversation", use_container_width=True, key="assistant_nouvelle"):
             _nouvelle_conversation()
             st.rerun()
-
-    with st.expander(f"Mes conversations ({len(conversations)})", expanded=False):
-        if not conversations:
-            st.caption("Aucune conversation enregistrée pour le moment.")
-
-        for conversation in conversations:
-            colonne_titre, colonne_date, colonne_suppr = st.columns([6, 2, 1])
-            actuelle = conversation.get("id") == st.session_state.get("assistant_conv_id")
-            libelle = ("● " if actuelle else "") + conversation.get("titre", "Conversation")
-
-            if colonne_titre.button(libelle, key=f"conv_{conversation['id']}", use_container_width=True):
-                _ouvrir_conversation(conversation)
-                st.rerun()
-
-            date = str(conversation.get("date", ""))[:10]
-            colonne_date.caption(date)
-
-            if colonne_suppr.button("🗑", key=f"suppr_{conversation['id']}", help="Supprimer"):
-                _supprimer_conversation(conversation["id"])
-                st.rerun()
-
-        if st.session_state.get("assistant_stockage_ko"):
-            st.caption("Historique non sauvegardé (stockage indisponible).")
-        elif not _drive_actif():
-            st.caption("Historique local : perdu au redémarrage de l'application.")
 
 
 # ============================================================
@@ -1492,8 +1545,9 @@ def afficher_assistant(df, registre, nom_base):
         st.session_state.assistant_nom_base = nom_base
         _nouvelle_conversation()
 
+    st.markdown(STYLE_ASSISTANT, unsafe_allow_html=True)
     _charger_liste_conversations()
-    _afficher_historique_conversations(nom_base)
+    _afficher_historique_conversations()
 
     # Historique affiché
     for message in st.session_state.assistant_display:
