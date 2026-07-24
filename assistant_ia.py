@@ -1511,10 +1511,7 @@ def _afficher_historique_conversations():
             for conversation in conversations:
                 colonne_titre, colonne_suppr = st.columns([9, 1])
                 actuelle = conversation.get("id") == st.session_state.get("assistant_conv_id")
-                date = str(conversation.get("date", ""))[:10]
                 libelle = ("● " if actuelle else "") + conversation.get("titre", "Conversation")
-                if date:
-                    libelle += f"   ·   {date}"
 
                 if colonne_titre.button(libelle, key=f"conv_{conversation['id']}",
                                         use_container_width=True):
