@@ -1211,6 +1211,19 @@ def _est_erreur_quota(erreur):
             or "RESOURCE_EXHAUSTED" in texte)
 
 
+def _details_quota(erreur):
+    """Extrait le modèle et la limite mentionnés dans une erreur 429."""
+    texte = str(erreur)
+    modele = re.search(r"'model':\s*'([^']+)'", texte)
+    limite = re.search(r"limit:\s*(\d+)", texte)
+    identifiant = re.search(r"'quotaId':\s*'([^']+)'", texte)
+    return {
+        "modele": modele.group(1) if modele else "?",
+        "limite": limite.group(1) if limite else "?",
+        "quota": identifiant.group(1) if identifiant else "?",
+    }
+
+
 def _est_quota_journalier(erreur):
     """Le quota par jour ne se libère qu'au reset (minuit heure du Pacifique) :
     inutile de patienter quelques secondes."""
@@ -1601,7 +1614,13 @@ def _afficher_historique_conversations(nom_base):
 
     colonne_info, colonne_bouton = st.columns([3, 1])
     with colonne_info:
-        st.caption(f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')}")
+        modele_actif = {"anthropic": MODELE_ANTHROPIC, "gemini": MODELE_GEMINI}.get(
+            _detecter_fournisseur(), MODELE_GROQ
+        )
+        st.caption(
+            f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')} "
+            f"· modèle `{modele_actif}`"
+        )
     with colonne_bouton:
         if st.button("Nouvelle conversation", use_container_width=True, key="assistant_nouvelle"):
             _nouvelle_conversation()
@@ -1742,15 +1761,19 @@ def afficher_assistant(df, registre, nom_base):
         except Exception as e:
             statut.update(label="Erreur", state="error")
             if _est_erreur_quota(e) and _est_quota_journalier(e):
+                infos = _details_quota(e)
                 st.error(
-                    f"Quota **journalier** du modèle {MODELE_GEMINI} épuisé. Il se réinitialise "
-                    "à minuit heure du Pacifique (9 h en France). Inutile de réessayer avant. "
-                    "Pour augmenter le plafond, utilisez un modèle Flash-Lite ou passez sur une clé payante."
+                    f"Quota **journalier** épuisé sur le modèle `{infos['modele']}` "
+                    f"(limite : {infos['limite']}). Il se réinitialise à minuit heure du Pacifique "
+                    "(9 h en France). Inutile de réessayer avant."
                 )
             elif _est_erreur_quota(e):
+                infos = _details_quota(e)
                 st.error(
-                    "Quota par minute atteint malgré plusieurs tentatives. Patientez une minute : "
-                    "le palier gratuit est limité et chaque question consomme plusieurs requêtes."
+                    f"Quota **par minute** atteint sur le modèle `{infos['modele']}` "
+                    f"(limite : {infos['limite']} requêtes/minute, quota `{infos['quota']}`). "
+                    "Patientez une minute. Si la limite affichée est très basse, le modèle configuré "
+                    "n'est pas un Flash-Lite : vérifiez MODELE_GEMINI dans assistant_ia.py."
                 )
             else:
                 st.error(f"Erreur lors de l'appel à l'API ({fournisseur}) : {e}")
