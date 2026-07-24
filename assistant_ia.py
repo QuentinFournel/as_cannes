@@ -37,12 +37,12 @@ except ImportError:
 # Configuration
 # ============================================================
 MODELE_ANTHROPIC = "claude-sonnet-4-6"          # payant, qualité maximale
-MODELE_GEMINI = "gemini-3.5-flash"              # palier gratuit de Google AI Studio
+MODELE_GEMINI = "gemini-2.5-flash-lite"         # palier gratuit le plus généreux
 MODELE_GROQ = "llama-3.3-70b-versatile"         # palier gratuit de Groq
 URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 MAX_TOKENS = 4000
-MAX_ITERATIONS_OUTILS = 10  # garde-fou de la boucle agentique
+MAX_ITERATIONS_OUTILS = 6   # garde-fou : limite aussi la consommation de quota
 TOP_N_RESULTATS = 15        # nb max de lignes renvoyées au modèle par outil
 
 EXEMPLES_QUESTIONS = [
@@ -1211,12 +1211,19 @@ def _est_erreur_quota(erreur):
             or "RESOURCE_EXHAUSTED" in texte)
 
 
-def _delai_reprise(erreur):
-    """Délai conseillé par l'API ('retryDelay': '46s'), sinon valeur par défaut."""
+def _est_quota_journalier(erreur):
+    """Le quota par jour ne se libère qu'au reset (minuit heure du Pacifique) :
+    inutile de patienter quelques secondes."""
+    texte = str(erreur)
+    return "PerDay" in texte or "per_day" in texte or "GenerateContentPaidTierInputTokensPerDay" in texte
+
+
+def _delai_reprise(erreur, tentative=0):
+    """Délai conseillé par l'API ('retryDelay': '46s'), sinon backoff exponentiel."""
     trouve = re.search(r"retryDelay['\"]?\s*:\s*['\"](\d+)s", str(erreur))
     if trouve:
         return min(int(trouve.group(1)) + 2, DELAI_REPRISE_MAX)
-    return DELAI_REPRISE_DEFAUT
+    return min(DELAI_REPRISE_DEFAUT * (2 ** tentative), DELAI_REPRISE_MAX)
 
 
 def _appeler_avec_reprise(appel, on_attente=None):
@@ -1225,9 +1232,10 @@ def _appeler_avec_reprise(appel, on_attente=None):
         try:
             return appel()
         except Exception as e:
-            if not _est_erreur_quota(e) or tentative == MAX_REPRISES_QUOTA:
+            quota_journalier = _est_erreur_quota(e) and _est_quota_journalier(e)
+            if not _est_erreur_quota(e) or quota_journalier or tentative == MAX_REPRISES_QUOTA:
                 raise
-            attente = _delai_reprise(e)
+            attente = _delai_reprise(e, tentative)
             if on_attente:
                 on_attente(attente, tentative + 1)
             time.sleep(attente)
@@ -1733,11 +1741,16 @@ def afficher_assistant(df, registre, nom_base):
             )
         except Exception as e:
             statut.update(label="Erreur", state="error")
-            if _est_erreur_quota(e):
+            if _est_erreur_quota(e) and _est_quota_journalier(e):
                 st.error(
-                    "Quota de l'API atteint. Le palier gratuit est limité à quelques requêtes "
-                    "par minute et chaque question en consomme plusieurs. Patientez une minute "
-                    "avant de réessayer."
+                    f"Quota **journalier** du modèle {MODELE_GEMINI} épuisé. Il se réinitialise "
+                    "à minuit heure du Pacifique (9 h en France). Inutile de réessayer avant. "
+                    "Pour augmenter le plafond, utilisez un modèle Flash-Lite ou passez sur une clé payante."
+                )
+            elif _est_erreur_quota(e):
+                st.error(
+                    "Quota par minute atteint malgré plusieurs tentatives. Patientez une minute : "
+                    "le palier gratuit est limité et chaque question consomme plusieurs requêtes."
                 )
             else:
                 st.error(f"Erreur lors de l'appel à l'API ({fournisseur}) : {e}")
