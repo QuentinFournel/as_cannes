@@ -31,9 +31,9 @@ EXEMPLES_QUESTIONS = [
     "Trouve-moi un ailier rapide qui centre beaucoup",
     "Fais-moi un rapport complet sur Ousmane Dembélé",
     "Quels joueurs ressemblent à notre meilleur milieu ?",
-    "Quels sont les points forts et faibles de Fréjus ?",
+    "Quels sont les points forts et faibles de Caen ?",
     "Quels joueurs sont en fin de contrat cet été ?",
-    "Compare les deux meilleurs latéraux droits de National 1",
+    "Compare les deux meilleurs latéraux droits de Ligue 3",
 ]
 
 
