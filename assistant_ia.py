@@ -1181,8 +1181,52 @@ def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None,
     )
 
 
+SENTINELLE_SIGNATURE = "skip_thought_signature_validator"
+
+
+def _message_assistant_openai(message, signatures=False):
+    """Sérialise un message assistant contenant des appels d'outils.
+
+    Les modèles Gemini « thinking » signent leur raisonnement et placent la
+    signature dans le champ non standard
+    tool_calls[].extra_content.google.thought_signature. Un client OpenAI
+    classique reconstruit le message et perd ce champ, ce qui provoque une
+    erreur 400 au tour suivant. On repart donc du message brut ; si la signature
+    est absente, on injecte la sentinelle de contournement documentée.
+    """
+    try:
+        brut = message.model_dump(exclude_none=True)
+    except AttributeError:
+        brut = dict(message)
+
+    sortie = {"role": "assistant", "content": brut.get("content") or ""}
+    appels_bruts = brut.get("tool_calls") or []
+    if not appels_bruts:
+        return sortie
+
+    appels = []
+    for appel_brut in appels_bruts:
+        fonction = appel_brut.get("function", {})
+        appel = {
+            "id": appel_brut.get("id"),
+            "type": "function",
+            "function": {"name": fonction.get("name"),
+                         "arguments": fonction.get("arguments") or "{}"},
+        }
+        extra = appel_brut.get("extra_content") or {}
+        signature = (extra.get("google") or {}).get("thought_signature")
+        if signatures or signature:
+            appel["extra_content"] = {
+                "google": {"thought_signature": signature or SENTINELLE_SIGNATURE}
+            }
+        appels.append(appel)
+
+    sortie["tool_calls"] = appels
+    return sortie
+
+
 def _schemas_outils_openai():
-    """Convertit les schémas d'outils au format OpenAI (utilisé par Groq)."""
+    """Convertit les schémas d'outils au format OpenAI (utilisé par Gemini et Groq)."""
     return [
         {"type": "function",
          "function": {"name": s["name"],
@@ -1193,10 +1237,12 @@ def _schemas_outils_openai():
 
 
 def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on_outil=None,
-                          modele=None):
+                          modele=None, signatures=False):
     """Même boucle agentique que la version Anthropic, au format OpenAI.
 
     Utilisée par Gemini (endpoint compatible OpenAI) et par Groq.
+    signatures=True conserve les signatures de raisonnement exigées par les
+    modèles Gemini « thinking ».
     Pas de streaming token par token : on_texte est appelé une fois par tour
     avec le texte accumulé.
     """
@@ -1225,13 +1271,7 @@ def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on
 
         # Tour avec appels d'outils
         st.session_state.assistant_api_history.append(
-            {"role": "assistant",
-             "content": message.content or "",
-             "tool_calls": [
-                 {"id": tc.id, "type": "function",
-                  "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
-                 for tc in message.tool_calls
-             ]}
+            _message_assistant_openai(message, signatures)
         )
         if message.content:
             texte_complet += message.content + "\n\n"
@@ -1369,7 +1409,7 @@ def afficher_assistant(df, registre, nom_base):
         executer_tour = _executer_tour_anthropic
     elif fournisseur == "gemini":
         client = OpenAI(api_key=st.secrets["GEMINI_API_KEY"], base_url=URL_GEMINI)
-        executer_tour = partial(_executer_tour_openai, modele=MODELE_GEMINI)
+        executer_tour = partial(_executer_tour_openai, modele=MODELE_GEMINI, signatures=True)
     else:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
         executer_tour = partial(_executer_tour_openai, modele=MODELE_GROQ)
