@@ -6,24 +6,9 @@ import time
 import unicodedata
 from datetime import datetime
 from difflib import get_close_matches
-from functools import partial
-
 import pandas as pd
 import streamlit as st
-
-# SDK optionnels : seul celui du fournisseur configuré est nécessaire
-try:
-    from anthropic import Anthropic
-except ImportError:
-    Anthropic = None
-try:
-    from groq import Groq
-except ImportError:
-    Groq = None
-try:
-    from openai import OpenAI          # utilisé pour Gemini (endpoint compatible)
-except ImportError:
-    OpenAI = None
+from anthropic import Anthropic
 
 # Persistance des conversations sur Google Drive (mêmes identifiants que l'app)
 try:
@@ -36,13 +21,10 @@ except ImportError:
 # ============================================================
 # Configuration
 # ============================================================
-MODELE_ANTHROPIC = "claude-sonnet-4-6"          # payant, qualité maximale
-MODELE_GEMINI = "gemini-2.5-flash-lite"         # palier gratuit le plus généreux
-MODELE_GROQ = "llama-3.3-70b-versatile"         # palier gratuit de Groq
-URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai/"
+MODELE = "claude-sonnet-5"
 
 MAX_TOKENS = 4000
-MAX_ITERATIONS_OUTILS = 6   # garde-fou : limite aussi la consommation de quota
+MAX_ITERATIONS_OUTILS = 6   # garde-fou de la boucle agentique
 TOP_N_RESULTATS = 15        # nb max de lignes renvoyées au modèle par outil
 
 EXEMPLES_QUESTIONS = [
@@ -53,18 +35,6 @@ EXEMPLES_QUESTIONS = [
     "Quels joueurs sont en fin de contrat cet été ?",
     "Compare les deux meilleurs latéraux droits de National 1",
 ]
-
-
-def _detecter_fournisseur():
-    """Choisit le fournisseur selon les clés présentes dans les secrets.
-    Ordre de priorité : Anthropic (payant, meilleure qualité), Gemini, Groq."""
-    if "ANTHROPIC_API_KEY" in st.secrets and Anthropic is not None:
-        return "anthropic"
-    if "GEMINI_API_KEY" in st.secrets and OpenAI is not None:
-        return "gemini"
-    if "GROQ_API_KEY" in st.secrets and Groq is not None:
-        return "groq"
-    return None
 
 
 # ============================================================
@@ -1141,19 +1111,35 @@ def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None,
     appels_outils = []
     texte_complet = ""
 
+    # Le prompt système (catalogue de métriques) et les schémas d'outils sont
+    # identiques à chaque appel : on les met en cache pour ne les facturer
+    # qu'une fois par tranche de 5 minutes au lieu de 3 à 5 fois par question.
+    systeme_cache = [{
+        "type": "text",
+        "text": system_prompt,
+        "cache_control": {"type": "ephemeral"},
+    }]
+
     for _ in range(MAX_ITERATIONS_OUTILS):
-        with client.messages.stream(
-            model=MODELE_ANTHROPIC,
-            max_tokens=MAX_TOKENS,
-            system=system_prompt,
-            tools=_schemas_outils(),
-            messages=st.session_state.assistant_api_history,
-        ) as stream:
-            for delta in stream.text_stream:
-                texte_complet += delta
-                if on_texte:
-                    on_texte(texte_complet)
-            reponse = stream.get_final_message()
+        depart = texte_complet
+
+        def _appel():
+            nonlocal texte_complet
+            texte_complet = depart          # repart du même point si l'appel est rejoué
+            with client.messages.stream(
+                model=MODELE,
+                max_tokens=MAX_TOKENS,
+                system=systeme_cache,
+                tools=_schemas_outils(),
+                messages=st.session_state.assistant_api_history,
+            ) as stream:
+                for delta in stream.text_stream:
+                    texte_complet += delta
+                    if on_texte:
+                        on_texte(texte_complet)
+                return stream.get_final_message()
+
+        reponse = _appeler_avec_reprise(_appel, on_attente)
 
         st.session_state.assistant_api_history.append(
             {"role": "assistant", "content": reponse.content}
@@ -1194,212 +1180,45 @@ def _executer_tour_anthropic(client, system_prompt, df, registre, on_texte=None,
     )
 
 
-SENTINELLE_SIGNATURE = "skip_thought_signature_validator"
-
-# Le palier gratuit de Gemini est limité à quelques requêtes par minute, et une
-# question consomme un appel par aller-retour d'outil : on reprend donc
-# automatiquement au lieu de renvoyer l'erreur à l'utilisateur.
-MAX_REPRISES_QUOTA = 3
-DELAI_REPRISE_DEFAUT = 25
-DELAI_REPRISE_MAX = 70
+# Reprise automatique en cas de limite de débit (429) ou de surcharge du
+# service (529) : une question consomme plusieurs appels API.
+MAX_REPRISES = 3
+DELAI_REPRISE_DEFAUT = 10
+DELAI_REPRISE_MAX = 60
 
 
-def _est_erreur_quota(erreur):
-    texte = str(erreur)
-    return (getattr(erreur, "status_code", None) == 429
-            or "429" in texte
-            or "RESOURCE_EXHAUSTED" in texte)
+def _est_erreur_debit(erreur):
+    """Limite de débit atteinte (429)."""
+    return getattr(erreur, "status_code", None) == 429 or "429" in str(erreur)
 
 
-def _details_quota(erreur):
-    """Extrait le modèle et la limite mentionnés dans une erreur 429."""
-    texte = str(erreur)
-    modele = re.search(r"'model':\s*'([^']+)'", texte)
-    limite = re.search(r"limit:\s*(\d+)", texte)
-    identifiant = re.search(r"'quotaId':\s*'([^']+)'", texte)
-    return {
-        "modele": modele.group(1) if modele else "?",
-        "limite": limite.group(1) if limite else "?",
-        "quota": identifiant.group(1) if identifiant else "?",
-    }
-
-
-def _est_quota_journalier(erreur):
-    """Le quota par jour ne se libère qu'au reset (minuit heure du Pacifique) :
-    inutile de patienter quelques secondes."""
-    texte = str(erreur)
-    return "PerDay" in texte or "per_day" in texte or "GenerateContentPaidTierInputTokensPerDay" in texte
+def _est_erreur_temporaire(erreur):
+    """Surcharge passagère du service (500 / 529) : un nouvel essai suffit."""
+    return (getattr(erreur, "status_code", None) in (500, 529)
+            or "overloaded" in str(erreur).lower())
 
 
 def _delai_reprise(erreur, tentative=0):
-    """Délai conseillé par l'API ('retryDelay': '46s'), sinon backoff exponentiel."""
-    trouve = re.search(r"retryDelay['\"]?\s*:\s*['\"](\d+)s", str(erreur))
+    """Délai conseillé par l'API si présent, sinon backoff exponentiel."""
+    trouve = re.search(r"retry-after['\"]?\s*[:=]\s*['\"]?(\d+)", str(erreur), re.IGNORECASE)
     if trouve:
-        return min(int(trouve.group(1)) + 2, DELAI_REPRISE_MAX)
+        return min(int(trouve.group(1)) + 1, DELAI_REPRISE_MAX)
     return min(DELAI_REPRISE_DEFAUT * (2 ** tentative), DELAI_REPRISE_MAX)
 
 
 def _appeler_avec_reprise(appel, on_attente=None):
-    """Exécute un appel API en réessayant si le quota par minute est dépassé."""
-    for tentative in range(MAX_REPRISES_QUOTA + 1):
+    """Exécute un appel API en réessayant sur limite de débit ou surcharge."""
+    for tentative in range(MAX_REPRISES + 1):
         try:
             return appel()
         except Exception as e:
-            quota_journalier = _est_erreur_quota(e) and _est_quota_journalier(e)
-            if not _est_erreur_quota(e) or quota_journalier or tentative == MAX_REPRISES_QUOTA:
+            reessayable = _est_erreur_debit(e) or _est_erreur_temporaire(e)
+            if not reessayable or tentative == MAX_REPRISES:
                 raise
             attente = _delai_reprise(e, tentative)
             if on_attente:
                 on_attente(attente, tentative + 1)
             time.sleep(attente)
-
-
-def _message_assistant_openai(message, signatures=False):
-    """Sérialise un message assistant contenant des appels d'outils.
-
-    Les modèles Gemini « thinking » signent leur raisonnement et placent la
-    signature dans le champ non standard
-    tool_calls[].extra_content.google.thought_signature. Un client OpenAI
-    classique reconstruit le message et perd ce champ, ce qui provoque une
-    erreur 400 au tour suivant. On repart donc du message brut ; si la signature
-    est absente, on injecte la sentinelle de contournement documentée.
-    """
-    try:
-        brut = message.model_dump(exclude_none=True)
-    except AttributeError:
-        brut = dict(message)
-
-    sortie = {"role": "assistant", "content": brut.get("content") or ""}
-    appels_bruts = brut.get("tool_calls") or []
-    if not appels_bruts:
-        return sortie
-
-    appels = []
-    for appel_brut in appels_bruts:
-        fonction = appel_brut.get("function", {})
-        appel = {
-            "id": appel_brut.get("id"),
-            "type": "function",
-            "function": {"name": fonction.get("name"),
-                         "arguments": fonction.get("arguments") or "{}"},
-        }
-        extra = appel_brut.get("extra_content") or {}
-        signature = (extra.get("google") or {}).get("thought_signature")
-        if signatures or signature:
-            appel["extra_content"] = {
-                "google": {"thought_signature": signature or SENTINELLE_SIGNATURE}
-            }
-        appels.append(appel)
-
-    sortie["tool_calls"] = appels
-    return sortie
-
-
-def _schemas_outils_openai():
-    """Convertit les schémas d'outils au format OpenAI (utilisé par Gemini et Groq)."""
-    return [
-        {"type": "function",
-         "function": {"name": s["name"],
-                      "description": s["description"],
-                      "parameters": s["input_schema"]}}
-        for s in _schemas_outils()
-    ]
-
-
-def _executer_tour_openai(client, system_prompt, df, registre, on_texte=None, on_outil=None,
-                          on_attente=None, modele=None, signatures=False):
-    """Même boucle agentique que la version Anthropic, au format OpenAI.
-
-    Utilisée par Gemini (endpoint compatible OpenAI) et par Groq.
-    signatures=True conserve les signatures de raisonnement exigées par les
-    modèles Gemini « thinking ».
-    Pas de streaming token par token : on_texte est appelé une fois par tour
-    avec le texte accumulé.
-    """
-    appels_outils = []
-    texte_complet = ""
-
-    for _ in range(MAX_ITERATIONS_OUTILS):
-        reponse = _appeler_avec_reprise(
-            lambda: client.chat.completions.create(
-                model=modele or MODELE_GROQ,
-                max_tokens=MAX_TOKENS,
-                messages=[{"role": "system", "content": system_prompt}]
-                         + st.session_state.assistant_api_history,
-                tools=_schemas_outils_openai(),
-            ),
-            on_attente,
-        )
-        message = reponse.choices[0].message
-
-        # Réponse finale (pas d'appel d'outil)
-        if not message.tool_calls:
-            texte_complet += message.content or ""
-            if on_texte:
-                on_texte(texte_complet)
-            st.session_state.assistant_api_history.append(
-                {"role": "assistant", "content": message.content or ""}
-            )
-            return texte_complet, appels_outils
-
-        # Tour avec appels d'outils
-        st.session_state.assistant_api_history.append(
-            _message_assistant_openai(message, signatures)
-        )
-        if message.content:
-            texte_complet += message.content + "\n\n"
-            if on_texte:
-                on_texte(texte_complet)
-
-        for tc in message.tool_calls:
-            nom_outil = tc.function.name
-            try:
-                arguments = json.loads(tc.function.arguments or "{}")
-            except json.JSONDecodeError:
-                arguments = None
-
-            appels_outils.append(
-                {"nom": nom_outil,
-                 "params": arguments if arguments is not None else tc.function.arguments}
-            )
-            if on_outil:
-                on_outil(nom_outil, appels_outils[-1]["params"])
-
-            # Garde-fous : Llama est moins fiable que Claude sur le respect des schémas
-            if arguments is None:
-                sortie = json.dumps(
-                    {"erreur": "Arguments JSON invalides. Renvoie un objet JSON valide."},
-                    ensure_ascii=False,
-                )
-            elif nom_outil not in EXECUTEURS:
-                sortie = json.dumps(
-                    {"erreur": f"Outil inconnu : {nom_outil}.",
-                     "outils_valides": list(EXECUTEURS)},
-                    ensure_ascii=False,
-                )
-            else:
-                try:
-                    sortie = EXECUTEURS[nom_outil](df, registre, arguments)
-                except KeyError as e:
-                    sortie = json.dumps(
-                        {"erreur": f"Paramètre obligatoire manquant : {e}."},
-                        ensure_ascii=False,
-                    )
-                except Exception as e:
-                    sortie = json.dumps(
-                        {"erreur": f"Erreur d'exécution : {type(e).__name__} : {e}"},
-                        ensure_ascii=False,
-                    )
-
-            st.session_state.assistant_api_history.append(
-                {"role": "tool", "tool_call_id": tc.id, "content": sortie}
-            )
-
-    return (
-        texte_complet
-        or "Je n'ai pas réussi à aboutir à une réponse (trop d'étapes de recherche). Reformule ta demande.",
-        appels_outils,
-    )
 
 
 # ============================================================
@@ -1525,8 +1344,7 @@ def _historique_api_depuis_messages(messages):
     """Reconstruit un historique API neutre (texte seul) à partir des messages affichés.
 
     Les appels d'outils ne sont pas rejoués : le modèle reprend le fil de la
-    conversation à partir des échanges rédigés, ce qui reste valable quel que
-    soit le fournisseur.
+    conversation à partir des échanges rédigés.
     """
     historique = []
     for message in messages:
@@ -1614,12 +1432,9 @@ def _afficher_historique_conversations(nom_base):
 
     colonne_info, colonne_bouton = st.columns([3, 1])
     with colonne_info:
-        modele_actif = {"anthropic": MODELE_ANTHROPIC, "gemini": MODELE_GEMINI}.get(
-            _detecter_fournisseur(), MODELE_GROQ
-        )
         st.caption(
             f"Base analysée : **{nom_base}** — saison {st.session_state.get('saison', '')} "
-            f"· modèle `{modele_actif}`"
+            f"· modèle `{MODELE}`"
         )
     with colonne_bouton:
         if st.button("Nouvelle conversation", use_container_width=True, key="assistant_nouvelle"):
@@ -1662,12 +1477,8 @@ def afficher_assistant(df, registre, nom_base):
     registre  : dict de callables/structures injectés depuis ams.py
     nom_base  : nom de la base sélectionnée (pour le contexte et le reset)
     """
-    fournisseur = _detecter_fournisseur()
-    if fournisseur is None:
-        st.error(
-            "Clé API manquante : ajoutez GEMINI_API_KEY (gratuit, aistudio.google.com), "
-            "GROQ_API_KEY ou ANTHROPIC_API_KEY dans les secrets Streamlit."
-        )
+    if "ANTHROPIC_API_KEY" not in st.secrets:
+        st.error("Clé API manquante : ajoutez ANTHROPIC_API_KEY dans les secrets Streamlit.")
         st.stop()
 
     if "assistant_api_history" not in st.session_state:
@@ -1721,15 +1532,7 @@ def afficher_assistant(df, registre, nom_base):
     # Collecteur des DataFrames produits par les outils pendant ce tour
     st.session_state.assistant_dfs_courants = []
 
-    if fournisseur == "anthropic":
-        client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-        executer_tour = _executer_tour_anthropic
-    elif fournisseur == "gemini":
-        client = OpenAI(api_key=st.secrets["GEMINI_API_KEY"], base_url=URL_GEMINI)
-        executer_tour = partial(_executer_tour_openai, modele=MODELE_GEMINI, signatures=True)
-    else:
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-        executer_tour = partial(_executer_tour_openai, modele=MODELE_GROQ)
+    client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
     system_prompt = _construire_system_prompt(df, registre, nom_base)
 
     # Snapshot pour restaurer proprement l'historique API en cas d'erreur en cours de boucle
@@ -1750,33 +1553,27 @@ def afficher_assistant(df, registre, nom_base):
 
         def on_attente(secondes, tentative):
             statut.update(
-                label=f"Quota par minute atteint — reprise dans {secondes} s "
-                      f"(tentative {tentative}/{MAX_REPRISES_QUOTA})"
+                label=f"Service momentanément indisponible — reprise dans {secondes} s "
+                      f"(tentative {tentative}/{MAX_REPRISES})"
             )
 
         try:
-            texte, appels_outils = executer_tour(
+            texte, appels_outils = _executer_tour_anthropic(
                 client, system_prompt, df, registre, on_texte, on_outil, on_attente
             )
         except Exception as e:
             statut.update(label="Erreur", state="error")
-            if _est_erreur_quota(e) and _est_quota_journalier(e):
-                infos = _details_quota(e)
+            if _est_erreur_debit(e):
                 st.error(
-                    f"Quota **journalier** épuisé sur le modèle `{infos['modele']}` "
-                    f"(limite : {infos['limite']}). Il se réinitialise à minuit heure du Pacifique "
-                    "(9 h en France). Inutile de réessayer avant."
+                    "Limite de débit de l'API atteinte. Patientez quelques instants avant de relancer."
                 )
-            elif _est_erreur_quota(e):
-                infos = _details_quota(e)
+            elif "credit balance" in str(e).lower():
                 st.error(
-                    f"Quota **par minute** atteint sur le modèle `{infos['modele']}` "
-                    f"(limite : {infos['limite']} requêtes/minute, quota `{infos['quota']}`). "
-                    "Patientez une minute. Si la limite affichée est très basse, le modèle configuré "
-                    "n'est pas un Flash-Lite : vérifiez MODELE_GEMINI dans assistant_ia.py."
+                    "Crédit Anthropic épuisé. Rechargez le compte depuis console.anthropic.com "
+                    "(rubrique Billing)."
                 )
             else:
-                st.error(f"Erreur lors de l'appel à l'API ({fournisseur}) : {e}")
+                st.error(f"Erreur lors de l'appel à l'API Anthropic : {e}")
             st.session_state.assistant_api_history = historique_avant
             st.session_state.assistant_display.pop()
             return
